@@ -1,0 +1,6 @@
+node_modules/
+payroll.db
+sessions/
+*.db-shm
+*.db-wal
+.env

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shark Exteriors — Payroll</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080a0c;
+      --surface: #0f1318;
+      --surface2: #161c22;
+      --border: #1e2530;
+      --text: #e8eaed;
+      --muted: #6b7785;
+      --teal: #00AAEF;
+      --gold: #F7941D;
+      --red: #ff5252;
+      --blue: #448aff;
+      --purple: #b388ff;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; }
+    .mono { font-family: 'DM Mono', monospace; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 220px; flex-shrink: 0;
+      background: #0a1628;
+      border-right: 1px solid #1e2530;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 20;
+    }
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 3px solid #F7941D;
+    }
+    .sidebar-logo h1 { font-size: 16px; font-weight: 700; color: #00AAEF; }
+    .sidebar-logo p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    nav { flex: 1; padding: 12px 10px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 14px; cursor: pointer;
+      color: var(--muted); transition: all .15s;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(0,229,195,.1); color: var(--teal); font-weight: 500; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-footer .user { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    .sidebar-footer .user strong { color: var(--text); display: block; }
+    .btn-logout {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: 8px;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Main content ── */
+    #main { margin-left: 220px; flex: 1; padding: 32px; min-height: 100vh; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-header { margin-bottom: 28px; }
+    .page-header h2 { font-size: 22px; font-weight: 700; }
+    .page-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Buttons ── */
+    .btn {
+      background: var(--teal); color: #fff; border: none;
+      border-radius: 8px; padding: 10px 18px; font-size: 14px;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: background .15s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { background: #0099D4; }
+    .btn-ghost {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 9px 16px;
+      font-size: 14px; cursor: pointer; font-family: inherit;
+    }
+    .btn-ghost:hover { border-color: var(--teal); }
+    .btn-danger {
+      background: rgba(255,82,82,.1); border: 1px solid rgba(255,82,82,.3);
+      color: var(--red); border-radius: 8px; padding: 8px 14px;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    .btn-danger:hover { background: rgba(255,82,82,.2); }
+    .btn-icon {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 16px; padding: 4px;
+      border-radius: 4px; transition: color .15s;
+    }
+    .btn-icon:hover { color: var(--text); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+    }
+    .card + .card { margin-top: 16px; }
+
+    /* ── Form elements ── */
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .04em; }
+    input, select {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14px;
+      padding: 9px 12px; outline: none; font-family: inherit; width: 100%;
+      transition: border-color .15s;
+    }
+    input:focus, select:focus { border-color: var(--teal); }
+    select option { background: var(--surface2); }
+
+    /* ── Date bar ── */
+    .date-bar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 18px;
+    }
+    .date-bar input[type=date] { width: auto; min-width: 160px; }
+    .date-bar label { margin: 0; text-transform: none; font-size: 14px; font-weight: 500; color: var(--text); }
+
+    /* ── Job card ── */
+    .job-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 16px; overflow: hidden;
+    }
+    .job-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .job-card-header .job-name { font-weight: 600; font-size: 15px; }
+    .job-card-header .job-amount { font-family: 'DM Mono', monospace; color: var(--teal); font-size: 17px; }
+    .job-card-body { padding: 16px 20px; }
+
+    /* Crew rows inside job card */
+    .crew-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .crew-table th {
+      text-align: left; padding: 6px 10px;
+      font-size: 11px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .04em; border-bottom: 1px solid var(--border);
+    }
+    .crew-table td { padding: 9px 10px; }
+    .crew-table tr:not(:last-child) td { border-bottom: 1px solid #111820; }
+    .paid-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      cursor: pointer; padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; border: none;
+      font-family: inherit; transition: all .15s;
+    }
+    .paid-toggle.unpaid { background: rgba(255,202,40,.08); color: var(--gold); }
+    .paid-toggle.paid { background: rgba(0,229,195,.1); color: var(--teal); }
+
+    /* Owner summary strip */
+    .owner-strip {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      background: rgba(0,229,195,.05); border: 1px solid rgba(0,229,195,.15);
+      border-radius: 10px; padding: 14px 18px; margin-top: 12px;
+    }
+    .owner-strip .item { }
+    .owner-strip .item .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .owner-strip .item .val { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--teal); }
+
+    /* ── Add job form ── */
+    #addJobForm { margin-bottom: 24px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid.full { grid-template-columns: 1fr; }
+    .form-field { }
+
+    .crew-selector { margin-top: 14px; }
+    .crew-selector-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+    .crew-check-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid #111820;
+    }
+    .crew-check-row:last-child { border-bottom: none; }
+    .crew-check-row label { text-transform: none; font-size: 14px; color: var(--text); margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .crew-check-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--teal); cursor: pointer; }
+    .commission-input {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .commission-input input { width: 80px; }
+    .commission-input span { color: var(--muted); font-size: 13px; }
+
+    /* ── Summary cards (daily total) ── */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .summary-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px;
+    }
+    .summary-card .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .summary-card .val { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 600; color: var(--teal); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th {
+      text-align: left; padding: 10px 14px;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 12px 14px; border-bottom: 1px solid #111820; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    .empty { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+
+    /* ── Leaderboard bar ── */
+    .lb-bar-wrap { height: 6px; background: var(--surface2); border-radius: 3px; margin-top: 4px; min-width: 80px; }
+    .lb-bar { height: 6px; background: var(--teal); border-radius: 3px; transition: width .4s; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; width: 440px; max-width: 92vw;
+      transform: translateY(12px); transition: transform .2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h3 { font-size: 17px; margin-bottom: 8px; }
+    .modal p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* ── Toast ── */
+    #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 18px; font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      animation: slideIn .2s ease; max-width: 300px;
+    }
+    .toast.ok { border-left: 3px solid var(--teal); }
+    .toast.err { border-left: 3px solid var(--red); }
+    @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ── Manage crew form ── */
+    .emp-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid #111820;
+    }
+    .emp-row:last-child { border-bottom: none; }
+    .emp-info .name { font-size: 14px; font-weight: 500; }
+    .emp-info .username { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .emp-info .role-badge {
+      display: inline-block; padding: 2px 7px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; margin-left: 8px;
+    }
+    .role-badge.owner { background: rgba(179,136,255,.12); color: var(--purple); }
+    .role-badge.crew { background: rgba(68,138,255,.12); color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+<div id="sidebar">
+  <div class="sidebar-logo">
+    <h1><span style="color:#00AAEF">Shark</span> <span style="color:#F7941D">Exteriors</span></h1>
+    <p>Payroll Management</p>
+  </div>
+  <nav>
+    <div class="nav-item active" data-page="daily">
+      <span class="icon">📋</span> Daily Entry
+    </div>
+    <div class="nav-item" data-page="weekly">
+      <span class="icon">📅</span> Weekly Totals
+    </div>
+    <div class="nav-item" data-page="leaderboard">
+      <span class="icon">🏆</span> Leaderboard
+    </div>
+    <div class="nav-item" data-page="crew">
+      <span class="icon">👥</span> Manage Crew
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user">Signed in as<strong id="ownerName">Easton</strong></div>
+    <button class="btn-logout" id="logoutBtn">Sign Out</button>
+  </div>
+</div>
+
+<!-- ── Main ────────────────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- Daily Entry -->
+  <div class="page active" id="page-daily">
+    <div class="page-header">
+      <h2>Daily Entry</h2>
+      <p>Add jobs, assign crew, and track today's payroll.</p>
+    </div>
+
+    <div class="date-bar">
+      <label>Date</label>
+      <input type="date" id="dailyDate" />
+      <button class="btn-ghost" id="todayBtn">Today</button>
+    </div>
+
+    <!-- Summary row -->
+    <div class="summary-grid" id="dailySummary" style="display:none">
+      <div class="summary-card"><div class="lbl">Total Revenue</div><div class="val" id="sumRevenue">$0</div></div>
+      <div class="summary-card"><div class="lbl">Owner Gross</div><div class="val" id="sumOwnerGross">$0</div></div>
+      <div class="summary-card"><div class="lbl">Tax Reserve (20%)</div><div class="val" id="sumTax">$0</div></div>
+      <div class="summary-card"><div class="lbl">Emergency (10%)</div><div class="val" id="sumEmergency">$0</div></div>
+      <div class="summary-card"><div class="lbl">Take-Home</div><div class="val" id="sumTakeHome" style="color:var(--gold)">$0</div></div>
+    </div>
+
+    <!-- Add job card -->
+    <div class="card" id="addJobForm">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">➕ Add Job</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Job / Customer Name</label>
+          <input type="text" id="jobName" placeholder="e.g. Smith Residence" />
+        </div>
+        <div class="form-field">
+          <label>Job Total ($)</label>
+          <input type="number" id="jobTotal" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="crew-selector">
+        <div class="crew-selector-title">Assign Crew & Commission</div>
+        <div id="crewCheckList"><!-- populated by JS --></div>
+      </div>
+
+      <div style="margin-top:18px;display:flex;gap:10px">
+        <button class="btn" id="addJobBtn">Add Job</button>
+      </div>
+    </div>
+
+    <!-- Jobs list -->
+    <div id="jobsList"><!-- populated by JS --></div>
+  </div>
+
+  <!-- Weekly Totals -->
+  <div class="page" id="page-weekly">
+    <div class="page-header">
+      <h2>Weekly Totals</h2>
+      <p>Combined payroll breakdown for any date range.</p>
+    </div>
+    <div class="date-bar" style="flex-wrap:wrap;gap:12px">
+      <label>From</label>
+      <input type="date" id="weekStart" style="width:auto;min-width:150px" />
+      <label>To</label>
+      <input type="date" id="weekEnd" style="width:auto;min-width:150px" />
+      <button class="btn" id="loadWeekBtn">Load</button>
+      <button class="btn-ghost" id="thisWeekBtn">This Week</button>
+    </div>
+
+    <div class="summary-grid" id="weeklySummaryCards" style="display:none">
+      <div class="summary-card"><div class="lbl">Total Revenue</div><div class="val" id="wSumRevenue">$0</div></div>
+      <div class="summary-card"><div class="lbl">Owner Gross</div><div class="val" id="wSumOwnerGross">$0</div></div>
+      <div class="summary-card"><div class="lbl">Tax Reserve</div><div class="val" id="wSumTax">$0</div></div>
+      <div class="summary-card"><div class="lbl">Emergency</div><div class="val" id="wSumEmergency">$0</div></div>
+      <div class="summary-card"><div class="lbl">Take-Home</div><div class="val" id="wSumTakeHome" style="color:var(--gold)">$0</div></div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px">Per-Employee Totals</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Employee</th><th>Crew Pay</th><th>Commission</th><th>Total</th>
+          </tr></thead>
+          <tbody id="weeklyEmpBody"><tr><td colspan="4" class="empty">Select a date range above</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px">Daily Breakdown</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Revenue</th><th>Owner Gross</th><th>Tax</th><th>Emergency</th><th>Take-Home</th>
+          </tr></thead>
+          <tbody id="weeklyDayBody"><tr><td colspan="6" class="empty">Select a date range above</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="page" id="page-leaderboard">
+    <div class="page-header">
+      <h2>Leaderboard</h2>
+      <p>All-time earnings ranked.</p>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:120px"></th>
+          </tr></thead>
+          <tbody id="lbBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Crew -->
+  <div class="page" id="page-crew">
+    <div class="page-header">
+      <h2>Manage Crew</h2>
+      <p>Add or remove employees from the roster.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:16px">➕ Add Employee</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Full Name</label>
+          <input type="text" id="newEmpName" placeholder="e.g. Jake Miller" />
+        </div>
+        <div class="form-field">
+          <label>Username</label>
+          <input type="text" id="newEmpUser" placeholder="e.g. jake" />
+        </div>
+        <div class="form-field">
+          <label>Default Password (optional)</label>
+          <input type="text" id="newEmpPw" placeholder="Defaults to username if blank" />
+        </div>
+        <div class="form-field">
+          <label>Role</label>
+          <select id="newEmpRole">
+            <option value="crew">Crew</option>
+            <option value="owner">Owner</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="addEmpBtn" style="margin-top:14px">Add Employee</button>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px">Current Roster</div>
+      <div id="empRoster"><!-- populated by JS --></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── Confirm modal ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="modalTitle">Are you sure?</h3>
+    <p id="modalBody"></p>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn-danger" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast container ────────────────────────────────────────────────── -->
+<div id="toastContainer"></div>
+
+<script>
+// ── Utilities ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const fmtPct = n => Number(n).toFixed(1) + '%';
+
+function toast(msg, type = 'ok') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  $('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function confirm(title, body) {
+  return new Promise(resolve => {
+    $('modalTitle').textContent = title;
+    $('modalBody').textContent = body;
+    const overlay = $('confirmModal');
+    overlay.classList.add('open');
+    const cleanup = (val) => { overlay.classList.remove('open'); resolve(val); };
+    $('modalConfirm').onclick = () => cleanup(true);
+    $('modalCancel').onclick = () => cleanup(false);
+  });
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+let employees = [];
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    $(`page-${item.dataset.page}`).classList.add('active');
+
+    if (item.dataset.page === 'leaderboard') loadLeaderboard();
+    if (item.dataset.page === 'crew') loadRoster();
+    if (item.dataset.page === 'daily') loadDay();
+  });
+});
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function init() {
+  const me = await fetch('/api/auth/me').then(r => r.json()).catch(() => null);
+  if (!me || !me.id) { window.location.href = '/login.html'; return; }
+  if (me.role !== 'owner') { window.location.href = '/crew.html'; return; }
+  $('ownerName').textContent = me.name;
+
+  employees = await fetch('/api/employees').then(r => r.json());
+  buildCrewCheckList();
+  setDefaultDates();
+  loadDay();
+}
+
+$('logoutBtn').addEventListener('click', async () => {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login.html';
+});
+
+// ── Daily Entry ───────────────────────────────────────────────────────────────
+function setDefaultDates() {
+  const today = new Date().toISOString().slice(0, 10);
+  $('dailyDate').value = today;
+
+  // This week Mon–Sun
+  const now = new Date();
+  const day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((day + 6) % 7));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  $('weekStart').value = mon.toISOString().slice(0, 10);
+  $('weekEnd').value = sun.toISOString().slice(0, 10);
+}
+
+$('todayBtn').addEventListener('click', () => {
+  $('dailyDate').value = new Date().toISOString().slice(0, 10);
+  loadDay();
+});
+$('dailyDate').addEventListener('change', loadDay);
+
+function buildCrewCheckList() {
+  const crewOnly = employees.filter(e => e.active && e.role === 'crew');
+  $('crewCheckList').innerHTML = crewOnly.map(e => `
+    <div class="crew-check-row" id="crew-row-${e.id}">
+      <label>
+        <input type="checkbox" class="crew-cb" data-id="${e.id}" data-name="${e.name}" />
+        ${e.name}
+      </label>
+      <div class="commission-input" id="comm-wrap-${e.id}" style="display:none">
+        <input type="number" min="0" max="100" step="0.5" value="0"
+               id="comm-${e.id}" style="width:72px" placeholder="0" />
+        <span>% commission</span>
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.crew-cb').forEach(cb => {
+    cb.addEventListener('change', () => {
+      $(`comm-wrap-${cb.dataset.id}`).style.display = cb.checked ? 'flex' : 'none';
+    });
+  });
+}
+
+$('addJobBtn').addEventListener('click', async () => {
+  const date = $('dailyDate').value;
+  const jobName = $('jobName').value.trim();
+  const totalAmount = parseFloat($('jobTotal').value);
+
+  if (!date || !jobName || isNaN(totalAmount) || totalAmount <= 0) {
+    toast('Fill in job name and a valid total amount.', 'err'); return;
+  }
+
+  const crew = [];
+  document.querySelectorAll('.crew-cb:checked').forEach(cb => {
+    const commPct = parseFloat($(`comm-${cb.dataset.id}`).value) || 0;
+    crew.push({ employeeId: parseInt(cb.dataset.id), commissionPct: commPct });
+  });
+
+  const res = await fetch('/api/jobs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date, jobName, totalAmount, crew }),
+  });
+
+  if (res.ok) {
+    toast(`Job "${jobName}" added!`);
+    $('jobName').value = '';
+    $('jobTotal').value = '';
+    document.querySelectorAll('.crew-cb').forEach(cb => {
+      cb.checked = false;
+      $(`comm-wrap-${cb.dataset.id}`).style.display = 'none';
+    });
+    loadDay();
+  } else {
+    toast('Failed to add job', 'err');
+  }
+});
+
+async function loadDay() {
+  const date = $('dailyDate').value;
+  if (!date) return;
+
+  const data = await fetch(`/api/reports/daily?date=${date}`).then(r => r.json());
+  const { summary, jobs = [] } = data;
+
+  // Summary strip
+  if (summary) {
+    $('dailySummary').style.display = 'grid';
+    $('sumRevenue').textContent = fmt(summary.total_revenue);
+    $('sumOwnerGross').textContent = fmt(summary.owner_gross);
+    $('sumTax').textContent = fmt(summary.owner_tax_reserve);
+    $('sumEmergency').textContent = fmt(summary.owner_emergency_reserve);
+    $('sumTakeHome').textContent = fmt(summary.owner_take_home);
+  } else {
+    $('dailySummary').style.display = 'none';
+  }
+
+  // Jobs list
+  if (!jobs.length) {
+    $('jobsList').innerHTML = `<div class="empty" style="padding:40px 0;color:var(--muted);font-size:14px;text-align:center">No jobs on this date yet.</div>`;
+    return;
+  }
+
+  $('jobsList').innerHTML = jobs.map(job => {
+    const crewCount = job.crew.length;
+    const crewRows = job.crew.map(c => `
+      <tr>
+        <td>${c.name}</td>
+        <td class="mono">${fmt(c.crew_pay)}</td>
+        <td class="mono">${c.commission_pct > 0 ? fmtPct(c.commission_pct) : '—'}</td>
+        <td class="mono">${c.commission_pay > 0 ? fmt(c.commission_pay) : '—'}</td>
+        <td class="mono" style="color:var(--teal)">${fmt(c.crew_pay + c.commission_pay)}</td>
+        <td>
+          <button class="paid-toggle ${c.paid ? 'paid' : 'unpaid'}"
+                  onclick="togglePaid(${c.id}, ${c.paid ? 0 : 1}, this)">
+            ${c.paid ? '✓ Paid' : '○ Unpaid'}
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    // Owner split for this job
+    const totalCrewPay = job.crew.reduce((s, c) => s + c.crew_pay, 0);
+    const totalCommission = job.crew.reduce((s, c) => s + c.commission_pay, 0);
+    const ownerGross = job.total_amount - totalCrewPay - totalCommission;
+    const tax = ownerGross * 0.20;
+    const emergency = ownerGross * 0.10;
+    const takeHome = ownerGross * 0.70;
+
+    return `
+      <div class="job-card">
+        <div class="job-card-header">
+          <div>
+            <div class="job-name">${job.job_name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">${crewCount} crew member${crewCount !== 1 ? 's' : ''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="job-amount">${fmt(job.total_amount)}</div>
+            <button class="btn-icon" title="Delete job"
+                    onclick="deleteJob(${job.id}, '${job.job_name.replace(/'/g, "\\'")}')">🗑</button>
+          </div>
+        </div>
+        <div class="job-card-body">
+          ${crewCount > 0 ? `
+            <table class="crew-table">
+              <thead><tr>
+                <th>Name</th><th>Crew Pay</th><th>Commission %</th><th>Commission $</th><th>Total</th><th>Status</th>
+              </tr></thead>
+              <tbody>${crewRows}</tbody>
+            </table>
+          ` : '<div style="font-size:13px;color:var(--muted)">No crew assigned</div>'}
+          <div class="owner-strip">
+            <div class="item"><div class="lbl">Owner Gross</div><div class="val">${fmt(ownerGross)}</div></div>
+            <div class="item"><div class="lbl">Tax (20%)</div><div class="val">${fmt(tax)}</div></div>
+            <div class="item"><div class="lbl">Emergency (10%)</div><div class="val">${fmt(emergency)}</div></div>
+            <div class="item"><div class="lbl">Take-Home</div><div class="val" style="color:var(--gold)">${fmt(takeHome)}</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function togglePaid(jobCrewId, newPaid, btn) {
+  const res = await fetch(`/api/jobs/crew/${jobCrewId}/paid`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paid: !!newPaid }),
+  });
+  if (res.ok) {
+    btn.className = `paid-toggle ${newPaid ? 'paid' : 'unpaid'}`;
+    btn.textContent = newPaid ? '✓ Paid' : '○ Unpaid';
+    btn.setAttribute('onclick', `togglePaid(${jobCrewId}, ${newPaid ? 0 : 1}, this)`);
+  }
+}
+
+async function deleteJob(jobId, jobName) {
+  const ok = await confirm('Delete Job', `Remove "${jobName}"? This cannot be undone.`);
+  if (!ok) return;
+  const res = await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
+  if (res.ok) { toast('Job removed'); loadDay(); }
+  else toast('Failed to delete job', 'err');
+}
+
+// ── Weekly ────────────────────────────────────────────────────────────────────
+$('thisWeekBtn').addEventListener('click', () => {
+  const now = new Date();
+  const day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((day + 6) % 7));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  $('weekStart').value = mon.toISOString().slice(0, 10);
+  $('weekEnd').value = sun.toISOString().slice(0, 10);
+  loadWeekly();
+});
+$('loadWeekBtn').addEventListener('click', loadWeekly);
+
+async function loadWeekly() {
+  const start = $('weekStart').value, end = $('weekEnd').value;
+  if (!start || !end) { toast('Select start and end dates', 'err'); return; }
+
+  const data = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r => r.json());
+  const { summaries = [], employeeTotals = [] } = data;
+
+  // Aggregate summary
+  const agg = summaries.reduce((a, s) => ({
+    revenue: a.revenue + s.total_revenue,
+    ownerGross: a.ownerGross + s.owner_gross,
+    tax: a.tax + s.owner_tax_reserve,
+    emergency: a.emergency + s.owner_emergency_reserve,
+    takeHome: a.takeHome + s.owner_take_home,
+  }), { revenue: 0, ownerGross: 0, tax: 0, emergency: 0, takeHome: 0 });
+
+  if (summaries.length) {
+    $('weeklySummaryCards').style.display = 'grid';
+    $('wSumRevenue').textContent = fmt(agg.revenue);
+    $('wSumOwnerGross').textContent = fmt(agg.ownerGross);
+    $('wSumTax').textContent = fmt(agg.tax);
+    $('wSumEmergency').textContent = fmt(agg.emergency);
+    $('wSumTakeHome').textContent = fmt(agg.takeHome);
+  }
+
+  // Employee totals
+  $('weeklyEmpBody').innerHTML = employeeTotals.length
+    ? employeeTotals.map(e => `
+        <tr>
+          <td>${e.name}</td>
+          <td class="mono">${fmt(e.crew_pay)}</td>
+          <td class="mono">${fmt(e.commission_pay)}</td>
+          <td class="mono" style="color:var(--teal);font-weight:600">${fmt(e.total_pay)}</td>
+        </tr>
+      `).join('')
+    : '<tr><td colspan="4" class="empty">No data for this range</td></tr>';
+
+  // Daily breakdown
+  $('weeklyDayBody').innerHTML = summaries.length
+    ? summaries.map(s => `
+        <tr>
+          <td>${s.date}</td>
+          <td class="mono">${fmt(s.total_revenue)}</td>
+          <td class="mono">${fmt(s.owner_gross)}</td>
+          <td class="mono">${fmt(s.owner_tax_reserve)}</td>
+          <td class="mono">${fmt(s.owner_emergency_reserve)}</td>
+          <td class="mono" style="color:var(--gold)">${fmt(s.owner_take_home)}</td>
+        </tr>
+      `).join('')
+    : '<tr><td colspan="6" class="empty">No data for this range</td></tr>';
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+async function loadLeaderboard() {
+  const rows = await fetch('/api/reports/leaderboard').then(r => r.json());
+  if (!rows.length) { $('lbBody').innerHTML = '<tr><td colspan="7" class="empty">No data yet</td></tr>'; return; }
+  const max = rows[0].total_pay || 1;
+  $('lbBody').innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted);font-weight:700">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td class="mono" style="color:var(--muted)">${r.job_count}</td>
+      <td class="mono">${fmt(r.crew_pay)}</td>
+      <td class="mono">${fmt(r.commission_pay)}</td>
+      <td class="mono" style="color:var(--teal);font-weight:600">${fmt(r.total_pay)}</td>
+      <td>
+        <div class="lb-bar-wrap">
+          <div class="lb-bar" style="width:${(r.total_pay / max * 100).toFixed(1)}%"></div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Manage Crew ───────────────────────────────────────────────────────────────
+async function loadRoster() {
+  const emps = await fetch('/api/employees').then(r => r.json());
+  $('empRoster').innerHTML = emps.map(e => `
+    <div class="emp-row">
+      <div class="emp-info">
+        <span class="name">${e.name}</span>
+        <span class="role-badge ${e.role}">${e.role}</span>
+        <div class="username">@${e.username}</div>
+      </div>
+      ${e.role !== 'owner' ? `
+        <button class="btn-danger" onclick="removeEmp(${e.id}, '${e.name.replace(/'/g, "\\'")}')">Remove</button>
+      ` : '<span style="font-size:12px;color:var(--muted)">Owner</span>'}
+    </div>
+  `).join('') || '<div class="empty">No employees</div>';
+}
+
+$('addEmpBtn').addEventListener('click', async () => {
+  const name = $('newEmpName').value.trim();
+  const username = $('newEmpUser').value.trim().toLowerCase();
+  const password = $('newEmpPw').value.trim() || undefined;
+  const role = $('newEmpRole').value;
+  if (!name || !username) { toast('Name and username required', 'err'); return; }
+
+  const res = await fetch('/api/employees', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, username, password, role }),
+  });
+  if (res.ok) {
+    toast(`${name} added!`);
+    $('newEmpName').value = $('newEmpUser').value = $('newEmpPw').value = '';
+    // Refresh employees list and crew checklist
+    employees = await fetch('/api/employees').then(r => r.json());
+    buildCrewCheckList();
+    loadRoster();
+  } else {
+    const { error } = await res.json();
+    toast(error || 'Failed to add employee', 'err');
+  }
+});
+
+async function removeEmp(id, name) {
+  const ok = await confirm('Remove Employee', `Remove ${name} from the roster?`);
+  if (!ok) return;
+  const res = await fetch(`/api/employees/${id}`, { method: 'DELETE' });
+  if (res.ok) {
+    toast(`${name} removed`);
+    employees = await fetch('/api/employees').then(r => r.json());
+    buildCrewCheckList();
+    loadRoster();
+  } else toast('Failed to remove employee', 'err');
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shark Exteriors — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #080a0c;
+      color: #e8eaed;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #0f1318;
+      border: 1px solid #1e2530;
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo img { width: 120px; margin-bottom: 12px; }
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #00AAEF;
+      letter-spacing: -0.5px;
+    }
+    .logo p { color: #6b7785; font-size: 13px; margin-top: 4px; }
+    label { display: block; font-size: 13px; color: #9aa3ad; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      background: #161c22;
+      border: 1px solid #1e2530;
+      border-radius: 8px;
+      color: #e8eaed;
+      font-size: 15px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+      font-family: inherit;
+    }
+    input:focus { border-color: #00AAEF; }
+    .field { margin-bottom: 20px; }
+    .btn {
+      width: 100%;
+      background: #00AAEF;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background .15s;
+      font-family: inherit;
+    }
+    .btn:hover { background: #0099D4; }
+    .error {
+      background: rgba(255,82,82,.12);
+      border: 1px solid rgba(255,82,82,.3);
+      color: #ff5252;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .shark-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, #00AAEF, #F7941D);
+      border-radius: 2px;
+      margin-bottom: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <img src="/logo.png" alt="Shark Exteriors" onerror="this.style.display='none'" />
+      <h1>Shark Exteriors</h1>
+      <p>Payroll Management</p>
+    </div>
+    <div class="shark-stripe"></div>
+    <div class="error" id="err"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" type="text" autocomplete="username" placeholder="e.g. malcolm" required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+      </div>
+      <button class="btn" type="submit">Sign In</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const err = document.getElementById('err');
+      err.style.display = 'none';
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value,
+        }),
+      });
+
+      if (res.ok) {
+        const { role } = await res.json();
+        window.location.href = role === 'owner' ? '/index.html' : '/crew.html';
+      } else {
+        const { error } = await res.json();
+        err.textContent = error || 'Login failed';
+        err.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
