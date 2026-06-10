@@ -9,8 +9,8 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #080a0c;
-      color: #e8eaed;
+      background: linear-gradient(135deg, #e8f4fd 0%, #fef3e8 100%);
+      color: #1a2332;
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
       display: flex;
@@ -18,86 +18,63 @@
       justify-content: center;
     }
     .card {
-      background: #0f1318;
-      border: 1px solid #1e2530;
-      border-radius: 16px;
-      padding: 48px 40px;
+      background: #fff;
+      border: 1.5px solid #dde3ea;
+      border-radius: 20px;
+      padding: 48px 42px;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.10);
     }
-    .logo {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .logo img { width: 120px; margin-bottom: 12px; }
-    .logo h1 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #00AAEF;
-      letter-spacing: -0.5px;
-    }
-    .logo p { color: #6b7785; font-size: 13px; margin-top: 4px; }
-    label { display: block; font-size: 13px; color: #9aa3ad; margin-bottom: 6px; }
-    input {
-      width: 100%;
-      background: #161c22;
-      border: 1px solid #1e2530;
-      border-radius: 8px;
-      color: #e8eaed;
-      font-size: 15px;
-      padding: 12px 14px;
-      outline: none;
-      transition: border-color .2s;
-      font-family: inherit;
-    }
-    input:focus { border-color: #00AAEF; }
-    .field { margin-bottom: 20px; }
-    .btn {
-      width: 100%;
-      background: #00AAEF;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      padding: 13px;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: background .15s;
-      font-family: inherit;
-    }
-    .btn:hover { background: #0099D4; }
-    .error {
-      background: rgba(255,82,82,.12);
-      border: 1px solid rgba(255,82,82,.3);
-      color: #ff5252;
-      border-radius: 8px;
-      padding: 11px 14px;
-      font-size: 13px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    .shark-stripe {
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo .shark { font-size: 52px; line-height: 1; margin-bottom: 10px; }
+    .logo h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .logo h1 .blue { color: #00AAEF; }
+    .logo h1 .orange { color: #F7941D; }
+    .logo p { color: #6b7a90; font-size: 13px; margin-top: 4px; }
+    .stripe {
       height: 3px;
       background: linear-gradient(90deg, #00AAEF, #F7941D);
       border-radius: 2px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
+    }
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #6b7a90; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
+    input {
+      width: 100%; background: #f7fafc; border: 1.5px solid #dde3ea;
+      border-radius: 10px; color: #1a2332; font-size: 15px;
+      padding: 12px 14px; outline: none; transition: border-color .2s;
+      font-family: inherit;
+    }
+    input:focus { border-color: #00AAEF; background: #fff; }
+    .btn {
+      width: 100%; background: #00AAEF; color: #fff; border: none;
+      border-radius: 10px; font-size: 15px; font-weight: 700;
+      padding: 14px; cursor: pointer; transition: background .15s;
+      font-family: inherit; margin-top: 4px;
+      box-shadow: 0 4px 14px rgba(0,170,239,.3);
+    }
+    .btn:hover { background: #0090cc; }
+    .error {
+      background: #fff5f5; border: 1.5px solid #fca5a5;
+      color: #dc2626; border-radius: 10px; padding: 11px 14px;
+      font-size: 13px; margin-bottom: 18px; display: none;
     }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="logo">
-      <img src="/logo.png" alt="Shark Exteriors" onerror="this.style.display='none'" />
-      <h1>Shark Exteriors</h1>
+      <div class="shark">🦈</div>
+      <h1><span class="blue">Shark</span> <span class="orange">Exteriors</span></h1>
       <p>Payroll Management</p>
     </div>
-    <div class="shark-stripe"></div>
+    <div class="stripe"></div>
     <div class="error" id="err"></div>
     <form id="loginForm">
       <div class="field">
         <label for="username">Username</label>
-        <input id="username" type="text" autocomplete="username" placeholder="e.g. malcolm" required />
+        <input id="username" type="text" autocomplete="username" placeholder="e.g. easton" required />
       </div>
       <div class="field">
         <label for="password">Password</label>
@@ -106,13 +83,11 @@
       <button class="btn" type="submit">Sign In</button>
     </form>
   </div>
-
   <script>
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
       const err = document.getElementById('err');
       err.style.display = 'none';
-
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,7 +96,6 @@
           password: document.getElementById('password').value,
         }),
       });
-
       if (res.ok) {
         const { role } = await res.json();
         window.location.href = role === 'owner' ? '/index.html' : '/crew.html';

@@ -9,127 +9,122 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #080a0c;
-      --surface: #0f1318;
-      --surface2: #161c22;
-      --border: #1e2530;
-      --text: #e8eaed;
-      --muted: #6b7785;
-      --teal: #00AAEF;
-      --gold: #F7941D;
-      --red: #ff5252;
-      --blue: #448aff;
-      --purple: #b388ff;
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --surface2: #f7fafc;
+      --border: #dde3ea;
+      --text: #1a2332;
+      --muted: #6b7a90;
+      --blue: #00AAEF;
+      --blue-dark: #0090cc;
+      --orange: #F7941D;
+      --red: #e53935;
+      --green: #00a86b;
+      --navy: #0a1628;
+      --shadow: 0 2px 12px rgba(0,0,0,.07);
     }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
     .mono { font-family: 'DM Mono', monospace; }
 
-    /* ── Layout ── */
     header {
-      background: #0a1628;
-      border-bottom: 3px solid #F7941D;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      background: var(--navy);
+      border-bottom: 3px solid var(--orange);
+      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 10;
     }
-    .logo { font-size: 18px; font-weight: 700; color: #fff; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo .shark { font-size: 26px; }
+    .logo h1 { font-size: 17px; font-weight: 800; }
+    .logo h1 .blue { color: var(--blue); }
+    .logo h1 .orange { color: var(--orange); }
     .user-info { display: flex; align-items: center; gap: 12px; }
-    .user-info span { font-size: 14px; color: var(--muted); }
-    .user-info strong { color: var(--text); }
+    .user-info span { font-size: 13px; color: rgba(255,255,255,.5); }
+    .user-info strong { color: #fff; }
     .btn-sm {
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--text); border-radius: 6px; padding: 6px 14px;
-      font-size: 13px; cursor: pointer; font-family: inherit;
-      transition: border-color .15s;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; border-radius: 8px; padding: 7px 16px;
+      font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s;
     }
-    .btn-sm:hover { border-color: var(--teal); }
+    .btn-sm:hover { background: rgba(229,57,53,.25); border-color: rgba(229,57,53,.4); }
 
-    main { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+    main { max-width: 860px; margin: 0 auto; padding: 28px 20px; }
 
-    /* ── Stat cards ── */
     .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px; margin-bottom: 28px;
     }
     .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 20px; box-shadow: var(--shadow);
     }
-    .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
-    .stat-card .value { font-size: 26px; font-weight: 700; color: var(--teal); font-family: 'DM Mono', monospace; }
+    .stat-card .label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+    .stat-card .value { font-size: 24px; font-weight: 700; color: var(--blue); font-family: 'DM Mono', monospace; }
+    .stat-card .value.orange { color: var(--orange); }
     .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-    /* ── Section ── */
-    section { margin-bottom: 36px; }
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    h2 { font-size: 16px; font-weight: 600; }
+    section { margin-bottom: 28px; }
+    .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); }
+    .card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+
     .period-picker { display: flex; gap: 8px; align-items: center; }
     .period-picker input {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text); padding: 6px 10px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 7px 10px;
       font-size: 13px; outline: none; font-family: inherit;
     }
-    .period-picker input:focus { border-color: var(--teal); }
+    .period-picker input:focus { border-color: var(--blue); }
+    .btn-load {
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 8px; padding: 7px 14px; font-size: 13px;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .btn-load:hover { background: var(--blue-dark); }
 
-    /* ── Table ── */
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th {
-      text-align: left; padding: 10px 14px;
-      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-align: left; padding: 9px 14px;
+      font-size: 11px; font-weight: 700; color: var(--muted);
       text-transform: uppercase; letter-spacing: .05em;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--border); background: var(--surface2);
     }
-    td { padding: 12px 14px; border-bottom: 1px solid #111820; }
+    td { padding: 11px 14px; border-bottom: 1px solid #f0f4f8; }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,.02); }
-    .paid-badge {
-      display: inline-block; padding: 2px 8px; border-radius: 20px;
-      font-size: 11px; font-weight: 600;
-    }
-    .paid-badge.paid { background: rgba(0,229,195,.12); color: var(--teal); }
-    .paid-badge.unpaid { background: rgba(255,202,40,.1); color: var(--gold); }
+    tr:hover td { background: #fafcff; }
     .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
-
-    /* ── Change password ── */
-    .pw-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
+    .paid-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
     }
-    .pw-section h2 { margin-bottom: 16px; }
+    .paid-badge.paid { background: rgba(0,168,107,.12); color: var(--green); }
+    .paid-badge.unpaid { background: rgba(247,148,29,.1); color: var(--orange); }
+
     .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .05em; }
     .field input {
-      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
       border-radius: 8px; color: var(--text); font-size: 14px;
       padding: 10px 12px; outline: none; font-family: inherit;
     }
-    .field input:focus { border-color: var(--teal); }
+    .field input:focus { border-color: var(--blue); background: #fff; }
     .btn-primary {
-      background: var(--teal); color: #080a0c; border: none;
-      border-radius: 8px; padding: 10px 20px; font-size: 14px;
-      font-weight: 600; cursor: pointer; font-family: inherit;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 8px; padding: 11px 22px; font-size: 14px;
+      font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s;
     }
-    .btn-primary:hover { background: #00c9aa; }
-    .msg { font-size: 13px; margin-top: 10px; }
-    .msg.ok { color: var(--teal); }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .msg { font-size: 13px; margin-top: 10px; font-weight: 500; }
+    .msg.ok { color: var(--green); }
     .msg.err { color: var(--red); }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo"><img src="/logo.png" alt="Shark Exteriors" style="height:36px;vertical-align:middle;margin-right:10px" onerror="this.style.display='none'"><span style="color:#00AAEF;font-weight:700">Shark</span> <span style="color:#F7941D;font-weight:700">Exteriors</span></div>
+    <div class="logo">
+      <div class="shark">🦈</div>
+      <h1><span class="blue">Shark</span> <span class="orange">Exteriors</span></h1>
+    </div>
     <div class="user-info">
       <span>Logged in as <strong id="userName">…</strong></span>
       <button class="btn-sm" id="logoutBtn">Sign Out</button>
@@ -137,8 +132,7 @@
   </header>
 
   <main>
-    <!-- All-time stats -->
-    <div class="stats-grid" id="statsGrid">
+    <div class="stats-grid">
       <div class="stat-card">
         <div class="label">All-Time Earnings</div>
         <div class="value" id="statAllTime">—</div>
@@ -154,72 +148,59 @@
       </div>
       <div class="stat-card">
         <div class="label">Outstanding</div>
-        <div class="value" id="statOutstanding" style="color:var(--gold)">—</div>
+        <div class="value orange" id="statOutstanding">—</div>
         <div class="sub" id="statPaidJobs">— paid</div>
       </div>
     </div>
 
-    <!-- Weekly breakdown -->
     <section>
-      <div class="section-header">
-        <h2>Weekly Breakdown</h2>
-        <div class="period-picker">
-          <input type="date" id="weekStart" />
-          <span style="color:var(--muted)">to</span>
-          <input type="date" id="weekEnd" />
-          <button class="btn-sm" id="weekBtn">Load</button>
+      <div class="card">
+        <div class="card-title">
+          Weekly Breakdown
+          <div class="period-picker">
+            <input type="date" id="weekStart" />
+            <span style="color:var(--muted);font-size:13px">to</span>
+            <input type="date" id="weekEnd" />
+            <button class="btn-load" id="weekBtn">Load</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th></tr></thead>
+            <tbody id="weekBody"><tr><td colspan="5" class="empty">Select a date range above</td></tr></tbody>
+          </table>
         </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Date</th><th>Jobs</th>
-            <th>Crew Pay</th><th>Commission</th><th>Total</th>
-          </tr></thead>
-          <tbody id="weekBody"><tr><td colspan="5" class="empty">Select a date range above</td></tr></tbody>
-        </table>
-      </div>
     </section>
 
-    <!-- Recent jobs -->
     <section>
-      <div class="section-header"><h2>Recent Jobs (last 30)</h2></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Date</th><th>Job</th>
-            <th>Crew Pay</th><th>Commission</th><th>Total</th><th>Status</th>
-          </tr></thead>
-          <tbody id="recentBody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
-        </table>
+      <div class="card">
+        <div class="card-title">Recent Jobs (last 30)</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Job</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="recentBody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <!-- Change password -->
-    <div class="pw-section">
-      <h2>Change Password</h2>
-      <div class="field">
-        <label>Current Password</label>
-        <input type="password" id="pwCurrent" />
+    <section>
+      <div class="card">
+        <div class="card-title">Change Password</div>
+        <div class="field"><label>Current Password</label><input type="password" id="pwCurrent" /></div>
+        <div class="field"><label>New Password</label><input type="password" id="pwNew" /></div>
+        <div class="field"><label>Confirm New Password</label><input type="password" id="pwConfirm" /></div>
+        <button class="btn-primary" id="pwBtn">Update Password</button>
+        <div class="msg" id="pwMsg"></div>
       </div>
-      <div class="field">
-        <label>New Password</label>
-        <input type="password" id="pwNew" />
-      </div>
-      <div class="field">
-        <label>Confirm New Password</label>
-        <input type="password" id="pwConfirm" />
-      </div>
-      <button class="btn-primary" id="pwBtn">Update Password</button>
-      <div class="msg" id="pwMsg"></div>
-    </div>
+    </section>
   </main>
 
   <script>
     const $ = id => document.getElementById(id);
     const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-    // ── Auth guard ────────────────────────────────────────────────────────────
     async function init() {
       const me = await fetch('/api/auth/me').then(r => r.json()).catch(() => null);
       if (!me || !me.id) { window.location.href = '/login.html'; return; }
@@ -234,42 +215,36 @@
       window.location.href = '/login.html';
     });
 
-    // ── All-time ──────────────────────────────────────────────────────────────
     async function loadAllTime() {
       const d = await fetch('/api/reports/my-earnings').then(r => r.json());
       const a = d.allTime || {};
-      $('statAllTime').textContent = fmt(a.total_pay);
-      $('statCrewPay').textContent = fmt(a.crew_pay);
+      $('statAllTime').textContent    = fmt(a.total_pay);
+      $('statCrewPay').textContent    = fmt(a.crew_pay);
       $('statCommission').textContent = fmt(a.commission_pay);
       $('statOutstanding').textContent = fmt(a.outstanding);
-      $('statJobs').textContent = `${a.job_count || 0} jobs`;
-      $('statPaidJobs').textContent = `${a.paid_count || 0} paid`;
+      $('statJobs').textContent       = `${a.job_count || 0} jobs`;
+      $('statPaidJobs').textContent   = `${a.paid_count || 0} paid`;
 
       const recent = d.recent || [];
-      if (!recent.length) {
-        $('recentBody').innerHTML = '<tr><td colspan="6" class="empty">No jobs yet</td></tr>';
-        return;
-      }
-      $('recentBody').innerHTML = recent.map(r => `
+      $('recentBody').innerHTML = recent.length ? recent.map(r => `
         <tr>
           <td>${r.date}</td>
           <td>${r.job_name}</td>
           <td class="mono">${fmt(r.crew_pay)}</td>
           <td class="mono">${fmt(r.commission_pay)}</td>
-          <td class="mono" style="color:var(--teal);font-weight:600">${fmt(r.total_pay)}</td>
+          <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.total_pay)}</td>
           <td><span class="paid-badge ${r.paid ? 'paid' : 'unpaid'}">${r.paid ? 'Paid' : 'Unpaid'}</span></td>
-        </tr>
-      `).join('');
+        </tr>`).join('')
+        : '<tr><td colspan="6" class="empty">No jobs yet</td></tr>';
     }
 
-    // ── Weekly ────────────────────────────────────────────────────────────────
     function setDefaultWeek() {
       const today = new Date();
-      const day = today.getDay(); // 0=Sun
+      const day = today.getDay();
       const mon = new Date(today); mon.setDate(today.getDate() - ((day + 6) % 7));
       const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
       $('weekStart').value = mon.toISOString().slice(0, 10);
-      $('weekEnd').value = sun.toISOString().slice(0, 10);
+      $('weekEnd').value   = sun.toISOString().slice(0, 10);
     }
 
     $('weekBtn').addEventListener('click', async () => {
@@ -277,43 +252,34 @@
       if (!start || !end) return;
       const d = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r => r.json());
       const rows = d.rows || [];
-      if (!rows.length) {
-        $('weekBody').innerHTML = '<tr><td colspan="5" class="empty">No jobs in this period</td></tr>';
-        return;
-      }
-      $('weekBody').innerHTML = rows.map(r => `
+      $('weekBody').innerHTML = rows.length ? rows.map(r => `
         <tr>
           <td>${r.date}</td>
           <td>${r.job_count}</td>
           <td class="mono">${fmt(r.crew_pay)}</td>
           <td class="mono">${fmt(r.commission_pay)}</td>
-          <td class="mono" style="color:var(--teal);font-weight:600">${fmt(r.total_pay)}</td>
-        </tr>
-      `).join('');
+          <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.total_pay)}</td>
+        </tr>`).join('')
+        : '<tr><td colspan="5" class="empty">No jobs in this period</td></tr>';
     });
 
-    // ── Change password ───────────────────────────────────────────────────────
     $('pwBtn').addEventListener('click', async () => {
       const msg = $('pwMsg');
       const cur = $('pwCurrent').value;
-      const nw = $('pwNew').value;
-      const cf = $('pwConfirm').value;
+      const nw  = $('pwNew').value;
+      const cf  = $('pwConfirm').value;
       if (nw !== cf) { msg.textContent = 'New passwords do not match'; msg.className = 'msg err'; return; }
       if (nw.length < 4) { msg.textContent = 'Password must be at least 4 characters'; msg.className = 'msg err'; return; }
-
       const res = await fetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword: cur, newPassword: nw }),
       });
       if (res.ok) {
-        msg.textContent = 'Password updated!';
-        msg.className = 'msg ok';
+        msg.textContent = 'Password updated!'; msg.className = 'msg ok';
         $('pwCurrent').value = $('pwNew').value = $('pwConfirm').value = '';
       } else {
         const { error } = await res.json();
-        msg.textContent = error || 'Update failed';
-        msg.className = 'msg err';
+        msg.textContent = error || 'Update failed'; msg.className = 'msg err';
       }
     });
 
