@@ -5,329 +5,230 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Exteriors — Payroll</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #f0f4f8;
-      --surface: #ffffff;
-      --surface2: #f7fafc;
-      --border: #dde3ea;
-      --text: #1a2332;
-      --muted: #6b7a90;
-      --blue: #00AAEF;
-      --blue-dark: #0090cc;
-      --orange: #F7941D;
-      --orange-dark: #e07d0a;
-      --red: #e53935;
-      --green: #00a86b;
-      --navy: #0a1628;
+      --bg: #f0f4f8; --surface: #fff; --surface2: #f7fafc; --border: #dde3ea;
+      --text: #1a2332; --muted: #6b7a90;
+      --blue: #00AAEF; --blue-dk: #0090cc;
+      --orange: #F7941D; --orange-dk: #e07d0a;
+      --red: #e53935; --green: #00a86b; --navy: #0a1628;
       --shadow: 0 2px 12px rgba(0,0,0,.07);
-      --shadow-lg: 0 4px 24px rgba(0,0,0,.10);
     }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; }
     .mono { font-family: 'DM Mono', monospace; }
 
-    /* ── Sidebar ── */
+    /* Sidebar */
     #sidebar {
-      width: 230px; flex-shrink: 0;
-      background: var(--navy);
+      width: 225px; flex-shrink: 0; background: var(--navy);
       display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; height: 100vh;
-      z-index: 20;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 20;
     }
     .sidebar-logo {
-      padding: 22px 20px 18px;
-      border-bottom: 3px solid var(--orange);
-      cursor: pointer;
-      display: flex; align-items: center; gap: 10px;
+      padding: 20px 18px 16px; border-bottom: 3px solid var(--orange);
+      cursor: pointer; display: flex; align-items: center; gap: 10px;
     }
-    .sidebar-logo:hover { opacity: .9; }
-    .shark-icon { font-size: 28px; }
-    .sidebar-logo-text h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
-    .sidebar-logo-text h1 span.blue { color: var(--blue); }
-    .sidebar-logo-text h1 span.orange { color: var(--orange); }
-    .sidebar-logo-text p { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
-    nav { flex: 1; padding: 14px 10px; }
+    .sidebar-logo:hover { opacity: .88; }
+    .sidebar-logo .shark { font-size: 26px; }
+    .logo-text h1 { font-size: 15px; font-weight: 800; }
+    .logo-text h1 .b { color: var(--blue); }
+    .logo-text h1 .o { color: var(--orange); }
+    .logo-text p { font-size: 10px; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .08em; margin-top: 1px; }
+    nav { flex: 1; padding: 12px 10px; }
     .nav-item {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; border-radius: 8px;
-      font-size: 14px; cursor: pointer;
-      color: rgba(255,255,255,.55); transition: all .15s;
-      user-select: none;
+      padding: 10px 12px; border-radius: 8px; font-size: 14px;
+      cursor: pointer; color: rgba(255,255,255,.5); transition: all .15s; user-select: none;
     }
     .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-    .nav-item.active { background: var(--blue); color: #fff; font-weight: 500; }
-    .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
-    .sidebar-footer {
-      padding: 16px;
-      border-top: 1px solid rgba(255,255,255,.1);
-    }
+    .nav-item.active { background: var(--blue); color: #fff; font-weight: 600; }
+    .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 14px; border-top: 1px solid rgba(255,255,255,.1); }
     .sidebar-footer .user { font-size: 12px; color: rgba(255,255,255,.4); margin-bottom: 10px; }
     .sidebar-footer .user strong { color: #fff; display: block; font-size: 14px; }
     .btn-logout {
-      width: 100%; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-      color: rgba(255,255,255,.6); border-radius: 6px; padding: 8px;
+      width: 100%; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.55); border-radius: 6px; padding: 8px;
       font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s;
     }
-    .btn-logout:hover { background: rgba(229,57,53,.2); border-color: rgba(229,57,53,.4); color: #ff7070; }
+    .btn-logout:hover { background: rgba(229,57,53,.2); color: #ff7070; }
 
-    /* ── Main ── */
-    #main { margin-left: 230px; flex: 1; padding: 28px 32px; min-height: 100vh; }
+    /* Main */
+    #main { margin-left: 225px; flex: 1; padding: 26px 30px; }
     .page { display: none; }
     .page.active { display: block; }
-    .page-header { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; }
-    .page-header h2 { font-size: 22px; font-weight: 700; color: var(--text); }
+    .page-header { margin-bottom: 22px; }
+    .page-header h2 { font-size: 21px; font-weight: 800; }
     .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
-    /* ── Buttons ── */
-    .btn {
-      background: var(--blue); color: #fff; border: none;
-      border-radius: 8px; padding: 10px 18px; font-size: 14px;
-      font-weight: 600; cursor: pointer; font-family: inherit;
-      transition: background .15s; display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn:hover { background: var(--blue-dark); }
-    .btn-orange { background: var(--orange); }
-    .btn-orange:hover { background: var(--orange-dark); }
-    .btn-ghost {
-      background: var(--surface); border: 1.5px solid var(--border);
-      color: var(--text); border-radius: 8px; padding: 9px 16px;
-      font-size: 14px; cursor: pointer; font-family: inherit; transition: all .15s;
-    }
+    /* Buttons */
+    .btn { background: var(--blue); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:hover { background: var(--blue-dk); }
+    .btn.orange { background: var(--orange); }
+    .btn.orange:hover { background: var(--orange-dk); }
+    .btn-ghost { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 16px; font-size: 14px; cursor: pointer; font-family: inherit; transition: all .15s; }
     .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
-    .btn-danger {
-      background: rgba(229,57,53,.08); border: 1.5px solid rgba(229,57,53,.25);
-      color: var(--red); border-radius: 8px; padding: 7px 14px;
-      font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s;
-    }
+    .btn-danger { background: rgba(229,57,53,.08); border: 1.5px solid rgba(229,57,53,.2); color: var(--red); border-radius: 8px; padding: 7px 13px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s; }
     .btn-danger:hover { background: rgba(229,57,53,.15); }
+    .btn-link { background: none; border: none; color: var(--blue); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; padding: 4px 0; text-decoration: underline; }
 
-    /* ── Card ── */
-    .card {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 14px; padding: 22px;
-      box-shadow: var(--shadow);
+    /* Cards */
+    .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
+    .card + .card { margin-top: 14px; }
+    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+    /* Form */
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    input[type=text], input[type=number], input[type=date], input[type=password], select {
+      background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 14px; padding: 9px 12px; outline: none;
+      font-family: inherit; width: 100%; transition: border-color .15s;
     }
-    .card + .card { margin-top: 16px; }
-    .card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    input:focus, select:focus { border-color: var(--blue); background: #fff; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* ── Form ── */
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .05em; }
-    .field input, .field select {
-      background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 14px;
-      padding: 9px 12px; outline: none; font-family: inherit; width: 100%;
-      transition: border-color .15s;
-    }
-    .field input:focus, .field select:focus { border-color: var(--blue); background: #fff; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-    /* ── Date bar ── */
+    /* Date bar */
     .date-bar {
       display: flex; align-items: center; gap: 12px;
       background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 12px 18px; margin-bottom: 22px;
-      box-shadow: var(--shadow);
+      border-radius: 10px; padding: 12px 18px; margin-bottom: 20px; box-shadow: var(--shadow);
+      flex-wrap: wrap;
     }
-    .date-bar label { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
-    .date-bar input[type=date] {
-      background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 14px;
-      padding: 8px 12px; outline: none; font-family: inherit;
-      transition: border-color .15s; width: auto; min-width: 160px;
-    }
-    .date-bar input:focus { border-color: var(--blue); }
+    .date-bar label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+    .date-bar input[type=date] { width: auto; min-width: 155px; }
 
-    /* ── Summary cards ── */
-    .summary-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px; margin-bottom: 22px;
-    }
-    .summary-card {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
-    }
-    .summary-card .lbl { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
-    .summary-card .val { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 600; color: var(--blue); }
-    .summary-card.highlight .val { color: var(--orange); }
-    .summary-card.green .val { color: var(--green); }
+    /* Summary grid */
+    .sum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .sum-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+    .sum-card .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+    .sum-card .val { font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 700; color: var(--blue); }
+    .sum-card.hi .val { color: var(--orange); }
 
-    /* ── Add Job Form ── */
-    .job-form-card { margin-bottom: 24px; }
-    .section-divider {
-      display: flex; align-items: center; gap: 10px;
-      margin: 16px 0 12px;
-    }
-    .section-divider .divider-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .07em; white-space: nowrap; padding: 4px 10px;
-      border-radius: 20px;
-    }
-    .divider-label.blue { background: rgba(0,170,239,.12); color: var(--blue); }
-    .divider-label.orange { background: rgba(247,148,29,.12); color: var(--orange); }
-    .divider-line { flex: 1; height: 1.5px; background: var(--border); }
+    /* Section divider */
+    .sec-div { display: flex; align-items: center; gap: 10px; margin: 16px 0 8px; }
+    .sec-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; padding: 4px 10px; border-radius: 20px; }
+    .sec-lbl.blue { background: rgba(0,170,239,.1); color: var(--blue); }
+    .sec-lbl.orange { background: rgba(247,148,29,.1); color: var(--orange); }
+    .sec-div hr { flex: 1; border: none; border-top: 1.5px solid var(--border); }
 
-    /* Crew/Sales person rows */
-    .person-check-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 12px; border-radius: 8px; transition: background .1s;
+    /* Person rows */
+    .person-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; transition: background .1s; }
+    .person-row:hover { background: var(--surface2); }
+    .person-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .person-label input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; flex-shrink: 0; }
+    .pct-wrap { display: none; align-items: center; gap: 6px; }
+    .pct-wrap.show { display: flex; }
+    .pct-input {
+      width: 62px !important; text-align: center; padding: 5px 8px !important;
+      font-size: 13px !important; font-family: 'DM Mono', monospace !important;
     }
-    .person-check-row:hover { background: var(--surface2); }
-    .person-check-row .person-label {
-      display: flex; align-items: center; gap: 9px;
-      font-size: 14px; color: var(--text); cursor: pointer; font-weight: 500;
-    }
-    .person-check-row input[type=checkbox] {
-      width: 17px; height: 17px; accent-color: var(--blue); cursor: pointer;
-    }
-    .commission-select {
-      background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 7px; color: var(--text); font-size: 13px;
-      padding: 5px 9px; outline: none; font-family: inherit;
-      transition: border-color .15s; display: none;
-    }
-    .commission-select:focus { border-color: var(--orange); }
-    .commission-select.visible { display: block; }
+    .pct-suffix { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .comm-select { width: auto !important; min-width: 90px; font-size: 13px !important; padding: 5px 8px !important; }
+    .comm-custom { width: 62px !important; padding: 5px 8px !important; font-size: 13px !important; }
 
-    /* ── Job cards (list) ── */
-    .job-card {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 14px; margin-bottom: 14px; overflow: hidden;
-      box-shadow: var(--shadow);
+    /* Crew pay total indicator */
+    .crew-total-bar {
+      display: none; margin: 10px 10px 4px;
+      font-size: 12px; color: var(--muted); font-weight: 600;
+      align-items: center; gap: 10px;
     }
-    .job-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px;
-      background: linear-gradient(135deg, #f8fbff 0%, #fff8f0 100%);
-      border-bottom: 1.5px solid var(--border);
-    }
-    .job-card-header .job-amount {
-      font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; color: var(--blue);
-    }
-    .job-card-body { padding: 16px 18px; }
+    .crew-total-bar.show { display: flex; }
+    .crew-total-bar .pct-num { color: var(--blue); font-family: 'DM Mono', monospace; }
+    .crew-total-bar .dollar-num { color: var(--text); font-family: 'DM Mono', monospace; }
 
+    /* Quick add employee */
+    .quick-add-panel {
+      display: none; background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 14px; margin-top: 14px;
+    }
+    .quick-add-panel.show { display: block; }
+    .quick-add-panel .qa-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; }
+    .quick-add-panel .qa-field label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 3px; }
+    .qa-btn { background: var(--navy); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; height: 38px; }
+    .qa-btn:hover { background: #1a2f4a; }
+
+    /* Added-job flash */
+    .job-added-flash {
+      display: none; align-items: center; gap: 8px; padding: 10px 14px;
+      background: rgba(0,168,107,.08); border: 1.5px solid rgba(0,168,107,.2);
+      border-radius: 8px; font-size: 13px; color: var(--green); font-weight: 600;
+      margin-top: 12px;
+    }
+    .job-added-flash.show { display: flex; }
+
+    /* Job cards */
+    .job-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .job-card-hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: linear-gradient(135deg,#f5fbff,#fff8f0); border-bottom: 1.5px solid var(--border); }
+    .job-card-hdr .job-amt { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; color: var(--blue); }
+    .job-card-body { padding: 14px 18px; }
     .pay-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .pay-table th {
-      text-align: left; padding: 7px 10px;
-      font-size: 10px; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .05em;
-      border-bottom: 1.5px solid var(--border);
-    }
+    .pay-table th { text-align: left; padding: 7px 10px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1.5px solid var(--border); background: var(--surface2); }
     .pay-table td { padding: 9px 10px; border-bottom: 1px solid #f0f4f8; }
     .pay-table tr:last-child td { border-bottom: none; }
-    .role-pill {
-      display: inline-block; padding: 2px 8px; border-radius: 20px;
-      font-size: 11px; font-weight: 600;
-    }
-    .role-pill.worker { background: rgba(0,170,239,.12); color: var(--blue); }
-    .role-pill.sales { background: rgba(247,148,29,.12); color: var(--orange); }
-    .role-pill.both { background: rgba(0,168,107,.12); color: var(--green); }
-
-    .paid-toggle {
-      display: inline-flex; align-items: center; gap: 5px;
-      cursor: pointer; padding: 4px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 600; border: none;
-      font-family: inherit; transition: all .15s;
-    }
+    .role-pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .role-pill.w { background: rgba(0,170,239,.1); color: var(--blue); }
+    .role-pill.s { background: rgba(247,148,29,.1); color: var(--orange); }
+    .role-pill.b { background: rgba(0,168,107,.1); color: var(--green); }
+    .paid-toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: none; font-family: inherit; transition: all .15s; }
     .paid-toggle.unpaid { background: rgba(247,148,29,.1); color: var(--orange); }
-    .paid-toggle.paid { background: rgba(0,168,107,.12); color: var(--green); }
-
-    .owner-strip {
-      display: flex; gap: 0; flex-wrap: wrap;
-      background: linear-gradient(135deg, #eaf6ff, #fff4e6);
-      border: 1.5px solid #d0e8f5; border-radius: 10px; overflow: hidden;
-      margin-top: 14px;
-    }
-    .owner-strip .item {
-      flex: 1; min-width: 110px; padding: 12px 16px;
-      border-right: 1px solid #d0e8f5;
-    }
-    .owner-strip .item:last-child { border-right: none; }
-    .owner-strip .item .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-    .owner-strip .item .val { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 600; color: var(--blue); margin-top: 3px; }
-    .owner-strip .item.takehome .val { color: var(--orange); }
-
-    .btn-icon {
-      background: none; border: none; cursor: pointer;
-      color: var(--muted); font-size: 16px; padding: 5px;
-      border-radius: 6px; transition: all .15s;
-    }
+    .paid-toggle.paid { background: rgba(0,168,107,.1); color: var(--green); }
+    .owner-strip { display: flex; background: linear-gradient(135deg,#eaf6ff,#fff4e6); border: 1.5px solid #d0e8f5; border-radius: 10px; overflow: hidden; margin-top: 12px; flex-wrap: wrap; }
+    .owner-strip .os-item { flex: 1; min-width: 100px; padding: 11px 14px; border-right: 1px solid #d0e8f5; }
+    .owner-strip .os-item:last-child { border-right: none; }
+    .os-item .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .os-item .val { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 700; color: var(--blue); margin-top: 3px; }
+    .os-item.hi .val { color: var(--orange); }
+    .btn-icon { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 5px; border-radius: 6px; transition: all .15s; }
     .btn-icon:hover { color: var(--red); background: rgba(229,57,53,.08); }
 
-    /* ── Table ── */
-    .table-wrap { overflow-x: auto; }
+    /* Table shared */
+    .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th {
-      text-align: left; padding: 10px 14px;
-      font-size: 11px; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .05em;
-      border-bottom: 2px solid var(--border); background: var(--surface2);
-    }
-    td { padding: 12px 14px; border-bottom: 1px solid #f0f4f8; }
+    th { text-align: left; padding: 9px 14px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); background: var(--surface2); }
+    td { padding: 11px 14px; border-bottom: 1px solid #f0f4f8; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fafcff; }
-    .empty { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+    .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
 
-    /* ── Leaderboard bar ── */
+    /* Leaderboard bar */
     .lb-bar-wrap { height: 8px; background: #e8eef4; border-radius: 4px; min-width: 80px; }
     .lb-bar { height: 8px; background: linear-gradient(90deg, var(--blue), var(--orange)); border-radius: 4px; transition: width .5s; }
 
-    /* ── Manage crew ── */
-    .emp-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
-    }
+    /* Manage crew */
+    .emp-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
     .emp-row:last-child { border-bottom: none; }
-    .emp-info .name { font-size: 14px; font-weight: 600; color: var(--text); }
-    .emp-info .username { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
-    .role-badge {
-      display: inline-block; padding: 2px 8px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; margin-left: 8px;
-    }
-    .role-badge.owner { background: rgba(247,148,29,.12); color: var(--orange); }
-    .role-badge.crew { background: rgba(0,170,239,.12); color: var(--blue); }
+    .emp-name { font-size: 14px; font-weight: 600; }
+    .emp-user { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+    .role-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 8px; }
+    .role-badge.owner { background: rgba(247,148,29,.1); color: var(--orange); }
+    .role-badge.crew  { background: rgba(0,170,239,.1); color: var(--blue); }
 
-    /* ── Modal ── */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(10,22,40,.45); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s;
-    }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(10,22,40,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 16px; padding: 28px; width: 420px; max-width: 92vw;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(12px); transition: transform .2s;
-    }
+    .modal { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 28px; width: 420px; max-width: 92vw; box-shadow: 0 8px 40px rgba(0,0,0,.15); transform: translateY(12px); transition: transform .2s; }
     .modal-overlay.open .modal { transform: translateY(0); }
     .modal h3 { font-size: 17px; margin-bottom: 6px; }
     .modal p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
-    /* ── Toast ── */
-    #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-    .toast {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 12px 18px; font-size: 14px;
-      box-shadow: var(--shadow-lg); animation: slideIn .2s ease; max-width: 300px; color: var(--text);
-    }
-    .toast.ok { border-left: 4px solid var(--green); }
+    /* Toast */
+    #toastBox { position: fixed; bottom: 22px; right: 22px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 16px; font-size: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.12); animation: slideIn .2s ease; max-width: 280px; color: var(--text); }
+    .toast.ok  { border-left: 4px solid var(--green); }
     .toast.err { border-left: 4px solid var(--red); }
-    @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
 <div id="sidebar">
   <div class="sidebar-logo" id="logoHome">
-    <div class="shark-icon">🦈</div>
-    <div class="sidebar-logo-text">
-      <h1><span class="blue">Shark</span> <span class="orange">Exteriors</span></h1>
+    <div class="shark">🦈</div>
+    <div class="logo-text">
+      <h1><span class="b">Shark</span> <span class="o">Exteriors</span></h1>
       <p>Payroll Management</p>
     </div>
   </div>
@@ -343,16 +244,13 @@
   </div>
 </div>
 
-<!-- ── Main ── -->
 <div id="main">
 
   <!-- ── DAILY ENTRY ── -->
   <div class="page active" id="page-daily">
     <div class="page-header">
-      <div>
-        <h2>Daily Entry</h2>
-        <p>Log jobs, assign crew workers and salespeople separately.</p>
-      </div>
+      <h2>Daily Entry</h2>
+      <p>Add all jobs for the day. Form stays ready between entries.</p>
     </div>
 
     <div class="date-bar">
@@ -361,229 +259,208 @@
       <button class="btn-ghost" id="todayBtn">Today</button>
     </div>
 
-    <!-- Daily summary -->
-    <div class="summary-grid" id="dailySummary" style="display:none">
-      <div class="summary-card"><div class="lbl">Total Revenue</div><div class="val" id="sumRevenue">$0</div></div>
-      <div class="summary-card"><div class="lbl">Owner Gross</div><div class="val" id="sumOwnerGross">$0</div></div>
-      <div class="summary-card"><div class="lbl">Tax Reserve (20%)</div><div class="val" id="sumTax">$0</div></div>
-      <div class="summary-card"><div class="lbl">Emergency (10%)</div><div class="val" id="sumEmergency">$0</div></div>
-      <div class="summary-card highlight"><div class="lbl">Take-Home</div><div class="val" id="sumTakeHome">$0</div></div>
+    <div class="sum-grid" id="dailySummary" style="display:none">
+      <div class="sum-card"><div class="lbl">Total Revenue</div><div class="val" id="sumRevenue">$0</div></div>
+      <div class="sum-card"><div class="lbl">Owner Gross</div><div class="val" id="sumOwnerGross">$0</div></div>
+      <div class="sum-card"><div class="lbl">Tax Reserve (20%)</div><div class="val" id="sumTax">$0</div></div>
+      <div class="sum-card"><div class="lbl">Emergency (10%)</div><div class="val" id="sumEmergency">$0</div></div>
+      <div class="sum-card hi"><div class="lbl">Take-Home</div><div class="val" id="sumTakeHome">$0</div></div>
     </div>
 
-    <!-- Add Job Form -->
-    <div class="card job-form-card">
+    <!-- Add Job form -->
+    <div class="card" style="margin-bottom:20px">
       <div class="card-title">➕ Add Job</div>
 
-      <div class="field" style="max-width:220px">
-        <label>Job Total ($)</label>
-        <input type="number" id="jobTotal" min="0" step="0.01" placeholder="0.00" />
+      <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+        <div class="field" style="margin:0;min-width:180px">
+          <label>Job Total ($)</label>
+          <input type="number" id="jobTotal" min="0" step="0.01" placeholder="0.00" style="width:180px" />
+        </div>
+        <div style="font-size:12px;color:var(--muted);padding-bottom:10px">
+          Crew: <strong id="workerTotalPct" style="color:var(--blue)">0%</strong>
+          = <strong id="workerTotalDollar" style="color:var(--text)">$0.00</strong>
+        </div>
       </div>
 
-      <!-- Crew workers (30% split) -->
-      <div class="section-divider">
-        <div class="divider-label blue">🔧 Crew — Worked the Job (30% split)</div>
-        <div class="divider-line"></div>
-      </div>
+      <!-- Workers -->
+      <div class="sec-div"><span class="sec-lbl blue">🔧 Crew Workers — each gets their % of job total</span><hr /></div>
       <div id="crewWorkerList"></div>
 
-      <!-- Salespeople (commission %) -->
-      <div class="section-divider">
-        <div class="divider-label orange">💼 Sales — Sold the Job (commission %)</div>
-        <div class="divider-line"></div>
-      </div>
+      <!-- Sales -->
+      <div class="sec-div"><span class="sec-lbl orange">💼 Sales Commission — sold the job</span><hr /></div>
       <div id="crewSalesList"></div>
 
-      <div style="margin-top:18px">
-        <button class="btn btn-orange" id="addJobBtn">Add Job</button>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap">
+        <button class="btn orange" id="addJobBtn">Add Job</button>
+        <span style="font-size:12px;color:var(--muted)">Selections stay ready for your next job ↓</span>
+      </div>
+
+      <div class="job-added-flash" id="jobFlash">✓ Job added! Enter the next one or scroll down to see today's jobs.</div>
+
+      <!-- Quick add employee -->
+      <div style="margin-top:18px;padding-top:16px;border-top:1.5px solid var(--border)">
+        <button class="btn-link" id="toggleQuickAdd">+ Add New Employee to Roster</button>
+        <div class="quick-add-panel" id="quickAddPanel">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Quick Add Employee</div>
+          <div class="qa-grid">
+            <div class="qa-field"><label>Full Name</label><input type="text" id="qaName" placeholder="Jake Miller" /></div>
+            <div class="qa-field"><label>Username</label><input type="text" id="qaUser" placeholder="jake" /></div>
+            <div class="qa-field"><label>Password (optional)</label><input type="text" id="qaPw" placeholder="Defaults to username" /></div>
+            <button class="qa-btn" id="qaSubmit">Add</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Jobs list -->
     <div id="jobsList"></div>
   </div>
 
-  <!-- ── WEEKLY TOTALS ── -->
+  <!-- ── WEEKLY ── -->
   <div class="page" id="page-weekly">
-    <div class="page-header">
-      <div><h2>Weekly Totals</h2><p>Combined payroll breakdown for any date range.</p></div>
-    </div>
-    <div class="date-bar" style="flex-wrap:wrap;gap:12px">
-      <label>From</label>
-      <input type="date" id="weekStart" style="width:auto;min-width:150px" />
-      <label>To</label>
-      <input type="date" id="weekEnd" style="width:auto;min-width:150px" />
+    <div class="page-header"><h2>Weekly Totals</h2><p>Payroll breakdown for any date range.</p></div>
+    <div class="date-bar">
+      <label>From</label><input type="date" id="weekStart" style="width:auto;min-width:150px" />
+      <label>To</label><input type="date" id="weekEnd" style="width:auto;min-width:150px" />
       <button class="btn" id="loadWeekBtn">Load</button>
       <button class="btn-ghost" id="thisWeekBtn">This Week</button>
     </div>
-
-    <div class="summary-grid" id="weeklySummaryCards" style="display:none">
-      <div class="summary-card"><div class="lbl">Total Revenue</div><div class="val" id="wSumRevenue">$0</div></div>
-      <div class="summary-card"><div class="lbl">Owner Gross</div><div class="val" id="wSumOwnerGross">$0</div></div>
-      <div class="summary-card"><div class="lbl">Tax Reserve</div><div class="val" id="wSumTax">$0</div></div>
-      <div class="summary-card"><div class="lbl">Emergency</div><div class="val" id="wSumEmergency">$0</div></div>
-      <div class="summary-card highlight"><div class="lbl">Take-Home</div><div class="val" id="wSumTakeHome">$0</div></div>
+    <div class="sum-grid" id="wSumGrid" style="display:none">
+      <div class="sum-card"><div class="lbl">Revenue</div><div class="val" id="wRev">$0</div></div>
+      <div class="sum-card"><div class="lbl">Owner Gross</div><div class="val" id="wGross">$0</div></div>
+      <div class="sum-card"><div class="lbl">Tax Reserve</div><div class="val" id="wTax">$0</div></div>
+      <div class="sum-card"><div class="lbl">Emergency</div><div class="val" id="wEmerg">$0</div></div>
+      <div class="sum-card hi"><div class="lbl">Take-Home</div><div class="val" id="wTake">$0</div></div>
     </div>
-
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:14px">
       <div class="card-title">Per-Employee Totals</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Employee</th><th>Crew Pay</th><th>Commission</th><th>Total</th></tr></thead>
-          <tbody id="weeklyEmpBody"><tr><td colspan="4" class="empty">Select a date range above</td></tr></tbody>
-        </table>
-      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Employee</th><th>Crew Pay</th><th>Commission</th><th>Total</th></tr></thead>
+        <tbody id="wEmpBody"><tr><td colspan="4" class="empty">Select a date range</td></tr></tbody>
+      </table></div>
     </div>
-
     <div class="card">
       <div class="card-title">Daily Breakdown</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Date</th><th>Revenue</th><th>Owner Gross</th><th>Tax</th><th>Emergency</th><th>Take-Home</th></tr></thead>
-          <tbody id="weeklyDayBody"><tr><td colspan="6" class="empty">Select a date range above</td></tr></tbody>
-        </table>
-      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Revenue</th><th>Owner Gross</th><th>Tax</th><th>Emergency</th><th>Take-Home</th></tr></thead>
+        <tbody id="wDayBody"><tr><td colspan="6" class="empty">Select a date range</td></tr></tbody>
+      </table></div>
     </div>
   </div>
 
   <!-- ── LEADERBOARD ── -->
   <div class="page" id="page-leaderboard">
-    <div class="page-header"><div><h2>Leaderboard</h2><p>All-time earnings ranked.</p></div></div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:100px"></th></tr></thead>
-          <tbody id="lbBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="page-header"><h2>Leaderboard</h2><p>All-time earnings ranked.</p></div>
+    <div class="card"><div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:90px"></th></tr></thead>
+      <tbody id="lbBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+    </table></div></div>
   </div>
 
   <!-- ── MANAGE CREW ── -->
   <div class="page" id="page-crew">
-    <div class="page-header"><div><h2>Manage Crew</h2><p>Add or remove employees from the roster.</p></div></div>
-
-    <div class="card" style="margin-bottom:20px">
+    <div class="page-header"><h2>Manage Crew</h2><p>Add or remove employees.</p></div>
+    <div class="card" style="margin-bottom:16px">
       <div class="card-title">➕ Add Employee</div>
       <div class="form-grid">
-        <div class="field"><label>Full Name</label><input type="text" id="newEmpName" placeholder="e.g. Jake Miller" /></div>
-        <div class="field"><label>Username</label><input type="text" id="newEmpUser" placeholder="e.g. jake" /></div>
-        <div class="field"><label>Default Password (optional)</label><input type="text" id="newEmpPw" placeholder="Defaults to username if blank" /></div>
-        <div class="field"><label>Role</label>
-          <select id="newEmpRole"><option value="crew">Crew</option><option value="owner">Owner</option></select>
-        </div>
+        <div class="field"><label>Full Name</label><input type="text" id="newEmpName" placeholder="Jake Miller" /></div>
+        <div class="field"><label>Username</label><input type="text" id="newEmpUser" placeholder="jake" /></div>
+        <div class="field"><label>Default Password</label><input type="text" id="newEmpPw" placeholder="Defaults to username" /></div>
+        <div class="field"><label>Role</label><select id="newEmpRole"><option value="crew">Crew</option><option value="owner">Owner</option></select></div>
       </div>
-      <button class="btn" id="addEmpBtn" style="margin-top:6px">Add Employee</button>
+      <button class="btn" id="addEmpBtn" style="margin-top:8px">Add Employee</button>
     </div>
-
-    <div class="card">
-      <div class="card-title">Current Roster</div>
-      <div id="empRoster"></div>
-    </div>
+    <div class="card"><div class="card-title">Current Roster</div><div id="empRoster"></div></div>
   </div>
 
-</div><!-- /main -->
+</div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
-    <h3 id="modalTitle">Are you sure?</h3>
-    <p id="modalBody"></p>
+    <h3 id="modalTitle">Are you sure?</h3><p id="modalBody"></p>
     <div class="modal-actions">
       <button class="btn-ghost" id="modalCancel">Cancel</button>
       <button class="btn-danger" id="modalConfirm">Confirm</button>
     </div>
   </div>
 </div>
-
-<div id="toastContainer"></div>
+<div id="toastBox"></div>
 
 <script>
-const $ = id => document.getElementById(id);
-const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const $  = id => document.getElementById(id);
+const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 
-// ── Toast ────────────────────────────────────────────────────────────────────
-function toast(msg, type = 'ok') {
+function toast(msg, type='ok') {
   const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  $('toastContainer').appendChild(el);
+  el.className = `toast ${type}`; el.textContent = msg;
+  $('toastBox').appendChild(el);
   setTimeout(() => el.remove(), 3200);
 }
-
-// ── Confirm modal ─────────────────────────────────────────────────────────────
 function confirm(title, body) {
   return new Promise(resolve => {
-    $('modalTitle').textContent = title;
-    $('modalBody').textContent = body;
-    const overlay = $('confirmModal');
-    overlay.classList.add('open');
-    $('modalConfirm').onclick = () => { overlay.classList.remove('open'); resolve(true); };
-    $('modalCancel').onclick  = () => { overlay.classList.remove('open'); resolve(false); };
+    $('modalTitle').textContent = title; $('modalBody').textContent = body;
+    $('confirmModal').classList.add('open');
+    $('modalConfirm').onclick = () => { $('confirmModal').classList.remove('open'); resolve(true); };
+    $('modalCancel').onclick  = () => { $('confirmModal').classList.remove('open'); resolve(false); };
   });
 }
 
 // ── Nav ───────────────────────────────────────────────────────────────────────
 let employees = [];
-
-function goToPage(page) {
+function goPage(p) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
-  $(`page-${page}`).classList.add('active');
-  if (page === 'leaderboard') loadLeaderboard();
-  if (page === 'crew') loadRoster();
-  if (page === 'daily') loadDay();
-  if (page === 'weekly') loadWeekly();
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${p}"]`).classList.add('active');
+  $(`page-${p}`).classList.add('active');
+  if (p==='daily')       loadDay();
+  if (p==='weekly')      loadWeekly();
+  if (p==='leaderboard') loadLeaderboard();
+  if (p==='crew')        loadRoster();
 }
-
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => goToPage(item.dataset.page));
-});
-$('logoHome').addEventListener('click', () => goToPage('daily'));
+document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => goPage(n.dataset.page)));
+$('logoHome').addEventListener('click', () => goPage('daily'));
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function init() {
-  const me = await fetch('/api/auth/me').then(r => r.json()).catch(() => null);
-  if (!me || !me.id) { window.location.href = '/login.html'; return; }
-  if (me.role !== 'owner') { window.location.href = '/crew.html'; return; }
+  const me = await fetch('/api/auth/me').then(r=>r.json()).catch(()=>null);
+  if (!me?.id) { location.href='/login.html'; return; }
+  if (me.role!=='owner') { location.href='/crew.html'; return; }
   $('ownerName').textContent = me.name;
-  employees = await fetch('/api/employees').then(r => r.json());
+  employees = await fetch('/api/employees').then(r=>r.json());
   buildPersonLists();
   setDefaultDates();
   loadDay();
 }
-
 $('logoutBtn').addEventListener('click', async () => {
-  await fetch('/api/auth/logout', { method: 'POST' });
-  window.location.href = '/login.html';
+  await fetch('/api/auth/logout',{method:'POST'});
+  location.href='/login.html';
 });
 
-// ── Build crew checkboxes (workers + sales separate) ─────────────────────────
+// ── Build person lists ────────────────────────────────────────────────────────
 function buildPersonLists() {
-  // Workers = all active employees (crew + owner can all work jobs)
-  const allActive = employees.filter(e => e.active);
-  // Sales = all active employees too
-  const crewOnly  = employees.filter(e => e.active);
+  const all = employees.filter(e => e.active);
 
-  // Workers list (30% split among checked)
-  $('crewWorkerList').innerHTML = allActive.map(e => `
-    <div class="person-check-row">
+  $('crewWorkerList').innerHTML = all.map(e => `
+    <div class="person-row">
       <label class="person-label">
-        <input type="checkbox" class="worker-cb" data-id="${e.id}" />
-        ${e.name}${e.role === 'owner' ? ' <span style="font-size:11px;color:var(--orange);font-weight:700">(Owner)</span>' : ''}
+        <input type="checkbox" class="worker-cb" data-id="${e.id}" onchange="onWorkerChange()" />
+        ${e.name}${e.role==='owner'?' <span style="font-size:10px;color:var(--orange);font-weight:700">(You)</span>':''}
       </label>
-    </div>
-  `).join('') || '<div style="color:var(--muted);font-size:13px;padding:8px">No employees yet</div>';
+      <div class="pct-wrap" id="wpct-wrap-${e.id}">
+        <input type="number" class="pct-input worker-pct" id="wpct-${e.id}"
+               min="0" max="100" step="0.5" value="0"
+               oninput="updateWorkerTotal()" />
+        <span class="pct-suffix">%</span>
+      </div>
+    </div>`).join('') || '<div style="padding:8px;color:var(--muted);font-size:13px">No employees yet</div>';
 
-  // Sales list (commission % per person)
-  $('crewSalesList').innerHTML = crewOnly.map(e => `
-    <div class="person-check-row">
+  $('crewSalesList').innerHTML = all.map(e => `
+    <div class="person-row">
       <label class="person-label">
-        <input type="checkbox" class="sales-cb" data-id="${e.id}" />
-        ${e.name}${e.role === 'owner' ? ' <span style="font-size:11px;color:var(--orange);font-weight:700">(Owner)</span>' : ''}
+        <input type="checkbox" class="sales-cb" data-id="${e.id}" onchange="onSalesChange(${e.id}, this)" />
+        ${e.name}${e.role==='owner'?' <span style="font-size:10px;color:var(--orange);font-weight:700">(You)</span>':''}
       </label>
-      <div class="commission-wrap" id="comm-wrap-${e.id}" style="display:none;align-items:center;gap:6px">
-        <select class="commission-select" id="sales-pct-${e.id}" onchange="handleCommSelect(${e.id}, this)">
+      <div class="pct-wrap" id="spct-wrap-${e.id}">
+        <select class="comm-select" id="spct-${e.id}" onchange="onCommSelect(${e.id},this)">
           <option value="5">5%</option>
           <option value="7.5">7.5%</option>
           <option value="10">10%</option>
@@ -592,101 +469,142 @@ function buildPersonLists() {
           <option value="20">20%</option>
           <option value="custom">Custom…</option>
         </select>
-        <input type="number" class="commission-custom" id="sales-custom-${e.id}"
+        <input type="number" class="comm-custom" id="spcustom-${e.id}"
                min="0" max="100" step="0.5" placeholder="%"
-               style="width:65px;display:none;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-size:13px;color:var(--text);outline:none;font-family:inherit" />
+               style="display:none" />
       </div>
-    </div>
-  `).join('') || '';
+    </div>`).join('') || '';
+}
 
-  document.querySelectorAll('.sales-cb').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const wrap = $(`comm-wrap-${cb.dataset.id}`);
-      wrap.style.display = cb.checked ? 'flex' : 'none';
-    });
+function onWorkerChange() {
+  // Show/hide pct inputs, recalculate even-split default for newly checked workers
+  const checked = [...document.querySelectorAll('.worker-cb:checked')];
+  const evenSplit = checked.length > 0 ? (30 / checked.length) : 0;
+  document.querySelectorAll('.worker-cb').forEach(cb => {
+    const wrap = $(`wpct-wrap-${cb.dataset.id}`);
+    if (cb.checked) {
+      wrap.classList.add('show');
+      // Only set default if currently 0 (unset)
+      const inp = $(`wpct-${cb.dataset.id}`);
+      if (!inp.dataset.manuallySet) inp.value = evenSplit.toFixed(1);
+    } else {
+      wrap.classList.remove('show');
+      const inp = $(`wpct-${cb.dataset.id}`);
+      inp.value = 0; delete inp.dataset.manuallySet;
+    }
   });
+  updateWorkerTotal();
 }
 
-function handleCommSelect(empId, sel) {
-  const customInput = $(`sales-custom-${empId}`);
-  customInput.style.display = sel.value === 'custom' ? 'block' : 'none';
-}
-
-function getSalesPct(empId) {
-  const sel = $(`sales-pct-${empId}`);
-  if (sel.value === 'custom') {
-    return parseFloat($(`sales-custom-${empId}`).value) || 0;
+// Mark as manually set when user types
+document.addEventListener('input', e => {
+  if (e.target.classList.contains('worker-pct')) {
+    e.target.dataset.manuallySet = '1';
+    updateWorkerTotal();
   }
-  return parseFloat(sel.value) || 0;
+});
+
+function updateWorkerTotal() {
+  const total = parseFloat($('jobTotal').value) || 0;
+  let pct = 0;
+  document.querySelectorAll('.worker-cb:checked').forEach(cb => {
+    pct += parseFloat($(`wpct-${cb.dataset.id}`).value) || 0;
+  });
+  $('workerTotalPct').textContent = pct.toFixed(1) + '%';
+  $('workerTotalDollar').textContent = fmt(total * pct / 100);
+}
+
+function onSalesChange(empId, cb) {
+  $(`spct-wrap-${empId}`).classList.toggle('show', cb.checked);
+}
+function onCommSelect(empId, sel) {
+  $(`spcustom-${empId}`).style.display = sel.value === 'custom' ? 'inline-block' : 'none';
+}
+function getSalesPct(empId) {
+  const sel = $(`spct-${empId}`);
+  return sel.value === 'custom'
+    ? (parseFloat($(`spcustom-${empId}`).value) || 0)
+    : (parseFloat(sel.value) || 0);
 }
 
 // ── Dates ─────────────────────────────────────────────────────────────────────
+function todayStr() { return new Date().toISOString().slice(0,10); }
 function setDefaultDates() {
   $('dailyDate').value = todayStr();
   setThisWeek();
 }
-
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 function setThisWeek() {
-  const now = new Date();
-  const day = now.getDay();
-  const mon = new Date(now); mon.setDate(now.getDate() - ((day + 6) % 7));
-  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-  $('weekStart').value = mon.toISOString().slice(0, 10);
-  $('weekEnd').value   = sun.toISOString().slice(0, 10);
+  const now = new Date(), day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((day+6)%7));
+  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+  $('weekStart').value = mon.toISOString().slice(0,10);
+  $('weekEnd').value   = sun.toISOString().slice(0,10);
 }
-
 $('todayBtn').addEventListener('click', () => { $('dailyDate').value = todayStr(); loadDay(); });
 $('dailyDate').addEventListener('change', loadDay);
+$('jobTotal').addEventListener('input', updateWorkerTotal);
 
 // ── Add Job ───────────────────────────────────────────────────────────────────
 $('addJobBtn').addEventListener('click', async () => {
   const date = $('dailyDate').value;
   const totalAmount = parseFloat($('jobTotal').value);
-  if (!date || isNaN(totalAmount) || totalAmount <= 0) {
-    toast('Enter a valid job total.', 'err'); return;
-  }
+  if (!date || isNaN(totalAmount) || totalAmount <= 0) { toast('Enter a valid job total.','err'); return; }
 
-  // Collect workers (split 30% among these)
-  const workerIds = new Set(
-    [...document.querySelectorAll('.worker-cb:checked')].map(cb => parseInt(cb.dataset.id))
-  );
-
-  // Collect salespeople (individual commission %)
-  const salesMap = {};
+  // Build crew array
+  const crewMap = {};
+  document.querySelectorAll('.worker-cb:checked').forEach(cb => {
+    const id = parseInt(cb.dataset.id);
+    crewMap[id] = { employeeId: id, crewPayPct: parseFloat($(`wpct-${id}`).value)||0, commissionPct: 0 };
+  });
   document.querySelectorAll('.sales-cb:checked').forEach(cb => {
-    salesMap[parseInt(cb.dataset.id)] = getSalesPct(cb.dataset.id);
+    const id = parseInt(cb.dataset.id);
+    const pct = getSalesPct(id);
+    if (crewMap[id]) crewMap[id].commissionPct = pct;
+    else crewMap[id] = { employeeId: id, crewPayPct: 0, commissionPct: pct };
   });
 
-  // Merge into a single crew array
-  const allIds = new Set([...workerIds, ...Object.keys(salesMap).map(Number)]);
-  if (allIds.size === 0) { toast('Select at least one crew member or salesperson.', 'err'); return; }
-
-  const crew = [...allIds].map(id => ({
-    employeeId: id,
-    isWorker: workerIds.has(id),
-    commissionPct: salesMap[id] || 0,
-  }));
+  const crew = Object.values(crewMap);
 
   const res = await fetch('/api/jobs', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ date, jobName: `Job — ${date}`, totalAmount, crew }),
   });
 
   if (res.ok) {
-    toast('Job added!');
+    // Keep form state — only clear the total
     $('jobTotal').value = '';
-    document.querySelectorAll('.worker-cb, .sales-cb').forEach(cb => { cb.checked = false; });
-    document.querySelectorAll('.commission-wrap').forEach(w => { w.style.display = 'none'; });
-    document.querySelectorAll('.commission-custom').forEach(i => { i.style.display = 'none'; i.value = ''; });
-    document.querySelectorAll('.commission-select').forEach(s => { s.value = '12.5'; });
+    updateWorkerTotal();
+    const flash = $('jobFlash');
+    flash.classList.add('show');
+    setTimeout(() => flash.classList.remove('show'), 3500);
     loadDay();
   } else {
-    toast('Failed to add job', 'err');
+    toast('Failed to add job','err');
+  }
+});
+
+// ── Quick add employee ────────────────────────────────────────────────────────
+$('toggleQuickAdd').addEventListener('click', () => {
+  $('quickAddPanel').classList.toggle('show');
+});
+$('qaSubmit').addEventListener('click', async () => {
+  const name     = $('qaName').value.trim();
+  const username = $('qaUser').value.trim().toLowerCase();
+  const password = $('qaPw').value.trim() || undefined;
+  if (!name || !username) { toast('Name and username required','err'); return; }
+  const res = await fetch('/api/employees', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name, username, password, role:'crew' }),
+  });
+  if (res.ok) {
+    toast(`${name} added to roster!`);
+    $('qaName').value = $('qaUser').value = $('qaPw').value = '';
+    $('quickAddPanel').classList.remove('show');
+    employees = await fetch('/api/employees').then(r=>r.json());
+    buildPersonLists();
+  } else {
+    const { error } = await res.json();
+    toast(error||'Failed','err');
   }
 });
 
@@ -694,103 +612,83 @@ $('addJobBtn').addEventListener('click', async () => {
 async function loadDay() {
   const date = $('dailyDate').value;
   if (!date) return;
-
-  const data = await fetch(`/api/reports/daily?date=${date}`).then(r => r.json());
-  const { summary, jobs = [] } = data;
+  const { summary, jobs=[] } = await fetch(`/api/reports/daily?date=${date}`).then(r=>r.json());
 
   if (summary) {
-    $('dailySummary').style.display = 'grid';
-    $('sumRevenue').textContent   = fmt(summary.total_revenue);
+    $('dailySummary').style.display='grid';
+    $('sumRevenue').textContent    = fmt(summary.total_revenue);
     $('sumOwnerGross').textContent = fmt(summary.owner_gross);
-    $('sumTax').textContent       = fmt(summary.owner_tax_reserve);
-    $('sumEmergency').textContent = fmt(summary.owner_emergency_reserve);
-    $('sumTakeHome').textContent  = fmt(summary.owner_take_home);
+    $('sumTax').textContent        = fmt(summary.owner_tax_reserve);
+    $('sumEmergency').textContent  = fmt(summary.owner_emergency_reserve);
+    $('sumTakeHome').textContent   = fmt(summary.owner_take_home);
   } else {
-    $('dailySummary').style.display = 'none';
+    $('dailySummary').style.display='none';
   }
 
   if (!jobs.length) {
-    $('jobsList').innerHTML = `<div class="empty" style="padding:40px 0">No jobs on this date yet.</div>`;
+    $('jobsList').innerHTML='<div class="empty" style="padding:32px 0">No jobs on this date yet.</div>';
     return;
   }
 
   $('jobsList').innerHTML = jobs.map(job => {
-    const workerCount = job.crew.filter(c => c.crew_pay > 0).length;
-    const totalCrewPay = job.crew.reduce((s, c) => s + c.crew_pay, 0);
-    const totalCommission = job.crew.reduce((s, c) => s + c.commission_pay, 0);
-    const ownerGross = job.total_amount - totalCrewPay - totalCommission;
-
+    const totalCrewPay    = job.crew.reduce((s,c)=>s+c.crew_pay,0);
+    const totalCommission = job.crew.reduce((s,c)=>s+c.commission_pay,0);
+    const ownerGross      = job.total_amount - totalCrewPay - totalCommission;
     const rows = job.crew.map(c => {
-      const isWorker = c.crew_pay > 0;
-      const isSales  = c.commission_pay > 0;
-      const roleLabel = isWorker && isSales ? '<span class="role-pill both">Worker + Sales</span>'
-                      : isWorker ? '<span class="role-pill worker">Worker</span>'
-                      : '<span class="role-pill sales">Sales</span>';
-      const total = c.crew_pay + c.commission_pay;
+      const isW = c.crew_pay > 0, isS = c.commission_pay > 0;
+      const pill = isW&&isS ? '<span class="role-pill b">Worker+Sales</span>'
+                 : isW ? '<span class="role-pill w">Worker</span>'
+                 : '<span class="role-pill s">Sales</span>';
       return `<tr>
         <td><strong>${c.name}</strong></td>
-        <td>${roleLabel}</td>
-        <td class="mono">${isWorker ? fmt(c.crew_pay) : '—'}</td>
-        <td class="mono">${isSales ? c.commission_pct + '%' : '—'}</td>
-        <td class="mono">${isSales ? fmt(c.commission_pay) : '—'}</td>
-        <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(total)}</td>
-        <td>
-          <button class="paid-toggle ${c.paid ? 'paid' : 'unpaid'}"
-            onclick="togglePaid(${c.id}, ${c.paid ? 0 : 1}, this)">
-            ${c.paid ? '✓ Paid' : '○ Unpaid'}
-          </button>
-        </td>
+        <td>${pill}</td>
+        <td class="mono">${isW ? fmt(c.crew_pay) : '—'}</td>
+        <td class="mono">${isS ? c.commission_pct+'%' : '—'}</td>
+        <td class="mono">${isS ? fmt(c.commission_pay) : '—'}</td>
+        <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(c.crew_pay+c.commission_pay)}</td>
+        <td><button class="paid-toggle ${c.paid?'paid':'unpaid'}"
+              onclick="togglePaid(${c.id},${c.paid?0:1},this)">
+              ${c.paid?'✓ Paid':'○ Unpaid'}</button></td>
       </tr>`;
     }).join('');
-
     return `<div class="job-card">
-      <div class="job-card-header">
+      <div class="job-card-hdr">
         <div>
           <div style="font-weight:700;font-size:15px">${job.job_name}</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px">${job.crew.length} people · ${workerCount} worker${workerCount !== 1 ? 's' : ''}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${job.crew.length} assigned</div>
         </div>
         <div style="display:flex;align-items:center;gap:12px">
-          <div class="job-amount">${fmt(job.total_amount)}</div>
+          <div class="job-amt">${fmt(job.total_amount)}</div>
           <button class="btn-icon" onclick="deleteJob(${job.id})">🗑</button>
         </div>
       </div>
       <div class="job-card-body">
-        ${job.crew.length ? `
-          <table class="pay-table">
-            <thead><tr><th>Name</th><th>Role</th><th>Crew Pay</th><th>Comm %</th><th>Comm $</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        ` : '<div style="font-size:13px;color:var(--muted)">No crew assigned</div>'}
+        ${job.crew.length ? `<table class="pay-table">
+          <thead><tr><th>Name</th><th>Role</th><th>Crew Pay</th><th>Comm%</th><th>Comm$</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody></table>` : '<div style="font-size:13px;color:var(--muted)">No crew assigned</div>'}
         <div class="owner-strip">
-          <div class="item"><div class="lbl">Owner Gross</div><div class="val">${fmt(ownerGross)}</div></div>
-          <div class="item"><div class="lbl">Tax (20%)</div><div class="val">${fmt(ownerGross * .20)}</div></div>
-          <div class="item"><div class="lbl">Emergency (10%)</div><div class="val">${fmt(ownerGross * .10)}</div></div>
-          <div class="item takehome"><div class="lbl">Take-Home</div><div class="val">${fmt(ownerGross * .70)}</div></div>
+          <div class="os-item"><div class="lbl">Owner Gross</div><div class="val">${fmt(ownerGross)}</div></div>
+          <div class="os-item"><div class="lbl">Tax (20%)</div><div class="val">${fmt(ownerGross*.2)}</div></div>
+          <div class="os-item"><div class="lbl">Emergency (10%)</div><div class="val">${fmt(ownerGross*.1)}</div></div>
+          <div class="os-item hi"><div class="lbl">Take-Home</div><div class="val">${fmt(ownerGross*.7)}</div></div>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-async function togglePaid(jobCrewId, newPaid, btn) {
-  const res = await fetch(`/api/jobs/crew/${jobCrewId}/paid`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paid: !!newPaid }),
-  });
+async function togglePaid(jcId, newPaid, btn) {
+  const res = await fetch(`/api/jobs/crew/${jcId}/paid`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({paid:!!newPaid})});
   if (res.ok) {
-    btn.className = `paid-toggle ${newPaid ? 'paid' : 'unpaid'}`;
-    btn.textContent = newPaid ? '✓ Paid' : '○ Unpaid';
-    btn.setAttribute('onclick', `togglePaid(${jobCrewId}, ${newPaid ? 0 : 1}, this)`);
+    btn.className=`paid-toggle ${newPaid?'paid':'unpaid'}`;
+    btn.textContent=newPaid?'✓ Paid':'○ Unpaid';
+    btn.setAttribute('onclick',`togglePaid(${jcId},${newPaid?0:1},this)`);
   }
 }
-
 async function deleteJob(jobId) {
-  const ok = await confirm('Delete Job', 'Remove this job? This cannot be undone.');
-  if (!ok) return;
-  const res = await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
-  if (res.ok) { toast('Job removed'); loadDay(); }
-  else toast('Failed to delete', 'err');
+  if (!await confirm('Delete Job','Remove this job? Cannot be undone.')) return;
+  if ((await fetch(`/api/jobs/${jobId}`,{method:'DELETE'})).ok) { toast('Job removed'); loadDay(); }
+  else toast('Failed to delete','err');
 }
 
 // ── Weekly ────────────────────────────────────────────────────────────────────
@@ -798,56 +696,40 @@ $('thisWeekBtn').addEventListener('click', () => { setThisWeek(); loadWeekly(); 
 $('loadWeekBtn').addEventListener('click', loadWeekly);
 
 async function loadWeekly() {
-  const start = $('weekStart').value, end = $('weekEnd').value;
-  if (!start || !end) return;
-  const data = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r => r.json());
-  const { summaries = [], employeeTotals = [] } = data;
-
-  const agg = summaries.reduce((a, s) => ({
-    revenue: a.revenue + s.total_revenue,
-    ownerGross: a.ownerGross + s.owner_gross,
-    tax: a.tax + s.owner_tax_reserve,
-    emergency: a.emergency + s.owner_emergency_reserve,
-    takeHome: a.takeHome + s.owner_take_home,
-  }), { revenue: 0, ownerGross: 0, tax: 0, emergency: 0, takeHome: 0 });
-
+  const start=$('weekStart').value, end=$('weekEnd').value;
+  if (!start||!end) return;
+  const { summaries=[], employeeTotals=[] } = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r=>r.json());
+  const agg = summaries.reduce((a,s)=>({
+    rev:a.rev+s.total_revenue, gross:a.gross+s.owner_gross,
+    tax:a.tax+s.owner_tax_reserve, emerg:a.emerg+s.owner_emergency_reserve,
+    take:a.take+s.owner_take_home
+  }),{rev:0,gross:0,tax:0,emerg:0,take:0});
   if (summaries.length) {
-    $('weeklySummaryCards').style.display = 'grid';
-    $('wSumRevenue').textContent   = fmt(agg.revenue);
-    $('wSumOwnerGross').textContent = fmt(agg.ownerGross);
-    $('wSumTax').textContent       = fmt(agg.tax);
-    $('wSumEmergency').textContent = fmt(agg.emergency);
-    $('wSumTakeHome').textContent  = fmt(agg.takeHome);
+    $('wSumGrid').style.display='grid';
+    $('wRev').textContent=fmt(agg.rev); $('wGross').textContent=fmt(agg.gross);
+    $('wTax').textContent=fmt(agg.tax); $('wEmerg').textContent=fmt(agg.emerg);
+    $('wTake').textContent=fmt(agg.take);
   }
-
-  $('weeklyEmpBody').innerHTML = employeeTotals.length
-    ? employeeTotals.map(e => `<tr>
-        <td style="font-weight:600">${e.name}</td>
-        <td class="mono">${fmt(e.crew_pay)}</td>
-        <td class="mono">${fmt(e.commission_pay)}</td>
-        <td class="mono" style="color:var(--blue);font-weight:700">${fmt(e.total_pay)}</td>
-      </tr>`).join('')
+  $('wEmpBody').innerHTML = employeeTotals.length
+    ? employeeTotals.map(e=>`<tr><td style="font-weight:600">${e.name}</td>
+        <td class="mono">${fmt(e.crew_pay)}</td><td class="mono">${fmt(e.commission_pay)}</td>
+        <td class="mono" style="color:var(--blue);font-weight:700">${fmt(e.total_pay)}</td></tr>`).join('')
     : '<tr><td colspan="4" class="empty">No data for this range</td></tr>';
-
-  $('weeklyDayBody').innerHTML = summaries.length
-    ? summaries.map(s => `<tr>
-        <td>${s.date}</td>
-        <td class="mono">${fmt(s.total_revenue)}</td>
-        <td class="mono">${fmt(s.owner_gross)}</td>
-        <td class="mono">${fmt(s.owner_tax_reserve)}</td>
+  $('wDayBody').innerHTML = summaries.length
+    ? summaries.map(s=>`<tr><td>${s.date}</td><td class="mono">${fmt(s.total_revenue)}</td>
+        <td class="mono">${fmt(s.owner_gross)}</td><td class="mono">${fmt(s.owner_tax_reserve)}</td>
         <td class="mono">${fmt(s.owner_emergency_reserve)}</td>
-        <td class="mono" style="color:var(--orange);font-weight:700">${fmt(s.owner_take_home)}</td>
-      </tr>`).join('')
+        <td class="mono" style="color:var(--orange);font-weight:700">${fmt(s.owner_take_home)}</td></tr>`).join('')
     : '<tr><td colspan="6" class="empty">No data for this range</td></tr>';
 }
 
 // ── Leaderboard ───────────────────────────────────────────────────────────────
 async function loadLeaderboard() {
-  const rows = await fetch('/api/reports/leaderboard').then(r => r.json());
-  if (!rows.length) { $('lbBody').innerHTML = '<tr><td colspan="7" class="empty">No data yet</td></tr>'; return; }
-  const max = rows[0].total_pay || 1;
-  $('lbBody').innerHTML = rows.map((r, i) => `<tr>
-    <td style="font-weight:700;font-size:16px">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+  const rows = await fetch('/api/reports/leaderboard').then(r=>r.json());
+  if (!rows.length) { $('lbBody').innerHTML='<tr><td colspan="7" class="empty">No data yet</td></tr>'; return; }
+  const max = rows[0].total_pay||1;
+  $('lbBody').innerHTML = rows.map((r,i)=>`<tr>
+    <td style="font-size:17px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
     <td style="font-weight:600">${r.name}</td>
     <td class="mono" style="color:var(--muted)">${r.job_count}</td>
     <td class="mono">${fmt(r.crew_pay)}</td>
@@ -859,47 +741,38 @@ async function loadLeaderboard() {
 
 // ── Manage Crew ───────────────────────────────────────────────────────────────
 async function loadRoster() {
-  const emps = await fetch('/api/employees').then(r => r.json());
-  $('empRoster').innerHTML = emps.map(e => `
+  const emps = await fetch('/api/employees').then(r=>r.json());
+  $('empRoster').innerHTML = emps.map(e=>`
     <div class="emp-row">
-      <div class="emp-info">
-        <span class="name">${e.name}</span>
+      <div>
+        <span class="emp-name">${e.name}</span>
         <span class="role-badge ${e.role}">${e.role}</span>
-        <div class="username">@${e.username}</div>
+        <div class="emp-user">@${e.username}</div>
       </div>
-      ${e.role !== 'owner' ? `<button class="btn-danger" onclick="removeEmp(${e.id}, '${e.name.replace(/'/g,"\\'")}')">Remove</button>`
+      ${e.role!=='owner'
+        ? `<button class="btn-danger" onclick="removeEmp(${e.id},'${e.name.replace(/'/g,"\\'")}')">Remove</button>`
         : '<span style="font-size:12px;color:var(--muted)">Owner</span>'}
     </div>`).join('') || '<div class="empty">No employees</div>';
 }
-
 $('addEmpBtn').addEventListener('click', async () => {
-  const name = $('newEmpName').value.trim();
-  const username = $('newEmpUser').value.trim().toLowerCase();
-  const password = $('newEmpPw').value.trim() || undefined;
-  const role = $('newEmpRole').value;
-  if (!name || !username) { toast('Name and username required', 'err'); return; }
-  const res = await fetch('/api/employees', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, username, password, role }),
-  });
+  const name=  $('newEmpName').value.trim();
+  const username=$('newEmpUser').value.trim().toLowerCase();
+  const password=$('newEmpPw').value.trim()||undefined;
+  const role=$('newEmpRole').value;
+  if (!name||!username) { toast('Name and username required','err'); return; }
+  const res = await fetch('/api/employees',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,username,password,role})});
   if (res.ok) {
     toast(`${name} added!`);
-    $('newEmpName').value = $('newEmpUser').value = $('newEmpPw').value = '';
-    employees = await fetch('/api/employees').then(r => r.json());
+    $('newEmpName').value=$('newEmpUser').value=$('newEmpPw').value='';
+    employees = await fetch('/api/employees').then(r=>r.json());
     buildPersonLists(); loadRoster();
-  } else {
-    const { error } = await res.json();
-    toast(error || 'Failed', 'err');
-  }
+  } else { const {error}=await res.json(); toast(error||'Failed','err'); }
 });
-
-async function removeEmp(id, name) {
-  const ok = await confirm('Remove Employee', `Remove ${name} from the roster?`);
-  if (!ok) return;
-  await fetch(`/api/employees/${id}`, { method: 'DELETE' });
+async function removeEmp(id,name) {
+  if (!await confirm('Remove Employee',`Remove ${name}?`)) return;
+  await fetch(`/api/employees/${id}`,{method:'DELETE'});
   toast(`${name} removed`);
-  employees = await fetch('/api/employees').then(r => r.json());
+  employees = await fetch('/api/employees').then(r=>r.json());
   buildPersonLists(); loadRoster();
 }
 

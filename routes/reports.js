@@ -114,8 +114,8 @@ router.get('/monthly', requireAuth, (req, res) => {
   res.json(rows);
 });
 
-// GET /api/reports/leaderboard — all-time earnings per employee
-router.get('/leaderboard', ownerOnly, (req, res) => {
+// GET /api/reports/leaderboard — all-time earnings per employee (crew-safe: no owner financials)
+router.get('/leaderboard', requireAuth, (req, res) => {
   const rows = db.prepare(`
     SELECT e.id, e.name,
            SUM(jc.crew_pay) as crew_pay,
