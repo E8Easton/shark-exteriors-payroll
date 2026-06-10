@@ -560,42 +560,64 @@ $('logoutBtn').addEventListener('click', async () => {
 
 // ── Build crew checkboxes (workers + sales separate) ─────────────────────────
 function buildPersonLists() {
-  const crew = employees.filter(e => e.active && e.role === 'crew');
+  // Workers = all active employees (crew + owner can all work jobs)
+  const allActive = employees.filter(e => e.active);
+  // Sales = all active employees too
+  const crewOnly  = employees.filter(e => e.active);
 
-  // Workers list (30% split)
-  $('crewWorkerList').innerHTML = crew.map(e => `
+  // Workers list (30% split among checked)
+  $('crewWorkerList').innerHTML = allActive.map(e => `
     <div class="person-check-row">
       <label class="person-label">
-        <input type="checkbox" class="worker-cb" data-id="${e.id}" data-name="${e.name}" />
-        ${e.name}
+        <input type="checkbox" class="worker-cb" data-id="${e.id}" />
+        ${e.name}${e.role === 'owner' ? ' <span style="font-size:11px;color:var(--orange);font-weight:700">(Owner)</span>' : ''}
       </label>
     </div>
-  `).join('') || '<div style="color:var(--muted);font-size:13px;padding:8px">No crew members yet</div>';
+  `).join('') || '<div style="color:var(--muted);font-size:13px;padding:8px">No employees yet</div>';
 
-  // Sales list (commission %)
-  $('crewSalesList').innerHTML = crew.map(e => `
+  // Sales list (commission % per person)
+  $('crewSalesList').innerHTML = crewOnly.map(e => `
     <div class="person-check-row">
       <label class="person-label">
-        <input type="checkbox" class="sales-cb" data-id="${e.id}" data-name="${e.name}" />
-        ${e.name}
+        <input type="checkbox" class="sales-cb" data-id="${e.id}" />
+        ${e.name}${e.role === 'owner' ? ' <span style="font-size:11px;color:var(--orange);font-weight:700">(Owner)</span>' : ''}
       </label>
-      <select class="commission-select" id="sales-pct-${e.id}">
-        <option value="7.5">7.5%</option>
-        <option value="10">10%</option>
-        <option value="12.5" selected>12.5%</option>
-        <option value="15">15%</option>
-        <option value="20">20%</option>
-      </select>
+      <div class="commission-wrap" id="comm-wrap-${e.id}" style="display:none;align-items:center;gap:6px">
+        <select class="commission-select" id="sales-pct-${e.id}" onchange="handleCommSelect(${e.id}, this)">
+          <option value="5">5%</option>
+          <option value="7.5">7.5%</option>
+          <option value="10">10%</option>
+          <option value="12.5" selected>12.5%</option>
+          <option value="15">15%</option>
+          <option value="20">20%</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <input type="number" class="commission-custom" id="sales-custom-${e.id}"
+               min="0" max="100" step="0.5" placeholder="%"
+               style="width:65px;display:none;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:5px 8px;font-size:13px;color:var(--text);outline:none;font-family:inherit" />
+      </div>
     </div>
   `).join('') || '';
 
   document.querySelectorAll('.sales-cb').forEach(cb => {
     cb.addEventListener('change', () => {
-      const sel = $(`sales-pct-${cb.dataset.id}`);
-      if (cb.checked) sel.classList.add('visible');
-      else sel.classList.remove('visible');
+      const wrap = $(`comm-wrap-${cb.dataset.id}`);
+      wrap.style.display = cb.checked ? 'flex' : 'none';
     });
   });
+}
+
+function handleCommSelect(empId, sel) {
+  const customInput = $(`sales-custom-${empId}`);
+  customInput.style.display = sel.value === 'custom' ? 'block' : 'none';
+}
+
+function getSalesPct(empId) {
+  const sel = $(`sales-pct-${empId}`);
+  if (sel.value === 'custom') {
+    return parseFloat($(`sales-custom-${empId}`).value) || 0;
+  }
+  return parseFloat(sel.value) || 0;
 }
 
 // ── Dates ─────────────────────────────────────────────────────────────────────
@@ -628,39 +650,40 @@ $('addJobBtn').addEventListener('click', async () => {
     toast('Enter a valid job total.', 'err'); return;
   }
 
-  // Collect workers
-  const workerIds = [...document.querySelectorAll('.worker-cb:checked')].map(cb => parseInt(cb.dataset.id));
+  // Collect workers (split 30% among these)
+  const workerIds = new Set(
+    [...document.querySelectorAll('.worker-cb:checked')].map(cb => parseInt(cb.dataset.id))
+  );
 
-  // Collect salespeople
-  const salesCrew = [...document.querySelectorAll('.sales-cb:checked')].map(cb => ({
-    employeeId: parseInt(cb.dataset.id),
-    commissionPct: parseFloat($(`sales-pct-${cb.dataset.id}`).value) || 12.5,
-  }));
-
-  // Build combined crew array: workers get crew_pay, salespeople get commission
-  const crewMap = {};
-  workerIds.forEach(id => { crewMap[id] = { employeeId: id, commissionPct: 0, isWorker: true }; });
-  salesCrew.forEach(s => {
-    if (crewMap[s.employeeId]) {
-      crewMap[s.employeeId].commissionPct = s.commissionPct; // both roles
-    } else {
-      crewMap[s.employeeId] = { employeeId: s.employeeId, commissionPct: s.commissionPct, isWorker: false };
-    }
+  // Collect salespeople (individual commission %)
+  const salesMap = {};
+  document.querySelectorAll('.sales-cb:checked').forEach(cb => {
+    salesMap[parseInt(cb.dataset.id)] = getSalesPct(cb.dataset.id);
   });
 
-  const crew = Object.values(crewMap);
+  // Merge into a single crew array
+  const allIds = new Set([...workerIds, ...Object.keys(salesMap).map(Number)]);
+  if (allIds.size === 0) { toast('Select at least one crew member or salesperson.', 'err'); return; }
+
+  const crew = [...allIds].map(id => ({
+    employeeId: id,
+    isWorker: workerIds.has(id),
+    commissionPct: salesMap[id] || 0,
+  }));
 
   const res = await fetch('/api/jobs', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ date, jobName: `Job — ${date}`, totalAmount, crew, workerIds }),
+    body: JSON.stringify({ date, jobName: `Job — ${date}`, totalAmount, crew }),
   });
 
   if (res.ok) {
     toast('Job added!');
     $('jobTotal').value = '';
     document.querySelectorAll('.worker-cb, .sales-cb').forEach(cb => { cb.checked = false; });
-    document.querySelectorAll('.commission-select').forEach(s => s.classList.remove('visible'));
+    document.querySelectorAll('.commission-wrap').forEach(w => { w.style.display = 'none'; });
+    document.querySelectorAll('.commission-custom').forEach(i => { i.style.display = 'none'; i.value = ''; });
+    document.querySelectorAll('.commission-select').forEach(s => { s.value = '12.5'; });
     loadDay();
   } else {
     toast('Failed to add job', 'err');
