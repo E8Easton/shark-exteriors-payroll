@@ -1,13 +1,27 @@
-const { DatabaseSync } = require('node:sqlite');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const { credentialsFromName } = require('./lib/credentials');
 
-// On Railway, mount a volume at /data and set DB_PATH=/data/payroll.db
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'payroll.db');
-const db = new DatabaseSync(DB_PATH);
 
-db.exec("PRAGMA journal_mode = WAL");
-db.exec("PRAGMA foreign_keys = ON");
+let db;
+let driver = 'better-sqlite3';
+try {
+  const BetterSqlite = require('better-sqlite3');
+  db = new BetterSqlite(DB_PATH);
+} catch {
+  const { DatabaseSync } = require('node:sqlite');
+  db = new DatabaseSync(DB_PATH);
+  driver = 'node:sqlite';
+}
+
+if (driver === 'better-sqlite3') {
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+} else {
+  db.exec('PRAGMA journal_mode = WAL');
+  db.exec('PRAGMA foreign_keys = ON');
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS employees (
@@ -50,27 +64,27 @@ db.exec(`
   );
 `);
 
-// Seed default employees if none exist
 const count = db.prepare('SELECT COUNT(*) as n FROM employees').get().n;
 if (count === 0) {
   const defaultCrew = [
-    { name: 'Easton Zastrow',  username: 'easton',  password: 'zastrow', role: 'owner' },
-    { name: 'Malcolm Gall',   username: 'malcolm', password: 'gall',    role: 'crew'  },
-    { name: 'Teddy',          username: 'teddy',   password: 'teddy',   role: 'crew'  },
-    { name: 'Asher Petersen', username: 'asher',   password: 'petersen',role: 'crew'  },
-    { name: 'Tyler Smith',    username: 'tyler',   password: 'smith',   role: 'crew'  },
-    { name: 'Graham Leyden',  username: 'graham',  password: 'leyden',  role: 'crew'  },
-    { name: 'Noah Zach',      username: 'noah',    password: 'zach',    role: 'crew'  },
+    { name: 'Easton Zastrow', role: 'owner' },
+    { name: 'Malcolm Gall', role: 'crew' },
+    { name: 'Teddy', role: 'crew' },
+    { name: 'Asher Petersen', role: 'crew' },
+    { name: 'Tyler Smith', role: 'crew' },
+    { name: 'Graham Leyden', role: 'crew' },
+    { name: 'Noah Zach', role: 'crew' },
   ];
 
   const insert = db.prepare(
     'INSERT INTO employees (name, username, password_hash, role) VALUES (?, ?, ?, ?)'
   );
   for (const emp of defaultCrew) {
-    const hash = bcrypt.hashSync(emp.password, 10);
-    insert.run(emp.name, emp.username, hash, emp.role);
+    const { username, password } = credentialsFromName(emp.name);
+    const hash = bcrypt.hashSync(password, 10);
+    insert.run(emp.name, username, hash, emp.role);
   }
-  console.log('Seeded default employees');
+  console.log(`Seeded default employees (db: ${driver})`);
 }
 
 module.exports = db;

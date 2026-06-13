@@ -130,8 +130,10 @@
 </header>
 
 <div class="tab-bar">
-  <div class="tab active" data-tab="mypay">💰 My Pay</div>
+  <div class="tab active" data-tab="mypay">💰 Overview</div>
+  <div class="tab" data-tab="daily">📋 Daily</div>
   <div class="tab" data-tab="weekly">📅 Weekly</div>
+  <div class="tab" data-tab="monthly">🗓 Monthly</div>
   <div class="tab" data-tab="leaderboard">🏆 Leaderboard</div>
   <div class="tab" data-tab="settings">⚙️ Settings</div>
 </div>
@@ -152,6 +154,29 @@
       <div class="tbl-wrap"><table>
         <thead><tr><th>Date</th><th>Job</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th>Status</th></tr></thead>
         <tbody id="recentBody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ── DAILY ── -->
+  <div class="tab-panel" id="tab-daily">
+    <div class="card">
+      <div class="card-title">
+        Daily Pay
+        <div class="date-bar">
+          <label>Date</label><input type="date" id="dailyDate" />
+          <button class="btn" id="dailyBtn">Load</button>
+          <button class="btn-ghost" id="todayBtn">Today</button>
+        </div>
+      </div>
+      <div class="week-sum" id="dailySum" style="display:none">
+        <div class="ws-item"><div class="lbl">Crew Pay</div><div class="val" id="dCrewPay">$0</div></div>
+        <div class="ws-item"><div class="lbl">Commission</div><div class="val" id="dCommPay">$0</div></div>
+        <div class="ws-item hi"><div class="lbl">Total</div><div class="val" id="dTotal">$0</div></div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Job</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody id="dailyBody"><tr><td colspan="5" class="empty">Pick a date above</td></tr></tbody>
       </table></div>
     </div>
   </div>
@@ -178,6 +203,30 @@
       <div class="tbl-wrap"><table>
         <thead><tr><th>Date</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th></tr></thead>
         <tbody id="weekBody"><tr><td colspan="5" class="empty">Select a date range above</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ── MONTHLY ── -->
+  <div class="tab-panel" id="tab-monthly">
+    <div class="card">
+      <div class="card-title">
+        Monthly Pay
+        <div class="date-bar">
+          <label>Month</label><input type="month" id="monthPicker" />
+          <button class="btn" id="monthBtn">Load</button>
+          <button class="btn-ghost" id="thisMonthBtn">This Month</button>
+        </div>
+      </div>
+      <div class="week-sum" id="monthSum" style="display:none">
+        <div class="ws-item"><div class="lbl">Crew Pay</div><div class="val" id="mCrewPay">$0</div></div>
+        <div class="ws-item"><div class="lbl">Commission</div><div class="val" id="mCommPay">$0</div></div>
+        <div class="ws-item hi"><div class="lbl">Total</div><div class="val" id="mTotal">$0</div></div>
+        <div class="ws-item"><div class="lbl">Jobs</div><div class="val" id="mJobs">0</div></div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th></tr></thead>
+        <tbody id="monthBody"><tr><td colspan="5" class="empty">Select a month above</td></tr></tbody>
       </table></div>
     </div>
   </div>
@@ -220,6 +269,8 @@ document.querySelectorAll('.tab').forEach(t => {
     t.classList.add('active');
     $(`tab-${t.dataset.tab}`).classList.add('active');
     if (t.dataset.tab === 'leaderboard') loadLeaderboard();
+    if (t.dataset.tab === 'daily') loadDaily();
+    if (t.dataset.tab === 'monthly') setThisMonth();
   });
 });
 
@@ -232,6 +283,15 @@ async function init() {
   $('userName').textContent = me.name;
   loadMyPay();
   setThisWeek();
+  setDefaultDaily();
+  setThisMonth();
+}
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function setDefaultDaily() { $('dailyDate').value = todayStr(); }
+function setThisMonth() {
+  const now = new Date();
+  $('monthPicker').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
 $('logoutBtn').addEventListener('click', async () => {
@@ -261,6 +321,36 @@ async function loadMyPay() {
         <td><span class="paid-badge ${r.paid ? 'paid' : 'unpaid'}">${r.paid ? 'Paid' : 'Unpaid'}</span></td>
       </tr>`).join('')
     : '<tr><td colspan="6" class="empty">No jobs yet</td></tr>';
+}
+
+// ── Daily ─────────────────────────────────────────────────────────────────────
+$('todayBtn').addEventListener('click', () => { $('dailyDate').value = todayStr(); loadDaily(); });
+$('dailyBtn').addEventListener('click', loadDaily);
+$('dailyDate').addEventListener('change', loadDaily);
+
+async function loadDaily() {
+  const date = $('dailyDate').value;
+  if (!date) return;
+  const { rows = [] } = await fetch(`/api/reports/daily?date=${date}`).then(r => r.json());
+  const crewPay = rows.reduce((s, r) => s + (r.crew_pay || 0), 0);
+  const commPay = rows.reduce((s, r) => s + (r.commission_pay || 0), 0);
+  if (rows.length) {
+    $('dCrewPay').textContent = fmt(crewPay);
+    $('dCommPay').textContent = fmt(commPay);
+    $('dTotal').textContent = fmt(crewPay + commPay);
+    $('dailySum').style.display = 'flex';
+  } else {
+    $('dailySum').style.display = 'none';
+  }
+  $('dailyBody').innerHTML = rows.length
+    ? rows.map(r => `<tr>
+        <td>${r.job_name}</td>
+        <td class="mono">${fmt(r.crew_pay)}</td>
+        <td class="mono">${fmt(r.commission_pay)}</td>
+        <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.crew_pay + r.commission_pay)}</td>
+        <td><span class="paid-badge ${r.paid ? 'paid' : 'unpaid'}">${r.paid ? 'Paid' : 'Unpaid'}</span></td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">No jobs on this date</td></tr>';
 }
 
 // ── Weekly ────────────────────────────────────────────────────────────────────
@@ -300,6 +390,40 @@ async function loadWeekly() {
         <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.total_pay)}</td>
       </tr>`).join('')
     : '<tr><td colspan="5" class="empty">No jobs in this period</td></tr>';
+}
+
+// ── Monthly ─────────────────────────────────────────────────────────────────
+$('thisMonthBtn').addEventListener('click', () => { setThisMonth(); loadMonthly(); });
+$('monthBtn').addEventListener('click', loadMonthly);
+
+async function loadMonthly() {
+  const val = $('monthPicker').value;
+  if (!val) return;
+  const [year, month] = val.split('-');
+  const start = `${year}-${month}-01`;
+  const end = `${year}-${month}-31`;
+  const rows = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r => r.json()).then(d => d.rows || []);
+  const crewPay = rows.reduce((s, r) => s + (r.crew_pay || 0), 0);
+  const commPay = rows.reduce((s, r) => s + (r.commission_pay || 0), 0);
+  const jobs = rows.reduce((s, r) => s + (r.job_count || 0), 0);
+  if (rows.length) {
+    $('mCrewPay').textContent = fmt(crewPay);
+    $('mCommPay').textContent = fmt(commPay);
+    $('mTotal').textContent = fmt(crewPay + commPay);
+    $('mJobs').textContent = String(jobs);
+    $('monthSum').style.display = 'flex';
+  } else {
+    $('monthSum').style.display = 'none';
+  }
+  $('monthBody').innerHTML = rows.length
+    ? rows.map(r => `<tr>
+        <td>${r.date}</td>
+        <td>${r.job_count}</td>
+        <td class="mono">${fmt(r.crew_pay)}</td>
+        <td class="mono">${fmt(r.commission_pay)}</td>
+        <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.total_pay)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">No jobs this month</td></tr>';
 }
 
 // ── Leaderboard ───────────────────────────────────────────────────────────────

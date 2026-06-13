@@ -132,7 +132,9 @@ router.get('/leaderboard', requireAuth, (req, res) => {
 
 // GET /api/reports/my-earnings — crew member's all-time breakdown
 router.get('/my-earnings', requireAuth, (req, res) => {
-  if (req.session.role === 'owner') return res.redirect('/api/reports/leaderboard');
+  if (req.session.role === 'owner') {
+    return res.status(403).json({ error: 'Owner should use the admin dashboard' });
+  }
 
   const allTime = db.prepare(`
     SELECT SUM(jc.crew_pay) as crew_pay,

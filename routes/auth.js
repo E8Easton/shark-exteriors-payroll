@@ -3,13 +3,21 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const router = express.Router();
 
+function requireAuth(req, res, next) {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+  next();
+}
+
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
 
-  const emp = db.prepare('SELECT * FROM employees WHERE username = ? AND active = 1').get(username.toLowerCase().trim());
+  const emp = db.prepare(
+    'SELECT * FROM employees WHERE username = ? AND active = 1'
+  ).get(username.toLowerCase().trim());
+
   if (!emp || !bcrypt.compareSync(password, emp.password_hash)) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
@@ -40,10 +48,5 @@ router.post('/change-password', requireAuth, (req, res) => {
   db.prepare('UPDATE employees SET password_hash = ? WHERE id = ?').run(hash, emp.id);
   res.json({ ok: true });
 });
-
-function requireAuth(req, res, next) {
-  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
-  next();
-}
 
 module.exports = router;
