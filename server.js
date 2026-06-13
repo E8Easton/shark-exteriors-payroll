@@ -29,6 +29,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/employees', require('./routes/employees'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/reports', require('./routes/reports'));
+app.use('/api/admin', require('./routes/admin'));
 
 function sendPage(res, filename) {
   res.sendFile(path.join(publicDir, filename));

@@ -87,4 +87,25 @@ if (count === 0) {
   console.log(`Seeded default employees (db: ${driver})`);
 }
 
+function columnExists(table, column) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  return cols.some(c => c.name === column);
+}
+
+if (!columnExists('jobs', 'crew_pool_pct')) {
+  db.exec('ALTER TABLE jobs ADD COLUMN crew_pool_pct REAL NOT NULL DEFAULT 30');
+}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS weekly_payouts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    week_start TEXT NOT NULL,
+    week_end TEXT NOT NULL,
+    employee_id INTEGER NOT NULL REFERENCES employees(id),
+    paid INTEGER NOT NULL DEFAULT 0,
+    paid_at TEXT,
+    UNIQUE(week_start, week_end, employee_id)
+  );
+`);
+
 module.exports = db;

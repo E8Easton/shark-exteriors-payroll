@@ -6,223 +6,11 @@
   <title>Shark Exteriors — Payroll</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #f0f4f8; --surface: #fff; --surface2: #f7fafc; --border: #dde3ea;
-      --text: #1a2332; --muted: #6b7a90;
-      --blue: #00AAEF; --blue-dk: #0090cc;
-      --orange: #F7941D; --orange-dk: #e07d0a;
-      --red: #e53935; --green: #00a86b; --navy: #0a1628;
-      --shadow: 0 2px 12px rgba(0,0,0,.07);
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; }
-    .mono { font-family: 'DM Mono', monospace; }
-
-    /* Sidebar */
-    #sidebar {
-      width: 225px; flex-shrink: 0; background: var(--navy);
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; height: 100vh; z-index: 20;
-    }
-    .sidebar-logo {
-      padding: 20px 18px 16px; border-bottom: 3px solid var(--orange);
-      cursor: pointer; display: flex; align-items: center; gap: 10px;
-    }
-    .sidebar-logo:hover { opacity: .88; }
-    .sidebar-logo .shark { font-size: 26px; }
-    .logo-text h1 { font-size: 15px; font-weight: 800; }
-    .logo-text h1 .b { color: var(--blue); }
-    .logo-text h1 .o { color: var(--orange); }
-    .logo-text p { font-size: 10px; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .08em; margin-top: 1px; }
-    nav { flex: 1; padding: 12px 10px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; border-radius: 8px; font-size: 14px;
-      cursor: pointer; color: rgba(255,255,255,.5); transition: all .15s; user-select: none;
-    }
-    .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-    .nav-item.active { background: var(--blue); color: #fff; font-weight: 600; }
-    .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
-    .sidebar-footer { padding: 14px; border-top: 1px solid rgba(255,255,255,.1); }
-    .sidebar-footer .user { font-size: 12px; color: rgba(255,255,255,.4); margin-bottom: 10px; }
-    .sidebar-footer .user strong { color: #fff; display: block; font-size: 14px; }
-    .btn-logout {
-      width: 100%; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.55); border-radius: 6px; padding: 8px;
-      font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s;
-    }
-    .btn-logout:hover { background: rgba(229,57,53,.2); color: #ff7070; }
-
-    /* Main */
-    #main { margin-left: 225px; flex: 1; padding: 26px 30px; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .page-header { margin-bottom: 22px; }
-    .page-header h2 { font-size: 21px; font-weight: 800; }
-    .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
-
-    /* Buttons */
-    .btn { background: var(--blue); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s; display: inline-flex; align-items: center; gap: 6px; }
-    .btn:hover { background: var(--blue-dk); }
-    .btn.orange { background: var(--orange); }
-    .btn.orange:hover { background: var(--orange-dk); }
-    .btn-ghost { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 16px; font-size: 14px; cursor: pointer; font-family: inherit; transition: all .15s; }
-    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
-    .btn-danger { background: rgba(229,57,53,.08); border: 1.5px solid rgba(229,57,53,.2); color: var(--red); border-radius: 8px; padding: 7px 13px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s; }
-    .btn-danger:hover { background: rgba(229,57,53,.15); }
-    .btn-link { background: none; border: none; color: var(--blue); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; padding: 4px 0; text-decoration: underline; }
-
-    /* Cards */
-    .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
-    .card + .card { margin-top: 14px; }
-    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-
-    /* Form */
-    .field { margin-bottom: 12px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
-    input[type=text], input[type=number], input[type=date], input[type=password], select {
-      background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px;
-      color: var(--text); font-size: 14px; padding: 9px 12px; outline: none;
-      font-family: inherit; width: 100%; transition: border-color .15s;
-    }
-    input:focus, select:focus { border-color: var(--blue); background: #fff; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    /* Date bar */
-    .date-bar {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 12px 18px; margin-bottom: 20px; box-shadow: var(--shadow);
-      flex-wrap: wrap;
-    }
-    .date-bar label { font-size: 13px; font-weight: 600; white-space: nowrap; }
-    .date-bar input[type=date] { width: auto; min-width: 155px; }
-
-    /* Summary grid */
-    .sum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
-    .sum-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
-    .sum-card .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
-    .sum-card .val { font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 700; color: var(--blue); }
-    .sum-card.hi .val { color: var(--orange); }
-
-    /* Section divider */
-    .sec-div { display: flex; align-items: center; gap: 10px; margin: 16px 0 8px; }
-    .sec-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; padding: 4px 10px; border-radius: 20px; }
-    .sec-lbl.blue { background: rgba(0,170,239,.1); color: var(--blue); }
-    .sec-lbl.orange { background: rgba(247,148,29,.1); color: var(--orange); }
-    .sec-div hr { flex: 1; border: none; border-top: 1.5px solid var(--border); }
-
-    /* Person rows */
-    .person-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; transition: background .1s; }
-    .person-row:hover { background: var(--surface2); }
-    .person-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
-    .person-label input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; flex-shrink: 0; }
-    .pct-wrap { display: none; align-items: center; gap: 6px; }
-    .pct-wrap.show { display: flex; }
-    .pct-input {
-      width: 62px !important; text-align: center; padding: 5px 8px !important;
-      font-size: 13px !important; font-family: 'DM Mono', monospace !important;
-    }
-    .pct-suffix { font-size: 13px; color: var(--muted); font-weight: 600; }
-    .comm-select { width: auto !important; min-width: 90px; font-size: 13px !important; padding: 5px 8px !important; }
-    .comm-custom { width: 62px !important; padding: 5px 8px !important; font-size: 13px !important; }
-
-    /* Crew pay total indicator */
-    .crew-total-bar {
-      display: none; margin: 10px 10px 4px;
-      font-size: 12px; color: var(--muted); font-weight: 600;
-      align-items: center; gap: 10px;
-    }
-    .crew-total-bar.show { display: flex; }
-    .crew-total-bar .pct-num { color: var(--blue); font-family: 'DM Mono', monospace; }
-    .crew-total-bar .dollar-num { color: var(--text); font-family: 'DM Mono', monospace; }
-
-    /* Quick add employee */
-    .quick-add-panel {
-      display: none; background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 14px; margin-top: 14px;
-    }
-    .quick-add-panel.show { display: block; }
-    .quick-add-panel .qa-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; }
-    .quick-add-panel .qa-field label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 3px; }
-    .qa-btn { background: var(--navy); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; height: 38px; }
-    .qa-btn:hover { background: #1a2f4a; }
-
-    /* Added-job flash */
-    .job-added-flash {
-      display: none; align-items: center; gap: 8px; padding: 10px 14px;
-      background: rgba(0,168,107,.08); border: 1.5px solid rgba(0,168,107,.2);
-      border-radius: 8px; font-size: 13px; color: var(--green); font-weight: 600;
-      margin-top: 12px;
-    }
-    .job-added-flash.show { display: flex; }
-
-    /* Job cards */
-    .job-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow); }
-    .job-card-hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: linear-gradient(135deg,#f5fbff,#fff8f0); border-bottom: 1.5px solid var(--border); }
-    .job-card-hdr .job-amt { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; color: var(--blue); }
-    .job-card-body { padding: 14px 18px; }
-    .pay-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .pay-table th { text-align: left; padding: 7px 10px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1.5px solid var(--border); background: var(--surface2); }
-    .pay-table td { padding: 9px 10px; border-bottom: 1px solid #f0f4f8; }
-    .pay-table tr:last-child td { border-bottom: none; }
-    .role-pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
-    .role-pill.w { background: rgba(0,170,239,.1); color: var(--blue); }
-    .role-pill.s { background: rgba(247,148,29,.1); color: var(--orange); }
-    .role-pill.b { background: rgba(0,168,107,.1); color: var(--green); }
-    .paid-toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: none; font-family: inherit; transition: all .15s; }
-    .paid-toggle.unpaid { background: rgba(247,148,29,.1); color: var(--orange); }
-    .paid-toggle.paid { background: rgba(0,168,107,.1); color: var(--green); }
-    .owner-strip { display: flex; background: linear-gradient(135deg,#eaf6ff,#fff4e6); border: 1.5px solid #d0e8f5; border-radius: 10px; overflow: hidden; margin-top: 12px; flex-wrap: wrap; }
-    .owner-strip .os-item { flex: 1; min-width: 100px; padding: 11px 14px; border-right: 1px solid #d0e8f5; }
-    .owner-strip .os-item:last-child { border-right: none; }
-    .os-item .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-    .os-item .val { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 700; color: var(--blue); margin-top: 3px; }
-    .os-item.hi .val { color: var(--orange); }
-    .btn-icon { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 5px; border-radius: 6px; transition: all .15s; }
-    .btn-icon:hover { color: var(--red); background: rgba(229,57,53,.08); }
-
-    /* Table shared */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; padding: 9px 14px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); background: var(--surface2); }
-    td { padding: 11px 14px; border-bottom: 1px solid #f0f4f8; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafcff; }
-    .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
-
-    /* Leaderboard bar */
-    .lb-bar-wrap { height: 8px; background: #e8eef4; border-radius: 4px; min-width: 80px; }
-    .lb-bar { height: 8px; background: linear-gradient(90deg, var(--blue), var(--orange)); border-radius: 4px; transition: width .5s; }
-
-    /* Manage crew */
-    .emp-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .emp-row:last-child { border-bottom: none; }
-    .emp-name { font-size: 14px; font-weight: 600; }
-    .emp-user { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
-    .role-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 8px; }
-    .role-badge.owner { background: rgba(247,148,29,.1); color: var(--orange); }
-    .role-badge.crew  { background: rgba(0,170,239,.1); color: var(--blue); }
-
-    /* Modal */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(10,22,40,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 28px; width: 420px; max-width: 92vw; box-shadow: 0 8px 40px rgba(0,0,0,.15); transform: translateY(12px); transition: transform .2s; }
-    .modal-overlay.open .modal { transform: translateY(0); }
-    .modal h3 { font-size: 17px; margin-bottom: 6px; }
-    .modal p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-
-    /* Toast */
-    #toastBox { position: fixed; bottom: 22px; right: 22px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-    .toast { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 16px; font-size: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.12); animation: slideIn .2s ease; max-width: 280px; color: var(--text); }
-    .toast.ok  { border-left: 4px solid var(--green); }
-    .toast.err { border-left: 4px solid var(--red); }
-    @keyframes slideIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  </style>
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/owner.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body>
+<body class="owner-app">
 
 <div id="sidebar">
   <div class="sidebar-logo" id="logoHome">
@@ -234,7 +22,9 @@
   </div>
   <nav>
     <div class="nav-item active" data-page="daily"><span class="icon">📋</span> Daily Entry</div>
+    <div class="nav-item" data-page="revenue"><span class="icon">📊</span> Revenue</div>
     <div class="nav-item" data-page="weekly"><span class="icon">📅</span> Weekly Totals</div>
+    <div class="nav-item" data-page="payroll"><span class="icon">💵</span> Pay Out</div>
     <div class="nav-item" data-page="leaderboard"><span class="icon">🏆</span> Leaderboard</div>
     <div class="nav-item" data-page="crew"><span class="icon">👥</span> Manage Crew</div>
   </nav>
@@ -250,7 +40,7 @@
   <div class="page active" id="page-daily">
     <div class="page-header">
       <h2>Daily Entry</h2>
-      <p>Add all jobs for the day. Form stays ready between entries.</p>
+      <p>Add jobs for the day — revenue stats live under Revenue.</p>
     </div>
 
     <div class="date-bar">
@@ -259,27 +49,34 @@
       <button class="btn-ghost" id="todayBtn">Today</button>
     </div>
 
-    <div class="sum-grid" id="dailySummary" style="display:none">
-      <div class="sum-card"><div class="lbl">Total Revenue</div><div class="val" id="sumRevenue">$0</div></div>
-      <div class="sum-card"><div class="lbl">Owner Gross</div><div class="val" id="sumOwnerGross">$0</div></div>
-      <div class="sum-card"><div class="lbl">Tax Reserve (20%)</div><div class="val" id="sumTax">$0</div></div>
-      <div class="sum-card"><div class="lbl">Emergency (10%)</div><div class="val" id="sumEmergency">$0</div></div>
-      <div class="sum-card hi"><div class="lbl">Take-Home</div><div class="val" id="sumTakeHome">$0</div></div>
-    </div>
-
+    <div class="daily-layout">
     <!-- Add Job form -->
-    <div class="card" style="margin-bottom:20px">
+    <div class="card">
       <div class="card-title">➕ Add Job</div>
 
-      <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+        <div class="field" style="margin:0;min-width:200px">
+          <label>House / Job Name</label>
+          <input type="text" id="jobName" placeholder="123 Main St" style="width:220px" />
+        </div>
         <div class="field" style="margin:0;min-width:180px">
           <label>Job Total ($)</label>
           <input type="number" id="jobTotal" min="0" step="0.01" placeholder="0.00" style="width:180px" />
         </div>
         <div style="font-size:12px;color:var(--muted);padding-bottom:10px">
-          Crew: <strong id="workerTotalPct" style="color:var(--blue)">0%</strong>
+          Crew pool: <strong id="poolLabel" style="color:var(--blue)">30%</strong> →
+          assigned <strong id="workerTotalPct" style="color:var(--blue)">0%</strong>
           = <strong id="workerTotalDollar" style="color:var(--text)">$0.00</strong>
+          <span class="pool-warn" id="poolWarn"> — over pool!</span>
         </div>
+      </div>
+
+      <div class="pool-bar">
+        <span class="lbl">Crew commission pool</span>
+        <button type="button" class="pool-btn active" data-pool="30">30% (default)</button>
+        <button type="button" class="pool-btn" data-pool="25">25%</button>
+        <button type="button" class="pool-btn" data-pool="custom">Custom</button>
+        <span style="font-size:12px;color:var(--muted)">Split evenly among checked workers — edit any % manually</span>
       </div>
 
       <!-- Workers -->
@@ -288,6 +85,11 @@
 
       <!-- Sales -->
       <div class="sec-div"><span class="sec-lbl orange">💼 Sales Commission — sold the job</span><hr /></div>
+      <div class="preset-row">
+        <button type="button" class="preset-btn" onclick="applySalesPreset('single15')">1 seller — 15%</button>
+        <button type="button" class="preset-btn" onclick="applySalesPreset('double10')">2 sellers — 10% each</button>
+        <button type="button" class="preset-btn" onclick="applySalesPreset('clear')">Clear sales</button>
+      </div>
       <div id="crewSalesList"></div>
 
       <div style="display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap">
@@ -312,7 +114,54 @@
       </div>
     </div>
 
-    <div id="jobsList"></div>
+    <div class="card">
+      <div class="jobs-section-title"><span>Today's Jobs</span><span id="jobCountLabel" style="font-weight:500;color:var(--muted)"></span></div>
+      <div id="jobsList"><div class="empty">No jobs on this date yet.</div></div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ── REVENUE ── -->
+  <div class="page" id="page-revenue">
+    <div class="page-header">
+      <h2>Revenue & Owner Pay</h2>
+      <p>Your numbers only — crew never sees this section.</p>
+    </div>
+    <div class="date-bar">
+      <label>From</label><input type="date" id="revStart" style="width:auto;min-width:150px" />
+      <label>To</label><input type="date" id="revEnd" style="width:auto;min-width:150px" />
+      <button class="btn" id="loadRevBtn">Load</button>
+      <button class="btn-ghost" id="revThisWeekBtn">This Week</button>
+    </div>
+    <div class="stat-grid" id="revStats" style="display:none">
+      <div class="stat-card"><div class="lbl">Total Revenue</div><div class="val blue" id="revTotal">$0</div></div>
+      <div class="stat-card"><div class="lbl">Owner Gross</div><div class="val" id="revGross">$0</div></div>
+      <div class="stat-card"><div class="lbl">Tax Reserve (20%)</div><div class="val" id="revTax">$0</div></div>
+      <div class="stat-card"><div class="lbl">Emergency (10%)</div><div class="val" id="revEmerg">$0</div></div>
+      <div class="stat-card"><div class="lbl">Your Take-Home</div><div class="val orange" id="revTake">$0</div></div>
+    </div>
+    <div class="chart-grid" id="revCharts" style="display:none">
+      <div class="chart-box">
+        <h4>Daily Revenue</h4>
+        <div class="chart-wrap"><canvas id="revBarChart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <h4>Where Your Gross Goes</h4>
+        <div class="chart-wrap"><canvas id="revDoughnutChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" id="revTableCard" style="display:none">
+      <div class="card-title">Day-by-Day Breakdown</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Revenue</th><th>Owner Gross</th><th>Tax</th><th>Emergency</th><th>Take-Home</th></tr></thead>
+        <tbody id="revDayBody"></tbody>
+      </table></div>
+    </div>
+    <div class="card reset-zone">
+      <div class="card-title">Reset for New Season</div>
+      <p>Clear all jobs and revenue data to start fresh next week. Employees are kept.</p>
+      <button class="btn-danger" id="resetDataBtn">Clear All Payroll Data</button>
+    </div>
   </div>
 
   <!-- ── WEEKLY ── -->
@@ -334,8 +183,8 @@
     <div class="card" style="margin-bottom:14px">
       <div class="card-title">Per-Employee Totals</div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Employee</th><th>Crew Pay</th><th>Commission</th><th>Total</th></tr></thead>
-        <tbody id="wEmpBody"><tr><td colspan="4" class="empty">Select a date range</td></tr></tbody>
+        <thead><tr><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th>Paid</th><th>Owed</th></tr></thead>
+        <tbody id="wEmpBody"><tr><td colspan="7" class="empty">Select a date range</td></tr></tbody>
       </table></div>
     </div>
     <div class="card">
@@ -347,11 +196,40 @@
     </div>
   </div>
 
+  <!-- ── PAYROLL ── -->
+  <div class="page" id="page-payroll">
+    <div class="page-header"><h2>Weekly Pay Out</h2><p>Check off employees once you've paid them for the week.</p></div>
+    <div class="date-bar">
+      <label>Week</label><input type="date" id="payStart" style="width:auto;min-width:150px" />
+      <label>to</label><input type="date" id="payEnd" style="width:auto;min-width:150px" />
+      <button class="btn" id="loadPayrollBtn">Load</button>
+      <button class="btn-ghost" id="payThisWeekBtn">This Week</button>
+      <button class="btn orange" id="markAllPaidBtn" style="margin-left:auto">Mark All Paid</button>
+    </div>
+    <div class="sum-grid" id="paySumGrid" style="display:none">
+      <div class="sum-card"><div class="lbl">Week Revenue</div><div class="val" id="payRev">$0</div></div>
+      <div class="sum-card"><div class="lbl">Your Gross</div><div class="val" id="payGross">$0</div></div>
+      <div class="sum-card hi"><div class="lbl">Your Take-Home</div><div class="val" id="payTake">$0</div></div>
+      <div class="sum-card"><div class="lbl">Total Owed Crew</div><div class="val" id="payOwed">$0</div></div>
+    </div>
+    <div class="card"><div class="card-title">Employee Payouts</div><div id="payrollList"><div class="empty">Select a week</div></div></div>
+  </div>
+
   <!-- ── LEADERBOARD ── -->
   <div class="page" id="page-leaderboard">
-    <div class="page-header"><h2>Leaderboard</h2><p>All-time earnings ranked.</p></div>
+    <div class="page-header"><h2>Leaderboard</h2><p>Rankings by total earnings and sales commission.</p></div>
+    <div class="lb-tabs">
+      <button type="button" class="lb-tab active" data-lb="total">💰 Total Earnings</button>
+      <button type="button" class="lb-tab" data-lb="sales">💼 Sales Leaders</button>
+    </div>
+    <div class="date-bar" style="margin-bottom:16px">
+      <label>Period (optional)</label><input type="date" id="lbStart" style="width:auto;min-width:140px" />
+      <label>to</label><input type="date" id="lbEnd" style="width:auto;min-width:140px" />
+      <button class="btn-ghost" id="lbAllTimeBtn">All Time</button>
+      <button class="btn" id="lbLoadBtn">Apply</button>
+    </div>
     <div class="card"><div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:90px"></th></tr></thead>
+      <thead id="lbHead"><tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:90px"></th></tr></thead>
       <tbody id="lbBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
     </table></div></div>
   </div>
@@ -365,7 +243,12 @@
         <div class="field"><label>Full Name</label><input type="text" id="newEmpName" placeholder="Jake Miller" /></div>
         <div class="field"><label>Username</label><input type="text" id="newEmpUser" placeholder="Auto: first name" /></div>
         <div class="field"><label>Default Password</label><input type="text" id="newEmpPw" placeholder="Auto: last name" /></div>
-        <div class="field"><label>Role</label><select id="newEmpRole"><option value="crew">Crew</option><option value="owner">Owner</option></select></div>
+        <div class="field"><label>Role</label><select id="newEmpRole">
+          <option value="crew">Crew</option>
+          <option value="cleaning_tech">Cleaning Technician</option>
+          <option value="d2d">Door-to-Door (D2D)</option>
+          <option value="owner">Owner</option>
+        </select></div>
       </div>
       <button class="btn" id="addEmpBtn" style="margin-top:8px">Add Employee</button>
     </div>
@@ -376,10 +259,12 @@
 
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
-    <h3 id="modalTitle">Are you sure?</h3><p id="modalBody"></p>
+    <h3 id="modalTitle">Are you sure?</h3>
+    <div class="modal-warn" id="modalWarn" style="display:none"></div>
+    <p id="modalBody"></p>
     <div class="modal-actions">
       <button class="btn-ghost" id="modalCancel">Cancel</button>
-      <button class="btn-danger" id="modalConfirm">Confirm</button>
+      <button class="btn-danger" id="modalConfirm">Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -389,15 +274,33 @@
 const $  = id => document.getElementById(id);
 const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 
-function toast(msg, type='ok') {
+function toast(msg, type='ok', opts={}) {
   const el = document.createElement('div');
-  el.className = `toast ${type}`; el.textContent = msg;
+  el.className = `toast ${type}`;
+  const msgEl = document.createElement('span');
+  msgEl.className = 'toast-msg';
+  msgEl.textContent = msg;
+  el.appendChild(msgEl);
+  if (opts.undo) {
+    const btn = document.createElement('button');
+    btn.className = 'toast-action';
+    btn.textContent = 'Undo';
+    btn.onclick = () => { opts.undo(); el.remove(); };
+    el.appendChild(btn);
+    el.classList.add('undo');
+  }
   $('toastBox').appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+  const ms = opts.undo ? 12000 : 3200;
+  setTimeout(() => el.remove(), ms);
 }
-function confirm(title, body) {
+function confirm(title, body, warn, btnText) {
   return new Promise(resolve => {
-    $('modalTitle').textContent = title; $('modalBody').textContent = body;
+    $('modalTitle').textContent = title;
+    $('modalBody').textContent = body;
+    $('modalConfirm').textContent = btnText || 'Confirm';
+    const warnEl = $('modalWarn');
+    if (warn) { warnEl.textContent = warn; warnEl.style.display = 'block'; }
+    else warnEl.style.display = 'none';
     $('confirmModal').classList.add('open');
     $('modalConfirm').onclick = () => { $('confirmModal').classList.remove('open'); resolve(true); };
     $('modalCancel').onclick  = () => { $('confirmModal').classList.remove('open'); resolve(false); };
@@ -406,13 +309,24 @@ function confirm(title, body) {
 
 // ── Nav ───────────────────────────────────────────────────────────────────────
 let employees = [];
+let crewPoolMode = 30;
+let lbType = 'total';
+let revBarChart = null;
+let revDoughnutChart = null;
+
+const ROLE_LABELS = {
+  owner: 'Owner', crew: 'Crew', cleaning_tech: 'Cleaning Tech', d2d: 'D2D',
+};
+
 function goPage(p) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
   document.querySelector(`.nav-item[data-page="${p}"]`).classList.add('active');
   $(`page-${p}`).classList.add('active');
   if (p==='daily')       loadDay();
+  if (p==='revenue')     loadRevenue();
   if (p==='weekly')      loadWeekly();
+  if (p==='payroll')     loadPayroll();
   if (p==='leaderboard') loadLeaderboard();
   if (p==='crew')        loadRoster();
 }
@@ -464,8 +378,7 @@ function buildPersonLists() {
           <option value="5">5%</option>
           <option value="7.5">7.5%</option>
           <option value="10">10%</option>
-          <option value="12.5" selected>12.5%</option>
-          <option value="15">15%</option>
+          <option value="15" selected>15%</option>
           <option value="20">20%</option>
           <option value="custom">Custom…</option>
         </select>
@@ -477,16 +390,15 @@ function buildPersonLists() {
 }
 
 function onWorkerChange() {
-  // Show/hide pct inputs, recalculate even-split default for newly checked workers
   const checked = [...document.querySelectorAll('.worker-cb:checked')];
-  const evenSplit = checked.length > 0 ? (30 / checked.length) : 0;
+  const pool = crewPoolMode === 'custom' ? null : Number(crewPoolMode);
+  const evenSplit = pool && checked.length > 0 ? (pool / checked.length) : 0;
   document.querySelectorAll('.worker-cb').forEach(cb => {
     const wrap = $(`wpct-wrap-${cb.dataset.id}`);
     if (cb.checked) {
       wrap.classList.add('show');
-      // Only set default if currently 0 (unset)
       const inp = $(`wpct-${cb.dataset.id}`);
-      if (!inp.dataset.manuallySet) inp.value = evenSplit.toFixed(1);
+      if (!inp.dataset.manuallySet && pool) inp.value = evenSplit.toFixed(1);
     } else {
       wrap.classList.remove('show');
       const inp = $(`wpct-${cb.dataset.id}`);
@@ -494,6 +406,41 @@ function onWorkerChange() {
     }
   });
   updateWorkerTotal();
+}
+
+document.querySelectorAll('.pool-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    crewPoolMode = btn.dataset.pool === 'custom' ? 'custom' : Number(btn.dataset.pool);
+    $('poolLabel').textContent = crewPoolMode === 'custom' ? 'Custom' : crewPoolMode + '%';
+    document.querySelectorAll('.worker-pct').forEach(inp => delete inp.dataset.manuallySet);
+    onWorkerChange();
+  });
+});
+
+function applySalesPreset(kind) {
+  document.querySelectorAll('.sales-cb').forEach(cb => {
+    cb.checked = false;
+    onSalesChange(parseInt(cb.dataset.id), cb);
+  });
+  const checked = [...document.querySelectorAll('.sales-cb')];
+  if (kind === 'clear') return;
+  if (kind === 'single15') {
+    if (!checked.length) { toast('No employees on roster','err'); return; }
+    const cb = checked[0];
+    cb.checked = true;
+    onSalesChange(parseInt(cb.dataset.id), cb);
+    $(`spct-${cb.dataset.id}`).value = '15';
+  }
+  if (kind === 'double10') {
+    if (checked.length < 2) { toast('Need at least 2 people for split','err'); return; }
+    [checked[0], checked[1]].forEach(cb => {
+      cb.checked = true;
+      onSalesChange(parseInt(cb.dataset.id), cb);
+      $(`spct-${cb.dataset.id}`).value = '10';
+    });
+  }
 }
 
 // Mark as manually set when user types
@@ -512,6 +459,10 @@ function updateWorkerTotal() {
   });
   $('workerTotalPct').textContent = pct.toFixed(1) + '%';
   $('workerTotalDollar').textContent = fmt(total * pct / 100);
+  const pool = crewPoolMode === 'custom' ? null : Number(crewPoolMode);
+  const warn = $('poolWarn');
+  if (pool && pct > pool + 0.01) warn.classList.add('show');
+  else warn.classList.remove('show');
 }
 
 function onSalesChange(empId, cb) {
@@ -527,6 +478,13 @@ function getSalesPct(empId) {
     : (parseFloat(sel.value) || 0);
 }
 
+function credsFromName(name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const first = parts[0] || '';
+  const last = parts.length > 1 ? parts[parts.length - 1] : first;
+  return { username: first.toLowerCase(), password: last.toLowerCase() };
+}
+
 // ── Dates ─────────────────────────────────────────────────────────────────────
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function setDefaultDates() {
@@ -537,8 +495,10 @@ function setThisWeek() {
   const now = new Date(), day = now.getDay();
   const mon = new Date(now); mon.setDate(now.getDate() - ((day+6)%7));
   const sun = new Date(mon); sun.setDate(mon.getDate()+6);
-  $('weekStart').value = mon.toISOString().slice(0,10);
-  $('weekEnd').value   = sun.toISOString().slice(0,10);
+  const s = mon.toISOString().slice(0,10), e = sun.toISOString().slice(0,10);
+  $('weekStart').value = s; $('weekEnd').value = e;
+  $('payStart').value = s; $('payEnd').value = e;
+  $('revStart').value = s; $('revEnd').value = e;
 }
 $('todayBtn').addEventListener('click', () => { $('dailyDate').value = todayStr(); loadDay(); });
 $('dailyDate').addEventListener('change', loadDay);
@@ -547,10 +507,11 @@ $('jobTotal').addEventListener('input', updateWorkerTotal);
 // ── Add Job ───────────────────────────────────────────────────────────────────
 $('addJobBtn').addEventListener('click', async () => {
   const date = $('dailyDate').value;
+  const jobNameRaw = $('jobName').value.trim();
+  const jobName = jobNameRaw || `Job — ${date}`;
   const totalAmount = parseFloat($('jobTotal').value);
   if (!date || isNaN(totalAmount) || totalAmount <= 0) { toast('Enter a valid job total.','err'); return; }
 
-  // Build crew array
   const crewMap = {};
   document.querySelectorAll('.worker-cb:checked').forEach(cb => {
     const id = parseInt(cb.dataset.id);
@@ -564,22 +525,26 @@ $('addJobBtn').addEventListener('click', async () => {
   });
 
   const crew = Object.values(crewMap);
+  if (!crew.length) { toast('Select at least one worker or seller','err'); return; }
+
+  const crewPoolPct = crewPoolMode === 'custom' ? null : Number(crewPoolMode);
 
   const res = await fetch('/api/jobs', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ date, jobName: `Job — ${date}`, totalAmount, crew }),
+    body: JSON.stringify({ date, jobName, totalAmount, crew, crewPoolPct }),
   });
 
   if (res.ok) {
-    // Keep form state — only clear the total
     $('jobTotal').value = '';
+    $('jobName').value = '';
     updateWorkerTotal();
     const flash = $('jobFlash');
     flash.classList.add('show');
     setTimeout(() => flash.classList.remove('show'), 3500);
     loadDay();
   } else {
-    toast('Failed to add job','err');
+    const { error } = await res.json().catch(() => ({}));
+    toast(error || 'Failed to add job','err');
   }
 });
 
@@ -588,10 +553,11 @@ $('toggleQuickAdd').addEventListener('click', () => {
   $('quickAddPanel').classList.toggle('show');
 });
 $('qaSubmit').addEventListener('click', async () => {
-  const name     = $('qaName').value.trim();
-  const username = $('qaUser').value.trim().toLowerCase();
-  const password = $('qaPw').value.trim() || undefined;
-  if (!name || !username) { toast('Name and username required','err'); return; }
+  const name = $('qaName').value.trim();
+  if (!name) { toast('Name required','err'); return; }
+  const defaults = credsFromName(name);
+  const username = ($('qaUser').value.trim() || defaults.username).toLowerCase();
+  const password = $('qaPw').value.trim() || defaults.password;
   const res = await fetch('/api/employees', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ name, username, password, role:'crew' }),
@@ -612,28 +578,16 @@ $('qaSubmit').addEventListener('click', async () => {
 async function loadDay() {
   const date = $('dailyDate').value;
   if (!date) return;
-  const { summary, jobs=[] } = await fetch(`/api/reports/daily?date=${date}`).then(r=>r.json());
+  const { jobs=[] } = await fetch(`/api/reports/daily?date=${date}`).then(r=>r.json());
 
-  if (summary) {
-    $('dailySummary').style.display='grid';
-    $('sumRevenue').textContent    = fmt(summary.total_revenue);
-    $('sumOwnerGross').textContent = fmt(summary.owner_gross);
-    $('sumTax').textContent        = fmt(summary.owner_tax_reserve);
-    $('sumEmergency').textContent  = fmt(summary.owner_emergency_reserve);
-    $('sumTakeHome').textContent   = fmt(summary.owner_take_home);
-  } else {
-    $('dailySummary').style.display='none';
-  }
+  $('jobCountLabel').textContent = jobs.length ? `${jobs.length} job${jobs.length>1?'s':''}` : '';
 
   if (!jobs.length) {
-    $('jobsList').innerHTML='<div class="empty" style="padding:32px 0">No jobs on this date yet.</div>';
+    $('jobsList').innerHTML='<div class="empty">No jobs on this date yet. Add one on the left.</div>';
     return;
   }
 
   $('jobsList').innerHTML = jobs.map(job => {
-    const totalCrewPay    = job.crew.reduce((s,c)=>s+c.crew_pay,0);
-    const totalCommission = job.crew.reduce((s,c)=>s+c.commission_pay,0);
-    const ownerGross      = job.total_amount - totalCrewPay - totalCommission;
     const rows = job.crew.map(c => {
       const isW = c.crew_pay > 0, isS = c.commission_pay > 0;
       const pill = isW&&isS ? '<span class="role-pill b">Worker+Sales</span>'
@@ -644,34 +598,29 @@ async function loadDay() {
         <td>${pill}</td>
         <td class="mono">${isW ? fmt(c.crew_pay) : '—'}</td>
         <td class="mono">${isS ? c.commission_pct+'%' : '—'}</td>
-        <td class="mono">${isS ? fmt(c.commission_pay) : '—'}</td>
         <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(c.crew_pay+c.commission_pay)}</td>
         <td><button class="paid-toggle ${c.paid?'paid':'unpaid'}"
               onclick="togglePaid(${c.id},${c.paid?0:1},this)">
               ${c.paid?'✓ Paid':'○ Unpaid'}</button></td>
       </tr>`;
     }).join('');
+    const safeName = job.job_name.replace(/'/g, "\\'");
     return `<div class="job-card">
       <div class="job-card-hdr">
         <div>
-          <div style="font-weight:700;font-size:15px">${job.job_name}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${job.crew.length} assigned</div>
+          <div class="job-name">${job.job_name}</div>
+          <div class="job-meta">${job.crew.length} crew · ${fmt(job.total_amount)}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
+        <div class="job-card-actions">
           <div class="job-amt">${fmt(job.total_amount)}</div>
-          <button class="btn-icon" onclick="deleteJob(${job.id})">🗑</button>
+          <button class="btn-delete" onclick="deleteJob(${job.id},'${safeName}')">Delete</button>
         </div>
       </div>
       <div class="job-card-body">
-        ${job.crew.length ? `<table class="pay-table">
-          <thead><tr><th>Name</th><th>Role</th><th>Crew Pay</th><th>Comm%</th><th>Comm$</th><th>Total</th><th>Status</th></tr></thead>
-          <tbody>${rows}</tbody></table>` : '<div style="font-size:13px;color:var(--muted)">No crew assigned</div>'}
-        <div class="owner-strip">
-          <div class="os-item"><div class="lbl">Owner Gross</div><div class="val">${fmt(ownerGross)}</div></div>
-          <div class="os-item"><div class="lbl">Tax (20%)</div><div class="val">${fmt(ownerGross*.2)}</div></div>
-          <div class="os-item"><div class="lbl">Emergency (10%)</div><div class="val">${fmt(ownerGross*.1)}</div></div>
-          <div class="os-item hi"><div class="lbl">Take-Home</div><div class="val">${fmt(ownerGross*.7)}</div></div>
-        </div>
+        <table class="pay-table">
+          <thead><tr><th>Name</th><th>Role</th><th>Crew</th><th>Sales %</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
       </div>
     </div>`;
   }).join('');
@@ -685,11 +634,142 @@ async function togglePaid(jcId, newPaid, btn) {
     btn.setAttribute('onclick',`togglePaid(${jcId},${newPaid?0:1},this)`);
   }
 }
-async function deleteJob(jobId) {
-  if (!await confirm('Delete Job','Remove this job? Cannot be undone.')) return;
-  if ((await fetch(`/api/jobs/${jobId}`,{method:'DELETE'})).ok) { toast('Job removed'); loadDay(); }
-  else toast('Failed to delete','err');
+async function deleteJob(jobId, jobName) {
+  const name = jobName || 'this job';
+  if (!await confirm(
+    'Delete Job?',
+    `Are you sure you want to delete "${name}"? This removes it from payroll totals.`,
+    'You can undo right after deleting if this was a mistake.',
+    'Yes, Delete'
+  )) return;
+
+  const res = await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
+  if (!res.ok) { toast('Failed to delete', 'err'); return; }
+
+  const data = await res.json();
+  toast(`"${data.jobName || name}" deleted`, 'undo', {
+    undo: async () => {
+      const r = await fetch('/api/jobs/restore', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snapshot: data.snapshot }),
+      });
+      if (r.ok) { toast('Job restored!'); loadDay(); }
+      else toast('Could not restore', 'err');
+    },
+  });
+  loadDay();
 }
+
+// ── Revenue charts ────────────────────────────────────────────────────────────
+$('revThisWeekBtn').addEventListener('click', () => { setThisWeek(); loadRevenue(); });
+$('loadRevBtn').addEventListener('click', loadRevenue);
+
+const chartDefaults = {
+  color: '#7a8fa6',
+  borderColor: 'rgba(255,255,255,0.08)',
+};
+Chart.defaults.color = chartDefaults.color;
+Chart.defaults.borderColor = chartDefaults.borderColor;
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+async function loadRevenue() {
+  const start = $('revStart').value, end = $('revEnd').value;
+  if (!start || !end) return;
+  const { summaries = [] } = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r => r.json());
+
+  const agg = summaries.reduce((a, s) => ({
+    rev: a.rev + s.total_revenue, gross: a.gross + s.owner_gross,
+    tax: a.tax + s.owner_tax_reserve, emerg: a.emerg + s.owner_emergency_reserve,
+    take: a.take + s.owner_take_home,
+  }), { rev: 0, gross: 0, tax: 0, emerg: 0, take: 0 });
+
+  if (!summaries.length) {
+    $('revStats').style.display = 'none';
+    $('revCharts').style.display = 'none';
+    $('revTableCard').style.display = 'none';
+    return;
+  }
+
+  $('revStats').style.display = 'grid';
+  $('revCharts').style.display = 'grid';
+  $('revTableCard').style.display = 'block';
+  $('revTotal').textContent = fmt(agg.rev);
+  $('revGross').textContent = fmt(agg.gross);
+  $('revTax').textContent = fmt(agg.tax);
+  $('revEmerg').textContent = fmt(agg.emerg);
+  $('revTake').textContent = fmt(agg.take);
+
+  $('revDayBody').innerHTML = summaries.map(s => `<tr>
+    <td>${s.date}</td><td class="mono">${fmt(s.total_revenue)}</td>
+    <td class="mono">${fmt(s.owner_gross)}</td><td class="mono">${fmt(s.owner_tax_reserve)}</td>
+    <td class="mono">${fmt(s.owner_emergency_reserve)}</td>
+    <td class="mono" style="color:var(--orange);font-weight:700">${fmt(s.owner_take_home)}</td>
+  </tr>`).join('');
+
+  const labels = summaries.map(s => s.date.slice(5));
+  const revData = summaries.map(s => s.total_revenue);
+  const takeData = summaries.map(s => s.owner_take_home);
+
+  if (revBarChart) revBarChart.destroy();
+  revBarChart = new Chart($('revBarChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Revenue', data: revData, backgroundColor: 'rgba(0,170,239,0.6)', borderRadius: 8 },
+        { label: 'Take-Home', data: takeData, backgroundColor: 'rgba(247,148,29,0.6)', borderRadius: 8 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: v => '$' + v } },
+      },
+    },
+  });
+
+  if (revDoughnutChart) revDoughnutChart.destroy();
+  revDoughnutChart = new Chart($('revDoughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Take-Home (70%)', 'Tax (20%)', 'Emergency (10%)'],
+      datasets: [{
+        data: [agg.take, agg.tax, agg.emerg],
+        backgroundColor: ['#F7941D', '#00AAEF', '#2dd4a0'],
+        borderWidth: 0, hoverOffset: 8,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } },
+      },
+    },
+  });
+}
+
+$('resetDataBtn').addEventListener('click', async () => {
+  if (!await confirm(
+    'Clear ALL payroll data?',
+    'This deletes every job and resets all revenue to zero. Employees stay on the roster.',
+    'Only do this before starting a new week. Type RESET on the next step.'
+  )) return;
+  const typed = prompt('Type RESET to confirm clearing all jobs and revenue:');
+  if (typed !== 'RESET') { toast('Reset cancelled', 'err'); return; }
+  const res = await fetch('/api/admin/reset-payroll', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ confirm: 'RESET' }),
+  });
+  if (res.ok) {
+    toast('All payroll data cleared — fresh start!');
+    loadDay(); loadRevenue(); loadWeekly();
+  } else {
+    const { error } = await res.json().catch(() => ({}));
+    toast(error || 'Reset failed', 'err');
+  }
+});
 
 // ── Weekly ────────────────────────────────────────────────────────────────────
 $('thisWeekBtn').addEventListener('click', () => { setThisWeek(); loadWeekly(); });
@@ -712,9 +792,12 @@ async function loadWeekly() {
   }
   $('wEmpBody').innerHTML = employeeTotals.length
     ? employeeTotals.map(e=>`<tr><td style="font-weight:600">${e.name}</td>
+        <td class="mono">${e.job_count||0}</td>
         <td class="mono">${fmt(e.crew_pay)}</td><td class="mono">${fmt(e.commission_pay)}</td>
-        <td class="mono" style="color:var(--blue);font-weight:700">${fmt(e.total_pay)}</td></tr>`).join('')
-    : '<tr><td colspan="4" class="empty">No data for this range</td></tr>';
+        <td class="mono" style="color:var(--blue);font-weight:700">${fmt(e.total_pay)}</td>
+        <td class="mono" style="color:var(--green)">${fmt(e.paid_amount)}</td>
+        <td class="mono" style="color:var(--orange)">${fmt(e.unpaid_amount)}</td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">No data for this range</td></tr>';
   $('wDayBody').innerHTML = summaries.length
     ? summaries.map(s=>`<tr><td>${s.date}</td><td class="mono">${fmt(s.total_revenue)}</td>
         <td class="mono">${fmt(s.owner_gross)}</td><td class="mono">${fmt(s.owner_tax_reserve)}</td>
@@ -723,20 +806,103 @@ async function loadWeekly() {
     : '<tr><td colspan="6" class="empty">No data for this range</td></tr>';
 }
 
+// ── Payroll ───────────────────────────────────────────────────────────────────
+$('payThisWeekBtn').addEventListener('click', () => { setThisWeek(); loadPayroll(); });
+$('loadPayrollBtn').addEventListener('click', loadPayroll);
+$('markAllPaidBtn').addEventListener('click', async () => {
+  const start = $('payStart').value, end = $('payEnd').value;
+  if (!start || !end) return;
+  if (!await confirm('Mark All Paid', `Mark every employee as paid for ${start} to ${end}?`)) return;
+  const res = await fetch('/api/reports/payroll/mark-all', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ start, end }),
+  });
+  if (res.ok) { toast('All employees marked paid!'); loadPayroll(); loadDay(); }
+  else toast('Failed','err');
+});
+
+async function loadPayroll() {
+  const start = $('payStart').value, end = $('payEnd').value;
+  if (!start || !end) return;
+  const { rows = [], weekRevenue = {} } = await fetch(`/api/reports/payroll?start=${start}&end=${end}`).then(r=>r.json());
+  if (rows.length || weekRevenue.revenue) {
+    $('paySumGrid').style.display = 'grid';
+    $('payRev').textContent = fmt(weekRevenue.revenue);
+    $('payGross').textContent = fmt(weekRevenue.owner_gross);
+    $('payTake').textContent = fmt(weekRevenue.take_home);
+    const owed = rows.reduce((s,r) => s + (r.unpaid_amount||0), 0);
+    $('payOwed').textContent = fmt(owed);
+  } else $('paySumGrid').style.display = 'none';
+
+  if (!rows.length) {
+    $('payrollList').innerHTML = '<div class="empty">No earnings this week</div>';
+    return;
+  }
+  $('payrollList').innerHTML = rows.map(r => `
+    <div class="payroll-row">
+      <label class="pay-check">
+        <input type="checkbox" ${r.weekPaid?'checked':''} onchange="toggleWeekPaid(${r.id}, this.checked)" />
+        <span>${r.name} <span style="font-size:11px;color:var(--muted);font-weight:500">(${ROLE_LABELS[r.role]||r.role})</span></span>
+      </label>
+      <div style="text-align:right">
+        <div class="pay-amt">${fmt(r.total_pay)}</div>
+        <div style="font-size:11px;color:var(--muted)">Crew ${fmt(r.crew_pay)} · Sales ${fmt(r.commission_pay)} · ${r.job_count} jobs</div>
+        ${r.unpaid_amount > 0 ? `<div style="font-size:11px;color:var(--orange);font-weight:600">Still owed ${fmt(r.unpaid_amount)}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function toggleWeekPaid(empId, paid) {
+  const start = $('payStart').value, end = $('payEnd').value;
+  const res = await fetch('/api/reports/payroll', {
+    method:'PATCH', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ start, end, employeeId: empId, paid }),
+  });
+  if (res.ok) { toast(paid ? 'Marked paid!' : 'Marked unpaid'); loadPayroll(); loadDay(); }
+  else toast('Update failed','err');
+}
+
 // ── Leaderboard ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.lb-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.lb-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    lbType = t.dataset.lb;
+    loadLeaderboard();
+  });
+});
+$('lbAllTimeBtn').addEventListener('click', () => { $('lbStart').value=''; $('lbEnd').value=''; loadLeaderboard(); });
+$('lbLoadBtn').addEventListener('click', loadLeaderboard);
+
 async function loadLeaderboard() {
-  const rows = await fetch('/api/reports/leaderboard').then(r=>r.json());
-  if (!rows.length) { $('lbBody').innerHTML='<tr><td colspan="7" class="empty">No data yet</td></tr>'; return; }
-  const max = rows[0].total_pay||1;
-  $('lbBody').innerHTML = rows.map((r,i)=>`<tr>
-    <td style="font-size:17px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
-    <td style="font-weight:600">${r.name}</td>
-    <td class="mono" style="color:var(--muted)">${r.job_count}</td>
-    <td class="mono">${fmt(r.crew_pay)}</td>
-    <td class="mono">${fmt(r.commission_pay)}</td>
-    <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.total_pay)}</td>
-    <td><div class="lb-bar-wrap"><div class="lb-bar" style="width:${(r.total_pay/max*100).toFixed(1)}%"></div></div></td>
-  </tr>`).join('');
+  const start = $('lbStart')?.value || '', end = $('lbEnd')?.value || '';
+  let url = `/api/reports/leaderboard?type=${lbType}`;
+  if (start && end) url += `&start=${start}&end=${end}`;
+  const rows = await fetch(url).then(r=>r.json());
+  const sortKey = lbType === 'sales' ? 'commission_pay' : 'total_pay';
+  const headCol = lbType === 'sales' ? 'Sales $' : 'Total';
+  $('lbHead').innerHTML = lbType === 'sales'
+    ? `<tr><th>#</th><th>Employee</th><th>Sales Jobs</th><th>Commission</th><th style="min-width:90px"></th></tr>`
+    : `<tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:90px"></th></tr>`;
+  if (!rows.length) { $('lbBody').innerHTML=`<tr><td colspan="7" class="empty">No data yet</td></tr>`; return; }
+  const max = rows[0][sortKey]||1;
+  $('lbBody').innerHTML = rows.map((r,i) => lbType === 'sales'
+    ? `<tr>
+      <td style="font-size:17px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td class="mono">${r.sales_count||0}</td>
+      <td class="mono" style="color:var(--orange);font-weight:700">${fmt(r.commission_pay)}</td>
+      <td><div class="lb-bar-wrap"><div class="lb-bar" style="width:${(r.commission_pay/max*100).toFixed(1)}%"></div></div></td>
+    </tr>`
+    : `<tr>
+      <td style="font-size:17px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td class="mono" style="color:var(--muted)">${r.job_count}</td>
+      <td class="mono">${fmt(r.crew_pay)}</td>
+      <td class="mono">${fmt(r.commission_pay)}</td>
+      <td class="mono" style="color:var(--blue);font-weight:700">${fmt(r.total_pay)}</td>
+      <td><div class="lb-bar-wrap"><div class="lb-bar" style="width:${(r.total_pay/max*100).toFixed(1)}%"></div></div></td>
+    </tr>`).join('');
 }
 
 // ── Manage Crew ───────────────────────────────────────────────────────────────
@@ -746,20 +912,24 @@ async function loadRoster() {
     <div class="emp-row">
       <div>
         <span class="emp-name">${e.name}</span>
-        <span class="role-badge ${e.role}">${e.role}</span>
-        <div class="emp-user">@${e.username}</div>
+        <span class="role-badge ${e.role}">${ROLE_LABELS[e.role]||e.role}</span>
+        ${!e.active ? '<span style="font-size:10px;color:var(--red);margin-left:6px">Inactive</span>' : ''}
+        <div class="emp-user">@${e.username} · default pw: last name</div>
       </div>
-      ${e.role!=='owner'
+      ${e.role!=='owner' && e.active
         ? `<button class="btn-danger" onclick="removeEmp(${e.id},'${e.name.replace(/'/g,"\\'")}')">Remove</button>`
-        : '<span style="font-size:12px;color:var(--muted)">Owner</span>'}
+        : e.role==='owner'
+        ? '<span style="font-size:12px;color:var(--muted)">Owner</span>'
+        : '<span style="font-size:12px;color:var(--muted)">Inactive</span>'}
     </div>`).join('') || '<div class="empty">No employees</div>';
 }
 $('addEmpBtn').addEventListener('click', async () => {
-  const name=  $('newEmpName').value.trim();
-  const username=$('newEmpUser').value.trim().toLowerCase();
-  const password=$('newEmpPw').value.trim()||undefined;
-  const role=$('newEmpRole').value;
-  if (!name||!username) { toast('Name and username required','err'); return; }
+  const name = $('newEmpName').value.trim();
+  if (!name) { toast('Name required','err'); return; }
+  const defaults = credsFromName(name);
+  const username = ($('newEmpUser').value.trim() || defaults.username).toLowerCase();
+  const password = $('newEmpPw').value.trim() || defaults.password;
+  const role = $('newEmpRole').value;
   const res = await fetch('/api/employees',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,username,password,role})});
   if (res.ok) {
     toast(`${name} added!`);

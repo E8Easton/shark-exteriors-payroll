@@ -6,114 +6,11 @@
   <title>Shark Exteriors — My Pay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/crew.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #f0f4f8; --surface: #fff; --surface2: #f7fafc; --border: #dde3ea;
-      --text: #1a2332; --muted: #6b7a90;
-      --blue: #00AAEF; --blue-dk: #0090cc;
-      --orange: #F7941D; --navy: #0a1628;
-      --red: #e53935; --green: #00a86b;
-      --shadow: 0 2px 12px rgba(0,0,0,.07);
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
     .mono { font-family: 'DM Mono', monospace; }
-
-    header {
-      background: var(--navy); border-bottom: 3px solid var(--orange);
-      padding: 13px 24px; display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 10;
-    }
-    .logo { display: flex; align-items: center; gap: 10px; }
-    .logo .shark { font-size: 24px; }
-    .logo h1 { font-size: 16px; font-weight: 800; }
-    .logo h1 .b { color: var(--blue); }
-    .logo h1 .o { color: var(--orange); }
-    .hdr-right { display: flex; align-items: center; gap: 12px; }
-    .hdr-right span { font-size: 13px; color: rgba(255,255,255,.45); }
-    .hdr-right strong { color: #fff; }
-    .btn-logout {
-      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-      color: #fff; border-radius: 8px; padding: 7px 15px;
-      font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s;
-    }
-    .btn-logout:hover { background: rgba(229,57,53,.2); }
-
-    /* Tab bar */
-    .tab-bar {
-      display: flex; gap: 0; border-bottom: 2px solid var(--border);
-      background: var(--surface); padding: 0 24px;
-      position: sticky; top: 59px; z-index: 9;
-    }
-    .tab {
-      padding: 13px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
-      color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px;
-      transition: all .15s; white-space: nowrap;
-    }
-    .tab:hover { color: var(--text); }
-    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-
-    main { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
-    .stat-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow); }
-    .stat-card .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 7px; }
-    .stat-card .val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; color: var(--blue); }
-    .stat-card .val.orange { color: var(--orange); }
-    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-    /* Cards */
-    .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); margin-bottom: 16px; }
-    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-
-    /* Date picker */
-    .date-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .date-bar label { font-size: 13px; font-weight: 600; white-space: nowrap; }
-    .date-bar input[type=date] {
-      background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px;
-      color: var(--text); padding: 7px 10px; font-size: 13px; outline: none; font-family: inherit;
-    }
-    .date-bar input[type=date]:focus { border-color: var(--blue); }
-    .btn { background: var(--blue); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s; }
-    .btn:hover { background: var(--blue-dk); }
-    .btn-ghost { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s; }
-    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
-
-    /* Tables */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; padding: 9px 13px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); background: var(--surface2); }
-    td { padding: 11px 13px; border-bottom: 1px solid #f0f4f8; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafcff; }
-    .empty { text-align: center; padding: 36px; color: var(--muted); font-size: 14px; }
-    .paid-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .paid-badge.paid { background: rgba(0,168,107,.1); color: var(--green); }
-    .paid-badge.unpaid { background: rgba(247,148,29,.1); color: var(--orange); }
-
-    /* Leaderboard */
-    .lb-bar-wrap { height: 8px; background: #e8eef4; border-radius: 4px; min-width: 80px; }
-    .lb-bar { height: 8px; background: linear-gradient(90deg, var(--blue), var(--orange)); border-radius: 4px; transition: width .5s; }
-    .you-row td { background: rgba(0,170,239,.04) !important; }
-
-    /* Weekly totals summary strip */
-    .week-sum { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-    .ws-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 18px; box-shadow: var(--shadow); }
-    .ws-item .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-    .ws-item .val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 700; color: var(--blue); margin-top: 3px; }
-    .ws-item.hi .val { color: var(--orange); }
-
-    /* Change password */
-    .field { margin-bottom: 13px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
-    .field input { width: 100%; max-width: 340px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 9px 12px; outline: none; font-family: inherit; transition: border-color .15s; }
-    .field input:focus { border-color: var(--blue); background: #fff; }
-    .msg { font-size: 13px; margin-top: 10px; font-weight: 500; }
-    .msg.ok { color: var(--green); }
-    .msg.err { color: var(--red); }
   </style>
 </head>
 <body>
@@ -133,6 +30,7 @@
   <div class="tab active" data-tab="mypay">💰 Overview</div>
   <div class="tab" data-tab="daily">📋 Daily</div>
   <div class="tab" data-tab="weekly">📅 Weekly</div>
+  <div class="tab" data-tab="calculator">🧮 Calculator</div>
   <div class="tab" data-tab="monthly">🗓 Monthly</div>
   <div class="tab" data-tab="leaderboard">🏆 Leaderboard</div>
   <div class="tab" data-tab="settings">⚙️ Settings</div>
@@ -143,6 +41,8 @@
   <!-- ── MY PAY ── -->
   <div class="tab-panel active" id="tab-mypay">
     <div class="stats-grid">
+      <div class="stat-card"><div class="lbl">Today</div><div class="val" id="statToday">—</div><div class="sub" id="statTodayJobs">—</div></div>
+      <div class="stat-card"><div class="lbl">This Week</div><div class="val" id="statThisWeek">—</div><div class="sub" id="statWeekJobs">—</div></div>
       <div class="stat-card"><div class="lbl">All-Time Earnings</div><div class="val" id="statAllTime">—</div><div class="sub" id="statJobs">— jobs</div></div>
       <div class="stat-card"><div class="lbl">Crew Pay</div><div class="val" id="statCrewPay">—</div></div>
       <div class="stat-card"><div class="lbl">Commission</div><div class="val" id="statCommission">—</div></div>
@@ -207,6 +107,37 @@
     </div>
   </div>
 
+  <!-- ── CALCULATOR ── -->
+  <div class="tab-panel" id="tab-calculator">
+    <div class="card" style="max-width:560px">
+      <div class="card-title">Pay Calculator</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">See what you'd make before taking a job. Enter the house price and your commission %.</p>
+      <div class="calc-grid">
+        <div class="field"><label>House Price ($)</label><input type="number" id="calcPrice" min="0" step="0.01" placeholder="200.00" value="200" /></div>
+        <div class="field"><label>Your Commission %</label><input type="number" id="calcPct" min="0" max="100" step="0.5" placeholder="15" value="15" /></div>
+        <div class="field"><label>Workers Splitting Pool</label><input type="number" id="calcWorkers" min="1" max="10" step="1" value="1" /></div>
+        <div class="field"><label>Pool Size %</label>
+          <select id="calcPool">
+            <option value="30" selected>30% pool (even split)</option>
+            <option value="25">25% pool (even split)</option>
+            <option value="custom">Custom % (use field above)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button type="button" class="btn-ghost" onclick="setCalcPreset(30,1)">Solo 30%</button>
+        <button type="button" class="btn-ghost" onclick="setCalcPreset(15,2)">2-person 15% each</button>
+        <button type="button" class="btn-ghost" onclick="setCalcPreset(10,3)">3-person 10% each</button>
+        <button type="button" class="btn-ghost" onclick="setCalcPreset(15,1,true)">Sales 15%</button>
+      </div>
+      <div class="calc-result">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">You would earn</div>
+        <div class="big" id="calcResult">$30.00</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px" id="calcBreakdown">15% of $200.00</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── MONTHLY ── -->
   <div class="tab-panel" id="tab-monthly">
     <div class="card">
@@ -234,9 +165,12 @@
   <!-- ── LEADERBOARD ── -->
   <div class="tab-panel" id="tab-leaderboard">
     <div class="card">
-      <div class="card-title">All-Time Leaderboard</div>
+      <div class="lb-tabs">
+        <button type="button" class="lb-tab active" data-lb="total">💰 Total Earnings</button>
+        <button type="button" class="lb-tab" data-lb="sales">💼 Sales Leaders</button>
+      </div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>#</th><th>Name</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:80px"></th></tr></thead>
+        <thead id="crewLbHead"><tr><th>#</th><th>Name</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:80px"></th></tr></thead>
         <tbody id="lbBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
       </table></div>
     </div>
@@ -260,6 +194,7 @@
 const $ = id => document.getElementById(id);
 const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 let myId = null;
+let crewLbType = 'total';
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(t => {
@@ -271,6 +206,16 @@ document.querySelectorAll('.tab').forEach(t => {
     if (t.dataset.tab === 'leaderboard') loadLeaderboard();
     if (t.dataset.tab === 'daily') loadDaily();
     if (t.dataset.tab === 'monthly') setThisMonth();
+    if (t.dataset.tab === 'calculator') updateCalc();
+  });
+});
+
+document.querySelectorAll('.lb-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.lb-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    crewLbType = t.dataset.lb;
+    loadLeaderboard();
   });
 });
 
@@ -303,6 +248,12 @@ $('logoutBtn').addEventListener('click', async () => {
 async function loadMyPay() {
   const d = await fetch('/api/reports/my-earnings').then(r => r.json());
   const a = d.allTime || {};
+  const tw = d.thisWeek || {};
+  const td = d.todayEarnings || {};
+  $('statToday').textContent = fmt(td.total_pay || 0);
+  $('statTodayJobs').textContent = `${td.job_count || 0} jobs today`;
+  $('statThisWeek').textContent = fmt(tw.total_pay || 0);
+  $('statWeekJobs').textContent = `${tw.job_count || 0} jobs this week (${d.weekStart || ''} – ${d.weekEnd || ''})`;
   $('statAllTime').textContent    = fmt(a.total_pay);
   $('statCrewPay').textContent    = fmt(a.crew_pay);
   $('statCommission').textContent = fmt(a.commission_pay);
@@ -426,13 +377,55 @@ async function loadMonthly() {
     : '<tr><td colspan="5" class="empty">No jobs this month</td></tr>';
 }
 
+// ── Calculator ────────────────────────────────────────────────────────────────
+function setCalcPreset(pct, workers, isSales) {
+  $('calcWorkers').value = workers;
+  if (isSales) {
+    $('calcPool').value = 'custom';
+    $('calcPct').value = pct;
+  } else {
+    $('calcPool').value = workers === 1 && pct === 30 ? '30' : 'custom';
+    $('calcPct').value = pct;
+  }
+  updateCalc();
+}
+
+function updateCalc() {
+  const price = parseFloat($('calcPrice').value) || 0;
+  const pool = $('calcPool').value;
+  const workers = parseInt($('calcWorkers').value, 10) || 1;
+  let pct = parseFloat($('calcPct').value) || 0;
+  if (pool === '30') pct = 30 / workers;
+  else if (pool === '25') pct = 25 / workers;
+  const earn = price * pct / 100;
+  $('calcResult').textContent = fmt(earn);
+  $('calcBreakdown').textContent = `${pct.toFixed(1)}% of ${fmt(price)}${workers > 1 ? ` (${workers} workers splitting ${pool === 'custom' ? 'custom' : pool + '%'} pool)` : ''}`;
+}
+
+['calcPrice','calcPct','calcWorkers','calcPool'].forEach(id => {
+  $(id).addEventListener('input', updateCalc);
+  $(id).addEventListener('change', updateCalc);
+});
+
 // ── Leaderboard ───────────────────────────────────────────────────────────────
 async function loadLeaderboard() {
-  const rows = await fetch('/api/reports/leaderboard').then(r => r.json());
+  const url = `/api/reports/leaderboard?type=${crewLbType}`;
+  const rows = await fetch(url).then(r => r.json());
+  const sortKey = crewLbType === 'sales' ? 'commission_pay' : 'total_pay';
+  $('crewLbHead').innerHTML = crewLbType === 'sales'
+    ? `<tr><th>#</th><th>Name</th><th>Sales Jobs</th><th>Commission</th><th style="min-width:80px"></th></tr>`
+    : `<tr><th>#</th><th>Name</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:80px"></th></tr>`;
   if (!rows.length) { $('lbBody').innerHTML = '<tr><td colspan="7" class="empty">No data yet</td></tr>'; return; }
-  const max = rows[0].total_pay || 1;
-  $('lbBody').innerHTML = rows.map((r, i) => `
-    <tr class="${r.id === myId ? 'you-row' : ''}">
+  const max = rows[0][sortKey] || 1;
+  $('lbBody').innerHTML = rows.map((r, i) => crewLbType === 'sales'
+    ? `<tr class="${r.id === myId ? 'you-row' : ''}">
+      <td style="font-size:16px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+      <td style="font-weight:600">${r.name}${r.id === myId ? ' <span style="font-size:10px;color:var(--blue);font-weight:700">(You)</span>' : ''}</td>
+      <td class="mono">${r.sales_count||0}</td>
+      <td class="mono" style="color:var(--orange);font-weight:700">${fmt(r.commission_pay)}</td>
+      <td><div class="lb-bar-wrap"><div class="lb-bar" style="width:${(r.commission_pay/max*100).toFixed(1)}%"></div></div></td>
+    </tr>`
+    : `<tr class="${r.id === myId ? 'you-row' : ''}">
       <td style="font-size:16px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
       <td style="font-weight:600">${r.name}${r.id === myId ? ' <span style="font-size:10px;color:var(--blue);font-weight:700">(You)</span>' : ''}</td>
       <td class="mono" style="color:var(--muted)">${r.job_count}</td>
@@ -465,6 +458,7 @@ $('pwBtn').addEventListener('click', async () => {
 });
 
 init();
+updateCalc();
 </script>
 </body>
 </html>

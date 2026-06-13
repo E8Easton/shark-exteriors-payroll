@@ -28,9 +28,16 @@ router.get('/', requireAuth, (req, res) => {
   res.json([emp]);
 });
 
+const VALID_ROLES = ['owner', 'crew', 'cleaning_tech', 'd2d'];
+
 router.post('/', ownerOnly, (req, res) => {
   const { name, username, password, role } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Name required' });
+
+  const empRole = role || 'crew';
+  if (!VALID_ROLES.includes(empRole)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
 
   const defaults = credentialsFromName(name);
   const user = (username || defaults.username).toLowerCase().trim();
@@ -40,8 +47,8 @@ router.post('/', ownerOnly, (req, res) => {
   try {
     const result = db.prepare(
       'INSERT INTO employees (name, username, password_hash, role) VALUES (?, ?, ?, ?)'
-    ).run(name.trim(), user, hash, role || 'crew');
-    res.json({ id: result.lastInsertRowid, name: name.trim(), username: user, role: role || 'crew' });
+    ).run(name.trim(), user, hash, empRole);
+    res.json({ id: result.lastInsertRowid, name: name.trim(), username: user, role: empRole });
   } catch (e) {
     if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Username already taken' });
     throw e;

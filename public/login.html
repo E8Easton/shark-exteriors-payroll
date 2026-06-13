@@ -5,68 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Exteriors — Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/theme.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: linear-gradient(135deg, #e8f4fd 0%, #fef3e8 100%);
-      color: #1a2332;
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
     }
-    .card {
-      background: #fff;
-      border: 1.5px solid #dde3ea;
-      border-radius: 20px;
-      padding: 48px 42px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.10);
+    .login-card {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 24px; padding: 48px 42px; width: 100%; max-width: 420px;
+      box-shadow: var(--shadow);
     }
     .logo { text-align: center; margin-bottom: 32px; }
-    .logo .shark { font-size: 52px; line-height: 1; margin-bottom: 10px; }
-    .logo h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-    .logo h1 .blue { color: #00AAEF; }
-    .logo h1 .orange { color: #F7941D; }
-    .logo p { color: #6b7a90; font-size: 13px; margin-top: 4px; }
+    .logo .shark { font-size: 52px; line-height: 1; margin-bottom: 10px; filter: drop-shadow(0 0 12px var(--blue-glow)); }
+    .logo h1 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+    .logo p { color: var(--muted); font-size: 13px; margin-top: 6px; }
     .stripe {
-      height: 3px;
-      background: linear-gradient(90deg, #00AAEF, #F7941D);
-      border-radius: 2px;
-      margin-bottom: 28px;
+      height: 3px; background: linear-gradient(90deg, var(--blue), var(--orange));
+      border-radius: 2px; margin-bottom: 28px;
     }
-    .field { margin-bottom: 18px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #6b7a90; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
-    input {
-      width: 100%; background: #f7fafc; border: 1.5px solid #dde3ea;
-      border-radius: 10px; color: #1a2332; font-size: 15px;
-      padding: 12px 14px; outline: none; transition: border-color .2s;
-      font-family: inherit;
-    }
-    input:focus { border-color: #00AAEF; background: #fff; }
-    .btn {
-      width: 100%; background: #00AAEF; color: #fff; border: none;
-      border-radius: 10px; font-size: 15px; font-weight: 700;
-      padding: 14px; cursor: pointer; transition: background .15s;
-      font-family: inherit; margin-top: 4px;
-      box-shadow: 0 4px 14px rgba(0,170,239,.3);
-    }
-    .btn:hover { background: #0090cc; }
     .error {
-      background: #fff5f5; border: 1.5px solid #fca5a5;
-      color: #dc2626; border-radius: 10px; padding: 11px 14px;
-      font-size: 13px; margin-bottom: 18px; display: none;
+      background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25);
+      color: var(--red); border-radius: var(--radius-sm);
+      padding: 12px 14px; font-size: 13px; margin-bottom: 18px; display: none;
     }
+    .btn { width: 100%; margin-top: 6px; justify-content: center; padding: 14px; font-size: 15px; }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="login-card">
     <div class="logo">
       <div class="shark">🦈</div>
-      <h1><span class="blue">Shark</span> <span class="orange">Exteriors</span></h1>
+      <h1><span class="b">Shark</span> <span class="o">Exteriors</span></h1>
       <p>Payroll Management</p>
     </div>
     <div class="stripe"></div>

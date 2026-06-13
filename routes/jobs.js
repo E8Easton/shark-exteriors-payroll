@@ -37,15 +37,16 @@ router.get('/', ownerOnly, (req, res) => {
 // crewPayPct  = % of job total paid to this person as crew pay  (0 if sales-only)
 // commissionPct = % of job total paid as sales commission        (0 if crew-only)
 router.post('/', ownerOnly, (req, res) => {
-  const { date, jobName, totalAmount, crew } = req.body;
+  const { date, jobName, totalAmount, crew, crewPoolPct } = req.body;
   if (!date || !jobName || totalAmount == null) {
     return res.status(400).json({ error: 'date, jobName, totalAmount required' });
   }
 
+  const poolPct = crewPoolPct != null ? Number(crewPoolPct) : 30;
   const members = Array.isArray(crew) ? crew : [];
   const jobResult = db.prepare(
-    'INSERT INTO jobs (date, job_name, total_amount) VALUES (?, ?, ?)'
-  ).run(date, jobName, totalAmount);
+    'INSERT INTO jobs (date, job_name, total_amount, crew_pool_pct) VALUES (?, ?, ?, ?)'
+  ).run(date, jobName, totalAmount, poolPct);
   const jobId = jobResult.lastInsertRowid;
 
   let totalCrewPay = 0, totalCommission = 0;
@@ -66,10 +67,58 @@ router.post('/', ownerOnly, (req, res) => {
 });
 
 router.delete('/:id', ownerOnly, (req, res) => {
-  const job = db.prepare('SELECT date FROM jobs WHERE id = ?').get(req.params.id);
-  db.prepare('DELETE FROM jobs WHERE id = ?').run(req.params.id);
-  if (job) upsertDailySummary(job.date);
-  res.json({ ok: true });
+  const jobId = req.params.id;
+  const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(jobId);
+  if (!job) return res.status(404).json({ error: 'Job not found' });
+
+  const crew = db.prepare(`
+    SELECT jc.*, e.name FROM job_crew jc
+    JOIN employees e ON e.id = jc.employee_id WHERE jc.job_id = ?
+  `).all(jobId);
+
+  const snapshot = {
+    date: job.date,
+    jobName: job.job_name,
+    totalAmount: job.total_amount,
+    crewPoolPct: job.crew_pool_pct ?? 30,
+    crew: crew.map(c => ({
+      employeeId: c.employee_id,
+      crewPayPct: job.total_amount ? (c.crew_pay / job.total_amount) * 100 : 0,
+      commissionPct: c.commission_pct,
+      paid: c.paid,
+    })),
+  };
+
+  db.prepare('DELETE FROM jobs WHERE id = ?').run(jobId);
+  upsertDailySummary(job.date);
+  res.json({ ok: true, snapshot, jobName: job.job_name });
+});
+
+// POST /api/jobs/restore — undo a deleted job
+router.post('/restore', ownerOnly, (req, res) => {
+  const { snapshot } = req.body;
+  if (!snapshot?.date || !snapshot?.jobName || snapshot.totalAmount == null) {
+    return res.status(400).json({ error: 'Invalid snapshot' });
+  }
+
+  const poolPct = snapshot.crewPoolPct != null ? Number(snapshot.crewPoolPct) : 30;
+  const members = Array.isArray(snapshot.crew) ? snapshot.crew : [];
+  const jobResult = db.prepare(
+    'INSERT INTO jobs (date, job_name, total_amount, crew_pool_pct) VALUES (?, ?, ?, ?)'
+  ).run(snapshot.date, snapshot.jobName, snapshot.totalAmount, poolPct);
+  const jobId = jobResult.lastInsertRowid;
+
+  const insertCrew = db.prepare(
+    'INSERT INTO job_crew (job_id, employee_id, crew_pay, commission_pct, commission_pay, paid) VALUES (?, ?, ?, ?, ?, ?)'
+  );
+  for (const m of members) {
+    const crewPay = snapshot.totalAmount * ((m.crewPayPct || 0) / 100);
+    const commissionPay = snapshot.totalAmount * ((m.commissionPct || 0) / 100);
+    insertCrew.run(jobId, m.employeeId, crewPay, m.commissionPct || 0, commissionPay, m.paid ? 1 : 0);
+  }
+
+  upsertDailySummary(snapshot.date);
+  res.json({ ok: true, id: jobId });
 });
 
 router.patch('/crew/:jobCrewId/paid', ownerOnly, (req, res) => {
