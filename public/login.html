@@ -9,6 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/perf.css" />
+  <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
   <meta name="theme-color" content="#080c12" />
   <style>
     body {
@@ -21,7 +24,6 @@
       box-shadow: var(--shadow);
     }
     .logo { text-align: center; margin-bottom: 32px; }
-    .logo .shark { font-size: 52px; line-height: 1; margin-bottom: 10px; filter: drop-shadow(0 0 12px var(--blue-glow)); }
     .logo h1 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
     .logo p { color: var(--muted); font-size: 13px; margin-top: 6px; }
     .stripe {
@@ -39,7 +41,9 @@
 <body>
   <div class="login-card">
     <div class="logo">
-      <div class="shark">🦈</div>
+    <div class="brand-icon brand-icon-xl" aria-hidden="true">
+      <img src="/icon.svg" alt="" width="64" height="64" />
+    </div>
       <h1><span class="b">Shark</span> <span class="o">Exteriors</span></h1>
       <p>Payroll Management</p>
     </div>

@@ -14,7 +14,7 @@ body.owner-app { display: flex; min-height: 100vh; }
   cursor: pointer; display: flex; align-items: center; gap: 12px;
 }
 .sidebar-logo:hover { opacity: .9; }
-.sidebar-logo .shark { font-size: 28px; filter: drop-shadow(0 0 8px var(--blue-glow)); }
+.sidebar-logo .brand-icon { width: 36px; height: 36px; }
 .logo-text h1 { font-size: 16px; font-weight: 800; }
 .logo-text p {
   font-size: 10px; color: var(--muted);

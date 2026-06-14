@@ -6,7 +6,7 @@ header {
   justify-content: space-between; position: sticky; top: 0; z-index: 10;
 }
 .logo { display: flex; align-items: center; gap: 10px; }
-.logo .shark { font-size: 24px; filter: drop-shadow(0 0 6px var(--blue-glow)); }
+.logo .brand-icon { width: 28px; height: 28px; }
 .logo h1 { font-size: 17px; font-weight: 800; }
 .hdr-right { display: flex; align-items: center; gap: 12px; }
 .hdr-right span { font-size: 13px; color: var(--muted); }

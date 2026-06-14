@@ -1,0 +1,23 @@
+/* Brand icon — falcon + payroll $ */
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.brand-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 8px var(--blue-glow));
+}
+
+.brand-icon-sm { width: 28px; height: 28px; }
+.brand-icon-md { width: 36px; height: 36px; }
+.brand-icon-lg { width: 48px; height: 48px; }
+.brand-icon-xl { width: 64px; height: 64px; }
+
+.sidebar-logo .brand-icon { width: 36px; height: 36px; }
+.logo .brand-icon { width: 64px; height: 64px; margin: 0 auto 10px; }
