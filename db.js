@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 const path = require('path');
 const { credentialsFromName } = require('./lib/credentials');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'payroll.db');
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 let db;
 let driver = 'better-sqlite3';

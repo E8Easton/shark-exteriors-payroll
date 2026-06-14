@@ -1,11 +1,22 @@
 const express = require('express');
 const session = require('express-session');
-const MemoryStore = require('memorystore')(session);
+const FileStore = require('session-file-store')(session);
+const fs = require('fs');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 const publicDir = path.join(__dirname, 'public');
+const SESSIONS_PATH = process.env.SESSIONS_PATH || path.join(__dirname, 'sessions');
+const sessionSecret = process.env.SESSION_SECRET || 'shark-exteriors-secret-change-me';
+
+if (isProduction && sessionSecret === 'shark-exteriors-secret-change-me') {
+  console.error('Set SESSION_SECRET before running in production (e.g. fly secrets set SESSION_SECRET=...)');
+  process.exit(1);
+}
+
+fs.mkdirSync(SESSIONS_PATH, { recursive: true });
 
 app.set('trust proxy', 1);
 
@@ -13,13 +24,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  store: new MemoryStore({ checkPeriod: 86400000 }),
-  secret: process.env.SESSION_SECRET || 'shark-exteriors-secret-change-me',
+  store: new FileStore({
+    path: SESSIONS_PATH,
+    ttl: 7 * 24 * 60 * 60,
+    retries: 0,
+  }),
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },
@@ -62,6 +77,10 @@ app.get('/crew.html', (req, res) => {
 
 app.use(express.static(publicDir, { index: false }));
 
-app.listen(PORT, () => {
-  console.log(`Shark Exteriors Payroll running on http://localhost:${PORT}`);
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Shark Exteriors Payroll running on port ${PORT}`);
 });

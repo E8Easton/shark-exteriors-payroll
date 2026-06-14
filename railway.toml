@@ -8,3 +8,5 @@ restartPolicyMaxRetries = 3
 
 [environments.production.variables]
 NODE_ENV = "production"
+DB_PATH = "/data/payroll.db"
+SESSIONS_PATH = "/data/sessions"
