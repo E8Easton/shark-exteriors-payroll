@@ -13,8 +13,7 @@ COPY . .
 
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV DB_PATH=/data/payroll.db
-ENV SESSIONS_PATH=/data/sessions
+ENV DATA_DIR=/data
 
 EXPOSE 3000
 

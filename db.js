@@ -3,7 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { credentialsFromName } = require('./lib/credentials');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'payroll.db');
+const { resolveDataDir } = require('./lib/dataDir');
+const DB_PATH = process.env.DB_PATH || path.join(resolveDataDir(), 'payroll.db');
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 let db;

@@ -3,20 +3,22 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const fs = require('fs');
 const path = require('path');
+const { resolveDataDir, resolveSessionSecret } = require('./lib/dataDir');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 const publicDir = path.join(__dirname, 'public');
-const SESSIONS_PATH = process.env.SESSIONS_PATH || path.join(__dirname, 'sessions');
-const sessionSecret = process.env.SESSION_SECRET || 'shark-exteriors-secret-change-me';
+const dataDir = resolveDataDir();
+const SESSIONS_PATH = process.env.SESSIONS_PATH || path.join(dataDir, 'sessions');
+const sessionSecret = resolveSessionSecret(dataDir);
 
-if (isProduction && sessionSecret === 'shark-exteriors-secret-change-me') {
-  console.error('Set SESSION_SECRET before running in production (e.g. fly secrets set SESSION_SECRET=...)');
-  process.exit(1);
+if (!process.env.DB_PATH) {
+  process.env.DB_PATH = path.join(dataDir, 'payroll.db');
 }
 
 fs.mkdirSync(SESSIONS_PATH, { recursive: true });
+console.log(`Data directory: ${dataDir}`);
 
 app.set('trust proxy', 1);
 
@@ -39,6 +41,10 @@ app.use(session({
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },
 }));
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true, dataDir });
+});
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/employees', require('./routes/employees'));
@@ -77,8 +83,8 @@ app.get('/crew.html', (req, res) => {
 
 app.use(express.static(publicDir, { index: false }));
 
-app.get('/health', (req, res) => {
-  res.json({ ok: true });
+app.use((req, res) => {
+  res.status(404).send('Page not found. Go to <a href="/login.html">/login.html</a>');
 });
 
 app.listen(PORT, '0.0.0.0', () => {

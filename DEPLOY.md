@@ -1,88 +1,54 @@
-# Deploy Shark Exteriors Payroll (Fly.io)
+# Deploy on Fly.io (GitHub link)
 
-This app stores **all payroll data** (jobs, tips, overrides, crew) in SQLite on a Fly **volume** at `/data`. Data persists across redeploys for the full 11-week season.
+## Fix for "Page not found"
 
-## One-time setup
+That usually means the app **never started**. Do these two things in the [Fly.io dashboard](https://fly.io/dashboard) **before** you hit Deploy:
 
-1. Install the [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/) and sign in:
+### 1. Create the storage volume (keeps all 11 weeks of payroll data)
 
-   ```bash
-   fly auth login
-   ```
+1. Open your app on Fly.io
+2. Go to **Storage** → **Volumes**
+3. **Create volume**
+   - Name: `payroll_data` (must match `fly.toml`)
+   - Region: `iad` (same as `primary_region` in `fly.toml`)
+   - Size: 1 GB
+4. Attach the volume to your machine (Fly usually does this on next deploy)
 
-2. From this repo folder, launch the app (use the existing `fly.toml`):
+### 2. Match the app name
 
-   ```bash
-   fly launch --no-deploy
-   ```
+In `fly.toml`, the line `app = 'shark-exteriors-payroll'` must match **your Fly app name** exactly. If Fly gave you a different name when you linked GitHub, change that line to match, commit, and push.
 
-   - Choose app name `shark-exteriors-payroll` or your own (update `app` in `fly.toml` if you change it).
-   - Confirm region (default `iad` — US East).
+### 3. Deploy from GitHub
 
-3. Create the persistent volume (only once per app):
+1. Fly.io dashboard → your app → **Deploy** (or enable auto-deploy on push to `master`)
+2. Wait until the deploy finishes (green / running)
+3. Open your app URL — you should see the **login page**, not "page not found"
+4. Test: visit `https://YOUR-APP.fly.dev/health` — should show `{"ok":true,...}`
 
-   ```bash
-   fly volumes create payroll_data --region iad --size 1
-   ```
+## Logins
 
-4. Set a strong session secret (required in production):
-
-   ```bash
-   fly secrets set SESSION_SECRET="paste-a-long-random-string-here"
-   ```
-
-   Generate one with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-
-5. Deploy:
-
-   ```bash
-   fly deploy
-   ```
-
-6. Open the site:
-
-   ```bash
-   fly open
-   ```
-
-Your live URL will look like: `https://shark-exteriors-payroll.fly.dev`
-
-## Default logins
-
-On first deploy, default crew accounts are seeded from names (username = first name, password = last name, lowercase). Example owner: **easton** / **zastrow**.
+- Owner: **easton** / **zastrow**
+- Crew: first name / last name (lowercase), e.g. **malcolm** / **gall**
 
 Change passwords from **Manage Crew** after going live.
 
-## Redeploy after GitHub updates
+## Redeploy after code updates
+
+Push to GitHub → Fly redeploys (if auto-deploy is on) or click **Deploy** in the dashboard. Data on the `payroll_data` volume is kept.
+
+## Optional: set your own session secret
+
+Fly auto-creates one on first boot and saves it on the volume. To set your own:
 
 ```bash
-git pull
-fly deploy
+fly secrets set SESSION_SECRET="your-long-random-string"
 ```
 
-Data on the `/data` volume is **not** wiped by redeploys.
-
-## Backup (recommended weekly)
-
-```bash
-fly ssh console -C "sqlite3 /data/payroll.db '.backup /data/backup.db'"
-fly ssh sftp get /data/backup.db ./payroll-backup.db
-```
-
-## Environment variables
-
-| Variable | Purpose |
-|----------|---------|
-| `SESSION_SECRET` | **Required** in production — signs login cookies |
-| `DB_PATH` | SQLite file (default `/data/payroll.db` on Fly) |
-| `SESSIONS_PATH` | Login sessions folder (default `/data/sessions`) |
-| `PORT` | Set automatically by Fly |
-
-## Local development
+## Local dev
 
 ```bash
 npm install
 npm run dev
 ```
 
-Uses `./payroll.db` and `./sessions/` locally (not committed to git).
+Uses `./data/` locally (not committed to git).

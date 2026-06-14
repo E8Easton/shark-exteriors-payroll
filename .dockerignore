@@ -2,6 +2,7 @@ node_modules
 .git
 .gitignore
 payroll.db
+data
 sessions
 *.db-shm
 *.db-wal
