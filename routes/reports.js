@@ -24,24 +24,27 @@ function ownerOnly(req, res, next) {
 }
 
 // GET /api/reports/daily?date=YYYY-MM-DD  (owner sees all; crew sees self)
-router.get('/daily', requireAuth, (req, res) => {
+router.get('/daily', requireAuth, async (req, res) => {
   const { date } = req.query;
   if (!date) return res.status(400).json({ error: 'date required' });
 
   if (req.session.role === 'owner') {
-    const summary = db.prepare('SELECT * FROM daily_summaries WHERE date = ?').get(date);
-    const jobs = db.prepare('SELECT * FROM jobs WHERE date = ? ORDER BY id').all(date);
-    const enriched = jobs.map(job => ({
-      ...job,
-      crew: db.prepare(`
-        SELECT jc.*, e.name FROM job_crew jc
-        JOIN employees e ON e.id = jc.employee_id WHERE jc.job_id = ?
-      `).all(job.id)
-    }));
+    const summary = await db.prepare('SELECT * FROM daily_summaries WHERE date = ?').get(date);
+    const jobs = await db.prepare('SELECT * FROM jobs WHERE date = ? ORDER BY id').all(date);
+    const enriched = [];
+    for (const job of jobs) {
+      enriched.push({
+        ...job,
+        crew: await db.prepare(`
+          SELECT jc.*, e.name FROM job_crew jc
+          JOIN employees e ON e.id = jc.employee_id WHERE jc.job_id = ?
+        `).all(job.id),
+      });
+    }
     return res.json({ summary, jobs: enriched });
   }
 
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT jc.id, jc.crew_pay, jc.commission_pct, jc.commission_pay, jc.paid,
            j.job_name, j.date, j.total_amount
     FROM job_crew jc
@@ -53,16 +56,16 @@ router.get('/daily', requireAuth, (req, res) => {
 });
 
 // GET /api/reports/weekly?start=YYYY-MM-DD&end=YYYY-MM-DD
-router.get('/weekly', requireAuth, (req, res) => {
+router.get('/weekly', requireAuth, async (req, res) => {
   const { start, end } = req.query;
   if (!start || !end) return res.status(400).json({ error: 'start and end dates required' });
 
   if (req.session.role === 'owner') {
-    const summaries = db.prepare(
+    const summaries = await db.prepare(
       'SELECT * FROM daily_summaries WHERE date BETWEEN ? AND ? ORDER BY date'
     ).all(start, end);
 
-    const empTotals = db.prepare(`
+    const empTotals = await db.prepare(`
       SELECT e.id, e.name, e.role,
              COALESCE(jc_agg.crew_pay, 0) as crew_pay,
              COALESCE(jc_agg.commission_pay, 0) as commission_pay,
@@ -100,7 +103,7 @@ router.get('/weekly', requireAuth, (req, res) => {
     return res.json({ summaries, employeeTotals: empTotals });
   }
 
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT j.date,
            SUM(jc.crew_pay) as crew_pay,
            SUM(jc.commission_pay) as commission_pay,
@@ -113,7 +116,7 @@ router.get('/weekly', requireAuth, (req, res) => {
     ORDER BY j.date
   `).all(req.session.userId, start, end);
 
-  const weekTotal = db.prepare(`
+  const weekTotal = await db.prepare(`
     SELECT SUM(jc.crew_pay) as crew_pay,
            SUM(jc.commission_pay) as commission_pay,
            SUM(jc.crew_pay + jc.commission_pay) as total_pay,
@@ -123,7 +126,7 @@ router.get('/weekly', requireAuth, (req, res) => {
     WHERE jc.employee_id = ? AND j.date BETWEEN ? AND ?
   `).get(req.session.userId, start, end);
 
-  const tipsTotal = db.prepare(`
+  const tipsTotal = await db.prepare(`
     SELECT COALESCE(SUM(amount), 0) as tips_pay,
            COALESCE(SUM(CASE WHEN paid = 0 THEN amount ELSE 0 END), 0) as unpaid_tips
     FROM tips WHERE employee_id = ? AND date BETWEEN ? AND ?
@@ -133,14 +136,14 @@ router.get('/weekly', requireAuth, (req, res) => {
 });
 
 // GET /api/reports/monthly?year=YYYY&month=MM
-router.get('/monthly', requireAuth, (req, res) => {
+router.get('/monthly', requireAuth, async (req, res) => {
   const { year, month } = req.query;
   if (!year || !month) return res.status(400).json({ error: 'year and month required' });
   const start = `${year}-${String(month).padStart(2, '0')}-01`;
   const end = `${year}-${String(month).padStart(2, '0')}-31`;
 
   if (req.session.role === 'owner') {
-    const totals = db.prepare(`
+    const totals = await db.prepare(`
       SELECT SUM(total_revenue) as revenue, SUM(owner_gross) as owner_gross,
              SUM(owner_take_home) as take_home, COUNT(*) as days
       FROM daily_summaries WHERE date BETWEEN ? AND ?
@@ -148,7 +151,7 @@ router.get('/monthly', requireAuth, (req, res) => {
     return res.json(totals);
   }
 
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT SUM(jc.crew_pay) as crew_pay,
            SUM(jc.commission_pay) as commission_pay,
            SUM(jc.crew_pay + jc.commission_pay) as total_pay,
@@ -161,7 +164,7 @@ router.get('/monthly', requireAuth, (req, res) => {
 });
 
 // GET /api/reports/leaderboard?type=total|sales&start=&end=
-router.get('/leaderboard', requireAuth, (req, res) => {
+router.get('/leaderboard', requireAuth, async (req, res) => {
   const { type = 'total', start, end } = req.query;
   const orderCol = type === 'sales' ? 'commission_pay' : 'total_pay';
   let dateClause = '';
@@ -171,7 +174,7 @@ router.get('/leaderboard', requireAuth, (req, res) => {
     params.push(start, end);
   }
 
-  const rows = db.prepare(`
+  const rows = await db.prepare(`
     SELECT e.id, e.name,
            SUM(jc.crew_pay) as crew_pay,
            SUM(jc.commission_pay) as commission_pay,
@@ -190,16 +193,18 @@ router.get('/leaderboard', requireAuth, (req, res) => {
 });
 
 // GET /api/reports/roster-payroll — season totals per employee for roster cards
-router.get('/roster-payroll', ownerOnly, (req, res) => {
+router.get('/roster-payroll', ownerOnly, async (req, res) => {
   const weeks = getDisplaySeasonWeeks();
 
-  const emps = db.prepare(`
+  const emps = await db.prepare(`
     SELECT id, name, username, role, active, notes FROM employees ORDER BY name
   `).all();
 
-  const rows = emps.map(emp => {
+  const rows = [];
+  for (const emp of emps) {
     if (emp.role === 'owner') {
-      return { ...emp, crew_pay: 0, commission_pay: 0, tips_pay: 0, total_pay: 0, job_count: 0, unpaid_amount: 0 };
+      rows.push({ ...emp, crew_pay: 0, commission_pay: 0, tips_pay: 0, total_pay: 0, job_count: 0, unpaid_amount: 0 });
+      continue;
     }
     let crewPay = 0;
     let commissionPay = 0;
@@ -207,14 +212,14 @@ router.get('/roster-payroll', ownerOnly, (req, res) => {
     let jobCount = 0;
     let unpaid = 0;
     for (const w of weeks) {
-      const wp = getEmployeeWeekPay(db, emp.id, w.start, w.end);
+      const wp = await getEmployeeWeekPay(db, emp.id, w.start, w.end);
       crewPay += wp.crew_pay || 0;
       commissionPay += wp.commission_pay || 0;
       tipsPay += wp.tips_pay || 0;
       jobCount += wp.job_count || 0;
       unpaid += wp.unpaid_amount || 0;
     }
-    return {
+    rows.push({
       ...emp,
       crew_pay: crewPay,
       commission_pay: commissionPay,
@@ -222,31 +227,32 @@ router.get('/roster-payroll', ownerOnly, (req, res) => {
       total_pay: crewPay + commissionPay + tipsPay,
       job_count: jobCount,
       unpaid_amount: unpaid,
-    };
-  });
+    });
+  }
   res.json(rows);
 });
 
 // GET /api/reports/payroll?start=&end= — owner weekly payout checklist
-router.get('/payroll', ownerOnly, (req, res) => {
+router.get('/payroll', ownerOnly, async (req, res) => {
   const { start, end } = req.query;
   if (!start || !end) return res.status(400).json({ error: 'start and end dates required' });
-  res.json(getPayrollForWeek(db, start, end));
+  res.json(await getPayrollForWeek(db, start, end));
 });
 
 // GET /api/reports/payroll/season — all season weeks with payout data
-router.get('/payroll/season', ownerOnly, (req, res) => {
+router.get('/payroll/season', ownerOnly, async (req, res) => {
   const weeks = getDisplaySeasonWeeks();
   const currentWeek = getCurrentWeekNumber();
-  const payload = weeks.map(w => {
-    const data = getPayrollForWeek(db, w.start, w.end);
-    return {
+  const payload = [];
+  for (const w of weeks) {
+    const data = await getPayrollForWeek(db, w.start, w.end);
+    payload.push({
       ...w,
       rows: data.rows,
       weekRevenue: data.weekRevenue,
       totalTips: data.totalTips,
-    };
-  });
+    });
+  }
   res.json({
     weeks: payload.reverse(),
     seasonEnd: SEASON_END,
@@ -258,16 +264,19 @@ router.get('/payroll/season', ownerOnly, (req, res) => {
 });
 
 // GET /api/reports/employee/:id/payroll — per-week earnings for one employee (owner)
-router.get('/employee/:id/payroll', ownerOnly, (req, res) => {
-  const emp = db.prepare(
+router.get('/employee/:id/payroll', ownerOnly, async (req, res) => {
+  const emp = await db.prepare(
     'SELECT id, name, username, role, active, notes FROM employees WHERE id = ?'
   ).get(req.params.id);
   if (!emp) return res.status(404).json({ error: 'Employee not found' });
 
-  const weeks = getDisplaySeasonWeeks().map(w => ({
-    ...w,
-    ...getEmployeeWeekPay(db, emp.id, w.start, w.end),
-  }));
+  const weeks = [];
+  for (const w of getDisplaySeasonWeeks()) {
+    weeks.push({
+      ...w,
+      ...(await getEmployeeWeekPay(db, emp.id, w.start, w.end)),
+    });
+  }
 
   const totals = weeks.reduce((a, w) => ({
     crew_pay: a.crew_pay + w.crew_pay,
@@ -289,8 +298,8 @@ router.get('/employee/:id/payroll', ownerOnly, (req, res) => {
 });
 
 // PUT /api/reports/employee/:id/override — admin adjust weekly pay totals
-router.put('/employee/:id/override', ownerOnly, (req, res) => {
-  const emp = db.prepare('SELECT id, role FROM employees WHERE id = ?').get(req.params.id);
+router.put('/employee/:id/override', ownerOnly, async (req, res) => {
+  const emp = await db.prepare('SELECT id, role FROM employees WHERE id = ?').get(req.params.id);
   if (!emp) return res.status(404).json({ error: 'Employee not found' });
   if (emp.role === 'owner') return res.status(400).json({ error: 'Cannot override owner pay' });
 
@@ -306,7 +315,7 @@ router.put('/employee/:id/override', ownerOnly, (req, res) => {
     return res.status(400).json({ error: 'Pay amounts must be non-negative numbers' });
   }
 
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO week_pay_overrides (employee_id, week_start, week_end, crew_pay, commission_pay, tips_pay, note, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT(employee_id, week_start, week_end) DO UPDATE SET
@@ -317,16 +326,16 @@ router.put('/employee/:id/override', ownerOnly, (req, res) => {
       updated_at = datetime('now')
   `).run(emp.id, weekStart, weekEnd, crew, comm, tips, note ?? '');
 
-  res.json({ ok: true, week: getEmployeeWeekPay(db, emp.id, weekStart, weekEnd) });
+  res.json({ ok: true, week: await getEmployeeWeekPay(db, emp.id, weekStart, weekEnd) });
 });
 
 // DELETE /api/reports/employee/:id/override?weekStart=&weekEnd=
-router.delete('/employee/:id/override', ownerOnly, (req, res) => {
+router.delete('/employee/:id/override', ownerOnly, async (req, res) => {
   const { weekStart, weekEnd } = req.query;
   if (!weekStart || !weekEnd) {
     return res.status(400).json({ error: 'weekStart and weekEnd required' });
   }
-  db.prepare(`
+  await db.prepare(`
     DELETE FROM week_pay_overrides
     WHERE employee_id = ? AND week_start = ? AND week_end = ?
   `).run(req.params.id, weekStart, weekEnd);
@@ -334,7 +343,7 @@ router.delete('/employee/:id/override', ownerOnly, (req, res) => {
 });
 
 // GET /api/reports/week-messages?start=&end= OR ?week=10 — copy-paste chat messages
-router.get('/week-messages', ownerOnly, (req, res) => {
+router.get('/week-messages', ownerOnly, async (req, res) => {
   const { start, end, week: weekParam } = req.query;
   const displayWeeks = getDisplaySeasonWeeks();
   let week;
@@ -349,7 +358,7 @@ router.get('/week-messages', ownerOnly, (req, res) => {
 
   if (!week) return res.status(400).json({ error: 'Week not found or not in active season range' });
 
-  const { rows } = getPayrollForWeek(db, week.start, week.end);
+  const { rows } = await getPayrollForWeek(db, week.start, week.end);
   res.json(buildWeekMessages(week, rows));
 });
 
@@ -367,7 +376,7 @@ router.get('/season', requireAuth, (req, res) => {
 });
 
 // PATCH /api/reports/payroll — mark employee paid/unpaid for a week
-router.patch('/payroll', ownerOnly, (req, res) => {
+router.patch('/payroll', ownerOnly, async (req, res) => {
   const { start, end, employeeId, paid } = req.body;
   if (!start || !end || !employeeId) {
     return res.status(400).json({ error: 'start, end, employeeId required' });
@@ -376,7 +385,7 @@ router.patch('/payroll', ownerOnly, (req, res) => {
   const isPaid = paid ? 1 : 0;
   const paidAt = isPaid ? new Date().toISOString() : null;
 
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO weekly_payouts (week_start, week_end, employee_id, paid, paid_at)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(week_start, week_end, employee_id) DO UPDATE SET
@@ -384,13 +393,13 @@ router.patch('/payroll', ownerOnly, (req, res) => {
   `).run(start, end, employeeId, isPaid, paidAt);
 
   if (isPaid) {
-    db.prepare(`
+    await db.prepare(`
       UPDATE job_crew SET paid = 1
       WHERE employee_id = ? AND job_id IN (
         SELECT id FROM jobs WHERE date BETWEEN ? AND ?
       )
     `).run(employeeId, start, end);
-    db.prepare(`
+    await db.prepare(`
       UPDATE tips SET paid = 1
       WHERE employee_id = ? AND date BETWEEN ? AND ?
     `).run(employeeId, start, end);
@@ -400,11 +409,11 @@ router.patch('/payroll', ownerOnly, (req, res) => {
 });
 
 // POST /api/reports/payroll/mark-all — mark everyone paid for the week
-router.post('/payroll/mark-all', ownerOnly, (req, res) => {
+router.post('/payroll/mark-all', ownerOnly, async (req, res) => {
   const { start, end } = req.body;
   if (!start || !end) return res.status(400).json({ error: 'start and end required' });
 
-  const emps = db.prepare(`
+  const emps = await db.prepare(`
     SELECT DISTINCT e.id
     FROM employees e
     WHERE e.active = 1 AND e.role != 'owner' AND (
@@ -425,24 +434,24 @@ router.post('/payroll/mark-all', ownerOnly, (req, res) => {
     ON CONFLICT(week_start, week_end, employee_id) DO UPDATE SET paid = 1, paid_at = excluded.paid_at
   `);
   const now = new Date().toISOString();
-  for (const e of emps) upsert.run(start, end, e.id, now);
+  for (const e of emps) await upsert.run(start, end, e.id, now);
 
-  db.prepare(`
+  await db.prepare(`
     UPDATE job_crew SET paid = 1
     WHERE job_id IN (SELECT id FROM jobs WHERE date BETWEEN ? AND ?)
   `).run(start, end);
-  db.prepare(`UPDATE tips SET paid = 1 WHERE date BETWEEN ? AND ?`).run(start, end);
+  await db.prepare(`UPDATE tips SET paid = 1 WHERE date BETWEEN ? AND ?`).run(start, end);
 
   res.json({ ok: true, count: emps.length });
 });
 
 // GET /api/reports/my-earnings — crew member's all-time breakdown
-router.get('/my-earnings', requireAuth, (req, res) => {
+router.get('/my-earnings', requireAuth, async (req, res) => {
   if (req.session.role === 'owner') {
     return res.status(403).json({ error: 'Owner should use the admin dashboard' });
   }
 
-  const allTime = db.prepare(`
+  const allTime = await db.prepare(`
     SELECT SUM(jc.crew_pay) as crew_pay,
            SUM(jc.commission_pay) as commission_pay,
            SUM(jc.crew_pay + jc.commission_pay) as total_pay,
@@ -454,14 +463,14 @@ router.get('/my-earnings', requireAuth, (req, res) => {
     WHERE jc.employee_id = ?
   `).get(req.session.userId);
 
-  const tipsAll = db.prepare(`
+  const tipsAll = await db.prepare(`
     SELECT COALESCE(SUM(amount), 0) as tips_pay,
            COALESCE(SUM(CASE WHEN paid = 0 THEN amount ELSE 0 END), 0) as tips_outstanding,
            COUNT(*) as tip_count
     FROM tips WHERE employee_id = ?
   `).get(req.session.userId);
 
-  const recent = db.prepare(`
+  const recent = await db.prepare(`
     SELECT j.date, j.job_name, jc.crew_pay, jc.commission_pay,
            jc.crew_pay + jc.commission_pay as total_pay, jc.paid
     FROM job_crew jc
@@ -480,7 +489,7 @@ router.get('/my-earnings', requireAuth, (req, res) => {
   const weekStart = mon.toISOString().slice(0, 10);
   const weekEnd = sun.toISOString().slice(0, 10);
 
-  const thisWeek = db.prepare(`
+  const thisWeek = await db.prepare(`
     SELECT SUM(jc.crew_pay) as crew_pay,
            SUM(jc.commission_pay) as commission_pay,
            SUM(jc.crew_pay + jc.commission_pay) as total_pay,
@@ -490,19 +499,19 @@ router.get('/my-earnings', requireAuth, (req, res) => {
     WHERE jc.employee_id = ? AND j.date BETWEEN ? AND ?
   `).get(req.session.userId, weekStart, weekEnd);
 
-  const weekTips = db.prepare(`
+  const weekTips = await db.prepare(`
     SELECT COALESCE(SUM(amount), 0) as tips_pay
     FROM tips WHERE employee_id = ? AND date BETWEEN ? AND ?
   `).get(req.session.userId, weekStart, weekEnd);
 
-  const recentTips = db.prepare(`
+  const recentTips = await db.prepare(`
     SELECT date, amount, note, paid FROM tips
     WHERE employee_id = ?
     ORDER BY date DESC, id DESC LIMIT 15
   `).all(req.session.userId);
 
   const today = now.toISOString().slice(0, 10);
-  const todayEarnings = db.prepare(`
+  const todayEarnings = await db.prepare(`
     SELECT SUM(jc.crew_pay + jc.commission_pay) as total_pay,
            COUNT(jc.id) as job_count
     FROM job_crew jc
@@ -511,10 +520,13 @@ router.get('/my-earnings', requireAuth, (req, res) => {
   `).get(req.session.userId, today);
 
   const seasonWeeksMeta = getDisplaySeasonWeeks();
-  const seasonWeeks = seasonWeeksMeta.map(w => ({
-    ...w,
-    ...getEmployeeWeekPay(db, req.session.userId, w.start, w.end),
-  }));
+  const seasonWeeks = [];
+  for (const w of seasonWeeksMeta) {
+    seasonWeeks.push({
+      ...w,
+      ...(await getEmployeeWeekPay(db, req.session.userId, w.start, w.end)),
+    });
+  }
 
   const grossIncome = (allTime?.total_pay || 0) + (tipsAll?.tips_pay || 0);
   const selfEmploymentTax = grossIncome * SELF_EMPLOYMENT_TAX_RATE;

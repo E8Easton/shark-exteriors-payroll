@@ -1,92 +1,12 @@
-const express = require('express');
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
-const fs = require('fs');
-const path = require('path');
-const { resolveDataDir, resolveSessionSecret } = require('./lib/dataDir');
+const createApp = require('./app');
 
-const app = express();
+const app = createApp();
 const PORT = process.env.PORT || 3000;
-const isProduction = process.env.NODE_ENV === 'production';
-const publicDir = path.join(__dirname, 'public');
-const dataDir = resolveDataDir();
-const SESSIONS_PATH = process.env.SESSIONS_PATH || path.join(dataDir, 'sessions');
-const sessionSecret = resolveSessionSecret(dataDir);
 
-if (!process.env.DB_PATH) {
-  process.env.DB_PATH = path.join(dataDir, 'payroll.db');
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Shark Exteriors Payroll running on http://localhost:${PORT}`);
+  });
 }
 
-fs.mkdirSync(SESSIONS_PATH, { recursive: true });
-console.log(`Data directory: ${dataDir}`);
-
-app.set('trust proxy', 1);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(session({
-  store: new FileStore({
-    path: SESSIONS_PATH,
-    ttl: 7 * 24 * 60 * 60,
-    retries: 0,
-  }),
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  },
-}));
-
-app.get('/health', (req, res) => {
-  res.json({ ok: true, dataDir });
-});
-
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/employees', require('./routes/employees'));
-app.use('/api/jobs', require('./routes/jobs'));
-app.use('/api/reports', require('./routes/reports'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/tips', require('./routes/tips'));
-
-function sendPage(res, filename) {
-  res.sendFile(path.join(publicDir, filename));
-}
-
-app.get('/login.html', (req, res) => {
-  if (req.session.userId) {
-    return res.redirect(req.session.role === 'owner' ? '/index.html' : '/crew.html');
-  }
-  sendPage(res, 'login.html');
-});
-
-app.get('/', (req, res) => {
-  if (!req.session.userId) return res.redirect('/login.html');
-  res.redirect(req.session.role === 'owner' ? '/index.html' : '/crew.html');
-});
-
-app.get('/index.html', (req, res) => {
-  if (!req.session.userId) return res.redirect('/login.html');
-  if (req.session.role !== 'owner') return res.redirect('/crew.html');
-  sendPage(res, 'index.html');
-});
-
-app.get('/crew.html', (req, res) => {
-  if (!req.session.userId) return res.redirect('/login.html');
-  if (req.session.role === 'owner') return res.redirect('/index.html');
-  sendPage(res, 'crew.html');
-});
-
-app.use(express.static(publicDir, { index: false }));
-
-app.use((req, res) => {
-  res.status(404).send('Page not found. Go to <a href="/login.html">/login.html</a>');
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Shark Exteriors Payroll running on port ${PORT}`);
-});
+module.exports = app;

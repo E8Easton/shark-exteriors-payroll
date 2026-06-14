@@ -15,14 +15,14 @@ function requireAuth(req, res, next) {
   next();
 }
 
-router.get('/', requireAuth, (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   if (req.session.role === 'owner') {
-    const rows = db.prepare(
+    const rows = await db.prepare(
       'SELECT id, name, username, role, active, notes FROM employees ORDER BY name'
     ).all();
     return res.json(rows);
   }
-  const emp = db.prepare(
+  const emp = await db.prepare(
     'SELECT id, name, username, role FROM employees WHERE id = ?'
   ).get(req.session.userId);
   res.json([emp]);
@@ -30,7 +30,7 @@ router.get('/', requireAuth, (req, res) => {
 
 const VALID_ROLES = ['owner', 'crew', 'cleaning_tech', 'd2d'];
 
-router.post('/', ownerOnly, (req, res) => {
+router.post('/', ownerOnly, async (req, res) => {
   const { name, username, password, role } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Name required' });
 
@@ -45,7 +45,7 @@ router.post('/', ownerOnly, (req, res) => {
 
   const hash = bcrypt.hashSync(pw, 10);
   try {
-    const result = db.prepare(
+    const result = await db.prepare(
       'INSERT INTO employees (name, username, password_hash, role) VALUES (?, ?, ?, ?)'
     ).run(name.trim(), user, hash, empRole);
     res.json({ id: result.lastInsertRowid, name: name.trim(), username: user, role: empRole });
@@ -55,24 +55,24 @@ router.post('/', ownerOnly, (req, res) => {
   }
 });
 
-router.delete('/:id', ownerOnly, (req, res) => {
-  db.prepare('UPDATE employees SET active = 0 WHERE id = ?').run(req.params.id);
+router.delete('/:id', ownerOnly, async (req, res) => {
+  await db.prepare('UPDATE employees SET active = 0 WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });
 
-router.put('/:id/reset-password', ownerOnly, (req, res) => {
+router.put('/:id/reset-password', ownerOnly, async (req, res) => {
   const { password } = req.body;
   if (!password) return res.status(400).json({ error: 'Password required' });
   const hash = bcrypt.hashSync(password, 10);
-  db.prepare('UPDATE employees SET password_hash = ? WHERE id = ?').run(hash, req.params.id);
+  await db.prepare('UPDATE employees SET password_hash = ? WHERE id = ?').run(hash, req.params.id);
   res.json({ ok: true });
 });
 
-router.patch('/:id', ownerOnly, (req, res) => {
+router.patch('/:id', ownerOnly, async (req, res) => {
   const { notes } = req.body;
-  const emp = db.prepare('SELECT id FROM employees WHERE id = ?').get(req.params.id);
+  const emp = await db.prepare('SELECT id FROM employees WHERE id = ?').get(req.params.id);
   if (!emp) return res.status(404).json({ error: 'Employee not found' });
-  db.prepare('UPDATE employees SET notes = ? WHERE id = ?').run(notes ?? '', req.params.id);
+  await db.prepare('UPDATE employees SET notes = ? WHERE id = ?').run(notes ?? '', req.params.id);
   res.json({ ok: true });
 });
 

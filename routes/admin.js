@@ -9,17 +9,17 @@ function ownerOnly(req, res, next) {
 }
 
 // POST /api/admin/reset-payroll — wipe all jobs, summaries, payouts (keeps employees)
-router.post('/reset-payroll', ownerOnly, (req, res) => {
+router.post('/reset-payroll', ownerOnly, async (req, res) => {
   const { confirm } = req.body;
   if (confirm !== 'RESET') {
     return res.status(400).json({ error: 'Type RESET to confirm' });
   }
 
-  db.exec('DELETE FROM job_crew');
-  db.exec('DELETE FROM jobs');
-  db.exec('DELETE FROM daily_summaries');
-  db.exec('DELETE FROM weekly_payouts');
-  db.exec('DELETE FROM tips');
+  await db.exec('DELETE FROM job_crew');
+  await db.exec('DELETE FROM jobs');
+  await db.exec('DELETE FROM daily_summaries');
+  await db.exec('DELETE FROM weekly_payouts');
+  await db.exec('DELETE FROM tips');
 
   res.json({ ok: true, message: 'All payroll data cleared. Employees kept.' });
 });

@@ -17,18 +17,21 @@ function calcOwnerBreakdown(ownerGross) {
 }
 
 // GET /api/jobs?date=YYYY-MM-DD
-router.get('/', ownerOnly, (req, res) => {
+router.get('/', ownerOnly, async (req, res) => {
   const { date } = req.query;
   const jobs = date
-    ? db.prepare('SELECT * FROM jobs WHERE date = ? ORDER BY id').all(date)
-    : db.prepare('SELECT * FROM jobs ORDER BY date DESC, id').all();
-  const enriched = jobs.map(job => ({
-    ...job,
-    crew: db.prepare(`
-      SELECT jc.*, e.name FROM job_crew jc
-      JOIN employees e ON e.id = jc.employee_id WHERE jc.job_id = ?
-    `).all(job.id),
-  }));
+    ? await db.prepare('SELECT * FROM jobs WHERE date = ? ORDER BY id').all(date)
+    : await db.prepare('SELECT * FROM jobs ORDER BY date DESC, id').all();
+  const enriched = [];
+  for (const job of jobs) {
+    enriched.push({
+      ...job,
+      crew: await db.prepare(`
+        SELECT jc.*, e.name FROM job_crew jc
+        JOIN employees e ON e.id = jc.employee_id WHERE jc.job_id = ?
+      `).all(job.id),
+    });
+  }
   res.json(enriched);
 });
 
@@ -36,7 +39,7 @@ router.get('/', ownerOnly, (req, res) => {
 // crew = [{ employeeId, crewPayPct, commissionPct }]
 // crewPayPct  = % of job total paid to this person as crew pay  (0 if sales-only)
 // commissionPct = % of job total paid as sales commission        (0 if crew-only)
-router.post('/', ownerOnly, (req, res) => {
+router.post('/', ownerOnly, async (req, res) => {
   const { date, jobName, totalAmount, crew, crewPoolPct } = req.body;
   if (!date || !jobName || totalAmount == null) {
     return res.status(400).json({ error: 'date, jobName, totalAmount required' });
@@ -44,7 +47,7 @@ router.post('/', ownerOnly, (req, res) => {
 
   const poolPct = crewPoolPct != null ? Number(crewPoolPct) : 30;
   const members = Array.isArray(crew) ? crew : [];
-  const jobResult = db.prepare(
+  const jobResult = await db.prepare(
     'INSERT INTO jobs (date, job_name, total_amount, crew_pool_pct) VALUES (?, ?, ?, ?)'
   ).run(date, jobName, totalAmount, poolPct);
   const jobId = jobResult.lastInsertRowid;
@@ -58,20 +61,20 @@ router.post('/', ownerOnly, (req, res) => {
     const commissionPay = totalAmount * ((m.commissionPct || 0) / 100);
     totalCrewPay    += crewPay;
     totalCommission += commissionPay;
-    insertCrew.run(jobId, m.employeeId, crewPay, m.commissionPct || 0, commissionPay);
+    await insertCrew.run(jobId, m.employeeId, crewPay, m.commissionPct || 0, commissionPay);
   }
 
-  upsertDailySummary(date);
+  await upsertDailySummary(date);
   const ownerGross = totalAmount - totalCrewPay - totalCommission;
   res.json({ id: jobId, ownerGross, ...calcOwnerBreakdown(ownerGross) });
 });
 
-router.delete('/:id', ownerOnly, (req, res) => {
+router.delete('/:id', ownerOnly, async (req, res) => {
   const jobId = req.params.id;
-  const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(jobId);
+  const job = await db.prepare('SELECT * FROM jobs WHERE id = ?').get(jobId);
   if (!job) return res.status(404).json({ error: 'Job not found' });
 
-  const crew = db.prepare(`
+  const crew = await db.prepare(`
     SELECT jc.*, e.name FROM job_crew jc
     JOIN employees e ON e.id = jc.employee_id WHERE jc.job_id = ?
   `).all(jobId);
@@ -89,13 +92,13 @@ router.delete('/:id', ownerOnly, (req, res) => {
     })),
   };
 
-  db.prepare('DELETE FROM jobs WHERE id = ?').run(jobId);
-  upsertDailySummary(job.date);
+  await db.prepare('DELETE FROM jobs WHERE id = ?').run(jobId);
+  await upsertDailySummary(job.date);
   res.json({ ok: true, snapshot, jobName: job.job_name });
 });
 
 // POST /api/jobs/restore — undo a deleted job
-router.post('/restore', ownerOnly, (req, res) => {
+router.post('/restore', ownerOnly, async (req, res) => {
   const { snapshot } = req.body;
   if (!snapshot?.date || !snapshot?.jobName || snapshot.totalAmount == null) {
     return res.status(400).json({ error: 'Invalid snapshot' });
@@ -103,7 +106,7 @@ router.post('/restore', ownerOnly, (req, res) => {
 
   const poolPct = snapshot.crewPoolPct != null ? Number(snapshot.crewPoolPct) : 30;
   const members = Array.isArray(snapshot.crew) ? snapshot.crew : [];
-  const jobResult = db.prepare(
+  const jobResult = await db.prepare(
     'INSERT INTO jobs (date, job_name, total_amount, crew_pool_pct) VALUES (?, ?, ?, ?)'
   ).run(snapshot.date, snapshot.jobName, snapshot.totalAmount, poolPct);
   const jobId = jobResult.lastInsertRowid;
@@ -114,30 +117,30 @@ router.post('/restore', ownerOnly, (req, res) => {
   for (const m of members) {
     const crewPay = snapshot.totalAmount * ((m.crewPayPct || 0) / 100);
     const commissionPay = snapshot.totalAmount * ((m.commissionPct || 0) / 100);
-    insertCrew.run(jobId, m.employeeId, crewPay, m.commissionPct || 0, commissionPay, m.paid ? 1 : 0);
+    await insertCrew.run(jobId, m.employeeId, crewPay, m.commissionPct || 0, commissionPay, m.paid ? 1 : 0);
   }
 
-  upsertDailySummary(snapshot.date);
+  await upsertDailySummary(snapshot.date);
   res.json({ ok: true, id: jobId });
 });
 
-router.patch('/crew/:jobCrewId/paid', ownerOnly, (req, res) => {
-  db.prepare('UPDATE job_crew SET paid = ? WHERE id = ?').run(req.body.paid ? 1 : 0, req.params.jobCrewId);
+router.patch('/crew/:jobCrewId/paid', ownerOnly, async (req, res) => {
+  await db.prepare('UPDATE job_crew SET paid = ? WHERE id = ?').run(req.body.paid ? 1 : 0, req.params.jobCrewId);
   res.json({ ok: true });
 });
 
-function upsertDailySummary(date) {
-  const jobs = db.prepare('SELECT * FROM jobs WHERE date = ?').all(date);
+async function upsertDailySummary(date) {
+  const jobs = await db.prepare('SELECT * FROM jobs WHERE date = ?').all(date);
   let totalRevenue = 0, ownerGross = 0;
   for (const job of jobs) {
     totalRevenue += job.total_amount;
-    const crew = db.prepare('SELECT * FROM job_crew WHERE job_id = ?').all(job.id);
+    const crew = await db.prepare('SELECT * FROM job_crew WHERE job_id = ?').all(job.id);
     ownerGross += job.total_amount
       - crew.reduce((s, c) => s + c.crew_pay, 0)
       - crew.reduce((s, c) => s + c.commission_pay, 0);
   }
   const { taxReserve, emergencyReserve, takeHome } = calcOwnerBreakdown(ownerGross);
-  db.prepare(`
+  await db.prepare(`
     INSERT INTO daily_summaries (date, total_revenue, owner_gross, owner_tax_reserve, owner_emergency_reserve, owner_take_home)
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(date) DO UPDATE SET

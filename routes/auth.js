@@ -8,13 +8,13 @@ function requireAuth(req, res, next) {
   next();
 }
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
 
-  const emp = db.prepare(
+  const emp = await db.prepare(
     'SELECT * FROM employees WHERE username = ? AND active = 1'
   ).get(username.toLowerCase().trim());
 
@@ -30,7 +30,12 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-  req.session.destroy(() => res.json({ ok: true }));
+  if (typeof req.session.destroy === 'function') {
+    req.session.destroy(() => res.json({ ok: true }));
+  } else {
+    req.session = null;
+    res.json({ ok: true });
+  }
 });
 
 router.get('/me', (req, res) => {
@@ -38,14 +43,14 @@ router.get('/me', (req, res) => {
   res.json({ id: req.session.userId, role: req.session.role, name: req.session.name });
 });
 
-router.post('/change-password', requireAuth, (req, res) => {
+router.post('/change-password', requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  const emp = db.prepare('SELECT * FROM employees WHERE id = ?').get(req.session.userId);
+  const emp = await db.prepare('SELECT * FROM employees WHERE id = ?').get(req.session.userId);
   if (!bcrypt.compareSync(currentPassword, emp.password_hash)) {
     return res.status(400).json({ error: 'Current password incorrect' });
   }
   const hash = bcrypt.hashSync(newPassword, 10);
-  db.prepare('UPDATE employees SET password_hash = ? WHERE id = ?').run(hash, emp.id);
+  await db.prepare('UPDATE employees SET password_hash = ? WHERE id = ?').run(hash, emp.id);
   res.json({ ok: true });
 });
 

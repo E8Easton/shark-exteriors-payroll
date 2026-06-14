@@ -1,54 +1,62 @@
-# Deploy on Fly.io (GitHub link)
+# Deploy on Netlify (netlify.com)
 
-## Fix for "Page not found"
+Connect your GitHub repo and deploy. All payroll data is stored in a **Turso** cloud database (SQLite) so it persists for the full season.
 
-That usually means the app **never started**. Do these two things in the [Fly.io dashboard](https://fly.io/dashboard) **before** you hit Deploy:
+## Step 1 — Create a Turso database (free, one time)
 
-### 1. Create the storage volume (keeps all 11 weeks of payroll data)
+Turso stores your payroll data in the cloud. Netlify cannot save SQLite files on its own servers.
 
-1. Open your app on Fly.io
-2. Go to **Storage** → **Volumes**
-3. **Create volume**
-   - Name: `payroll_data` (must match `fly.toml`)
-   - Region: `iad` (same as `primary_region` in `fly.toml`)
-   - Size: 1 GB
-4. Attach the volume to your machine (Fly usually does this on next deploy)
+1. Go to [turso.tech](https://turso.tech) and sign up (free).
+2. Install the Turso CLI or use the web dashboard to create a database named `shark-payroll`.
+3. Copy these two values:
+   - **Database URL** → looks like `libsql://shark-payroll-yourname.turso.io`
+   - **Auth token** → from `turso db tokens create shark-payroll`
 
-### 2. Match the app name
+Or use the **[Turso integration on Netlify](https://www.netlify.com/integrations/turso/)** — it can add the env vars for you automatically.
 
-In `fly.toml`, the line `app = 'shark-exteriors-payroll'` must match **your Fly app name** exactly. If Fly gave you a different name when you linked GitHub, change that line to match, commit, and push.
+## Step 2 — Connect GitHub on Netlify
 
-### 3. Deploy from GitHub
+1. Go to [app.netlify.com](https://app.netlify.com)
+2. **Add new site** → **Import an existing project**
+3. Choose **GitHub** → select `E8Easton/shark-exteriors-payroll`
+4. Netlify reads `netlify.toml` automatically — do **not** change the publish folder unless Netlify asks (should be `public`)
 
-1. Fly.io dashboard → your app → **Deploy** (or enable auto-deploy on push to `master`)
-2. Wait until the deploy finishes (green / running)
-3. Open your app URL — you should see the **login page**, not "page not found"
-4. Test: visit `https://YOUR-APP.fly.dev/health` — should show `{"ok":true,...}`
+## Step 3 — Add environment variables
 
-## Logins
+In Netlify: **Site configuration** → **Environment variables** → add:
 
-- Owner: **easton** / **zastrow**
-- Crew: first name / last name (lowercase), e.g. **malcolm** / **gall**
+| Name | Value |
+|------|--------|
+| `TURSO_DATABASE_URL` | your `libsql://...` URL |
+| `TURSO_AUTH_TOKEN` | your Turso token |
+| `NODE_ENV` | `production` |
 
-Change passwords from **Manage Crew** after going live.
+## Step 4 — Deploy
 
-## Redeploy after code updates
+Click **Deploy site**. When it finishes, open your Netlify URL (e.g. `https://something.netlify.app`).
 
-Push to GitHub → Fly redeploys (if auto-deploy is on) or click **Deploy** in the dashboard. Data on the `payroll_data` volume is kept.
+- `/health` should show `{"ok":true,"platform":"netlify","driver":"libsql"}`
+- `/` should redirect to the **login page**
 
-## Optional: set your own session secret
+**Owner login:** `easton` / `zastrow`
 
-Fly auto-creates one on first boot and saves it on the volume. To set your own:
+## Step 5 — Redeploy after GitHub updates
 
-```bash
-fly secrets set SESSION_SECRET="your-long-random-string"
-```
+Push to GitHub → Netlify auto-redeploys (if enabled) or click **Trigger deploy** in the Netlify dashboard. Your Turso data is **not** wiped.
 
-## Local dev
+## Local development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Uses `./data/` locally (not committed to git).
+Uses `./data/payroll.db` locally (no Turso needed). To test with Turso locally, set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in a `.env` file.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| **Page not found** | Check deploy logs. Usually missing `TURSO_DATABASE_URL` or failed build. |
+| **500 on login** | Turso env vars wrong or database not created. |
+| **Build failed** | Ensure Node 22 in Netlify: Site settings → Build → `NODE_VERSION` = `22` |

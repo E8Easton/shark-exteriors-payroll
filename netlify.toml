@@ -1,0 +1,22 @@
+# Netlify — connect GitHub repo at netlify.com and deploy
+[build]
+  command = "npm install"
+  publish = "public"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["express", "bcryptjs", "cookie-session", "@libsql/client"]
+  included_files = ["public/**", "app.js", "db.js", "routes/**", "lib/**"]
+
+[functions.server]
+  timeout = 26
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
+  force = true
