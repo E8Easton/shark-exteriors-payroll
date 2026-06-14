@@ -40,84 +40,122 @@
   <div class="page active" id="page-daily">
     <div class="page-header">
       <h2>Daily Entry</h2>
-      <p>Add jobs for the day — revenue stats live under Revenue.</p>
+      <p>Step through each job — name, total, crew, sales. Stack saves above.</p>
     </div>
 
     <div class="date-bar">
       <label>Date</label>
       <input type="date" id="dailyDate" />
       <button class="btn-ghost" id="todayBtn">Today</button>
+      <div class="daily-mode-toggle" style="margin-left:auto">
+        <button type="button" class="mode-btn active" data-daily-mode="wizard" title="Step-by-step cards">🃏 Steps</button>
+        <button type="button" class="mode-btn" data-daily-mode="classic" title="Show entire form">📋 All at once</button>
+      </div>
     </div>
 
-    <div class="daily-layout">
-    <!-- Add Job form -->
-    <div class="card">
-      <div class="card-title">➕ Add Job</div>
+    <div class="daily-flow" id="dailyFlow">
+      <div id="savedJobsStack"></div>
 
-      <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:8px">
-        <div class="field" style="margin:0;min-width:200px">
-          <label>House / Job Name</label>
-          <input type="text" id="jobName" placeholder="123 Main St" style="width:220px" />
+      <div class="card active-job-card" id="activeJobCard">
+        <div class="wizard-top">
+          <div class="job-slot-label"><span class="num" id="activeJobNum">1</span> <span id="activeJobLabel">Job 1 of the day</span></div>
+          <div class="wizard-top-actions">
+            <button type="button" class="btn-ghost" id="testJobWalkBtn" title="Fill sample data and walk through all 4 steps">🧪 Test Steps</button>
+            <button type="button" class="btn-ghost" id="resetJobFormBtn" title="Clear this job and start over">↺ Reset</button>
+          </div>
         </div>
-        <div class="field" style="margin:0;min-width:180px">
-          <label>Job Total ($)</label>
-          <input type="number" id="jobTotal" min="0" step="0.01" placeholder="0.00" style="width:180px" />
+
+        <div class="wizard-progress" id="wizardProgress">
+          <div class="wp-step active" data-wp="1"><span class="wp-num">1</span><span class="wp-lbl">Name</span></div>
+          <div class="wp-connector"></div>
+          <div class="wp-step" data-wp="2"><span class="wp-num">2</span><span class="wp-lbl">Total</span></div>
+          <div class="wp-connector"></div>
+          <div class="wp-step" data-wp="3"><span class="wp-num">3</span><span class="wp-lbl">Crew</span></div>
+          <div class="wp-connector"></div>
+          <div class="wp-step" data-wp="4"><span class="wp-num">4</span><span class="wp-lbl">Sales</span></div>
         </div>
-        <div style="font-size:12px;color:var(--muted);padding-bottom:10px">
-          Crew pool: <strong id="poolLabel" style="color:var(--blue)">30%</strong> →
-          assigned <strong id="workerTotalPct" style="color:var(--blue)">0%</strong>
-          = <strong id="workerTotalDollar" style="color:var(--text)">$0.00</strong>
-          <span class="pool-warn" id="poolWarn"> — over pool!</span>
+
+        <div class="wizard-viewport">
+          <div class="wizard-pane active" data-step="1">
+            <div class="wizard-pane-title">Step 1 — Job name</div>
+            <p class="wizard-pane-hint">House address or job label</p>
+            <input type="text" id="jobName" class="wizard-big-input" placeholder="123 Main St" autofocus />
+          </div>
+
+          <div class="wizard-pane" data-step="2">
+            <div class="wizard-pane-title">Step 2 — Job total</div>
+            <p class="wizard-pane-hint">Full price for the job</p>
+            <div class="wizard-money-wrap">
+              <span class="wizard-money-sign">$</span>
+              <input type="number" id="jobTotal" class="wizard-big-input wizard-money" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </div>
+
+          <div class="wizard-pane" data-step="3">
+            <div class="wizard-pane-title">Step 3 — Crew on the job</div>
+            <p class="wizard-pane-hint">Pick pool %, then check who's working</p>
+            <div class="pool-bar">
+              <span class="lbl">Crew pool</span>
+              <button type="button" class="pool-btn active" data-pool="30">30%</button>
+              <button type="button" class="pool-btn" data-pool="25">25%</button>
+              <button type="button" class="pool-btn" data-pool="custom">Custom</button>
+            </div>
+            <div class="wizard-pool-summary">
+              Pool <strong id="poolLabel" style="color:var(--blue)">30%</strong> →
+              assigned <strong id="workerTotalPct" style="color:var(--blue)">0%</strong> =
+              <strong id="workerTotalDollar" style="color:var(--text)">$0.00</strong>
+              <span class="pool-warn" id="poolWarn"> — over pool!</span>
+            </div>
+            <div id="crewWorkerList" class="wizard-person-list"></div>
+          </div>
+
+          <div class="wizard-pane" data-step="4">
+            <div class="wizard-pane-title">Step 4 — Sales commission</div>
+            <p class="wizard-pane-hint">Who sold it? Check a seller or tap Next if crew-only.</p>
+            <div class="preset-row">
+              <button type="button" class="preset-btn" onclick="applySalesPreset('single15')">1 seller — 15%</button>
+              <button type="button" class="preset-btn" onclick="applySalesPreset('double10')">2 sellers — 10% each</button>
+              <button type="button" class="preset-btn" onclick="applySalesPreset('clear')">Clear sales</button>
+            </div>
+            <div id="crewSalesList" class="wizard-person-list"></div>
+            <div class="wizard-review" id="wizardReview"></div>
+            <button class="btn orange wizard-save-btn" id="addJobBtn" type="button">Save Job &amp; Add Next</button>
+          </div>
         </div>
-      </div>
 
-      <div class="pool-bar">
-        <span class="lbl">Crew commission pool</span>
-        <button type="button" class="pool-btn active" data-pool="30">30% (default)</button>
-        <button type="button" class="pool-btn" data-pool="25">25%</button>
-        <button type="button" class="pool-btn" data-pool="custom">Custom</button>
-        <span style="font-size:12px;color:var(--muted)">Split evenly among checked workers — edit any % manually</span>
-      </div>
+        <div class="wizard-nav" id="wizardNav">
+          <button type="button" class="btn-ghost" id="wizardBack" disabled>← Back</button>
+          <button type="button" class="btn" id="wizardNext">Next →</button>
+        </div>
+        <div class="classic-save-row" id="classicSaveRow">
+          <button class="btn orange wizard-save-btn" id="addJobBtnClassic" type="button">Save Job &amp; Add Next</button>
+        </div>
 
-      <!-- Workers -->
-      <div class="sec-div"><span class="sec-lbl blue">🔧 Crew Workers — each gets their % of job total</span><hr /></div>
-      <div id="crewWorkerList"></div>
+        <div class="job-added-flash" id="jobFlash">✓ Job saved! Next slot ready.</div>
 
-      <!-- Sales -->
-      <div class="sec-div"><span class="sec-lbl orange">💼 Sales Commission — sold the job</span><hr /></div>
-      <div class="preset-row">
-        <button type="button" class="preset-btn" onclick="applySalesPreset('single15')">1 seller — 15%</button>
-        <button type="button" class="preset-btn" onclick="applySalesPreset('double10')">2 sellers — 10% each</button>
-        <button type="button" class="preset-btn" onclick="applySalesPreset('clear')">Clear sales</button>
-      </div>
-      <div id="crewSalesList"></div>
-
-      <div style="display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap">
-        <button class="btn orange" id="addJobBtn">Add Job</button>
-        <span style="font-size:12px;color:var(--muted)">Selections stay ready for your next job ↓</span>
-      </div>
-
-      <div class="job-added-flash" id="jobFlash">✓ Job added! Enter the next one or scroll down to see today's jobs.</div>
-
-      <!-- Quick add employee -->
-      <div style="margin-top:18px;padding-top:16px;border-top:1.5px solid var(--border)">
-        <button class="btn-link" id="toggleQuickAdd">+ Add New Employee to Roster</button>
-        <div class="quick-add-panel" id="quickAddPanel">
-          <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Quick Add Employee</div>
-          <div class="qa-grid">
-            <div class="qa-field"><label>Full Name</label><input type="text" id="qaName" placeholder="Jake Miller" /></div>
-            <div class="qa-field"><label>Username</label><input type="text" id="qaUser" placeholder="Auto: first name" /></div>
-            <div class="qa-field"><label>Password (optional)</label><input type="text" id="qaPw" placeholder="Auto: last name" /></div>
-            <button class="qa-btn" id="qaSubmit">Add</button>
+        <div style="margin-top:18px;padding-top:16px;border-top:1.5px solid var(--border)">
+          <button class="btn-link" id="toggleQuickAdd">+ Add New Employee to Roster</button>
+          <div class="quick-add-panel" id="quickAddPanel">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Quick Add Employee</div>
+            <div class="qa-grid">
+              <div class="qa-field"><label>Full Name</label><input type="text" id="qaName" placeholder="Jake Miller" /></div>
+              <div class="qa-field"><label>Username</label><input type="text" id="qaUser" placeholder="Auto: first name" /></div>
+              <div class="qa-field"><label>Password (optional)</label><input type="text" id="qaPw" placeholder="Auto: last name" /></div>
+              <button class="qa-btn" id="qaSubmit">Add</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="jobs-section-title"><span>Today's Jobs</span><span id="jobCountLabel" style="font-weight:500;color:var(--muted)"></span></div>
-      <div id="jobsList"><div class="empty">No jobs on this date yet.</div></div>
-    </div>
+      <div class="card daily-revenue-panel" id="dailyRevenuePanel">
+        <div class="panel-title">Revenue for this day</div>
+        <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+          <div class="stat-card c-revenue"><div class="lbl">Daily Revenue</div><div class="val c-revenue" id="dayRev">$0.00</div></div>
+          <div class="stat-card c-week"><div class="lbl">Week Revenue</div><div class="val blue" id="weekRevDay">$0.00</div><div class="sub" id="weekRevRange"></div></div>
+          <div class="stat-card c-gross"><div class="lbl">Owner Gross (today)</div><div class="val c-gross" id="dayGross">$0.00</div></div>
+          <div class="stat-card c-take"><div class="lbl">Take-Home (today)</div><div class="val c-take" id="dayTake">$0.00</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -134,11 +172,11 @@
       <button class="btn-ghost" id="revThisWeekBtn">This Week</button>
     </div>
     <div class="stat-grid" id="revStats" style="display:none">
-      <div class="stat-card"><div class="lbl">Total Revenue</div><div class="val blue" id="revTotal">$0</div></div>
-      <div class="stat-card"><div class="lbl">Owner Gross</div><div class="val" id="revGross">$0</div></div>
-      <div class="stat-card"><div class="lbl">Tax Reserve (20%)</div><div class="val" id="revTax">$0</div></div>
-      <div class="stat-card"><div class="lbl">Emergency (10%)</div><div class="val" id="revEmerg">$0</div></div>
-      <div class="stat-card"><div class="lbl">Your Take-Home</div><div class="val orange" id="revTake">$0</div></div>
+      <div class="stat-card c-revenue"><div class="lbl">Total Revenue</div><div class="val c-revenue" id="revTotal">$0</div></div>
+      <div class="stat-card c-gross"><div class="lbl">Owner Gross</div><div class="val c-gross" id="revGross">$0</div></div>
+      <div class="stat-card c-tax"><div class="lbl">Tax Reserve (20%)</div><div class="val c-tax" id="revTax">$0</div></div>
+      <div class="stat-card c-emergency"><div class="lbl">Emergency (10%)</div><div class="val c-emergency" id="revEmerg">$0</div></div>
+      <div class="stat-card c-take"><div class="lbl">Your Take-Home</div><div class="val c-take" id="revTake">$0</div></div>
     </div>
     <div class="chart-grid" id="revCharts" style="display:none">
       <div class="chart-box">
@@ -166,28 +204,38 @@
 
   <!-- ── WEEKLY ── -->
   <div class="page" id="page-weekly">
-    <div class="page-header"><h2>Weekly Totals</h2><p>Payroll breakdown for any date range.</p></div>
+    <div class="page-header"><h2>Weekly Totals</h2><p>Full week breakdown with charts.</p></div>
     <div class="date-bar">
       <label>From</label><input type="date" id="weekStart" style="width:auto;min-width:150px" />
       <label>To</label><input type="date" id="weekEnd" style="width:auto;min-width:150px" />
       <button class="btn" id="loadWeekBtn">Load</button>
       <button class="btn-ghost" id="thisWeekBtn">This Week</button>
     </div>
-    <div class="sum-grid" id="wSumGrid" style="display:none">
-      <div class="sum-card"><div class="lbl">Revenue</div><div class="val" id="wRev">$0</div></div>
-      <div class="sum-card"><div class="lbl">Owner Gross</div><div class="val" id="wGross">$0</div></div>
-      <div class="sum-card"><div class="lbl">Tax Reserve</div><div class="val" id="wTax">$0</div></div>
-      <div class="sum-card"><div class="lbl">Emergency</div><div class="val" id="wEmerg">$0</div></div>
-      <div class="sum-card hi"><div class="lbl">Take-Home</div><div class="val" id="wTake">$0</div></div>
+    <div class="stat-grid" id="wStats" style="display:none">
+      <div class="stat-card c-revenue"><div class="lbl">Revenue</div><div class="val c-revenue" id="wRev">$0</div></div>
+      <div class="stat-card c-gross"><div class="lbl">Owner Gross</div><div class="val c-gross" id="wGross">$0</div></div>
+      <div class="stat-card c-week"><div class="lbl">Crew Payout</div><div class="val blue" id="wCrewOut">$0</div></div>
+      <div class="stat-card"><div class="lbl">Tips Given</div><div class="val green" id="wTips">$0</div></div>
+      <div class="stat-card c-take"><div class="lbl">Your Take-Home</div><div class="val c-take" id="wTake">$0</div></div>
     </div>
-    <div class="card" style="margin-bottom:14px">
+    <div class="chart-grid" id="wCharts" style="display:none">
+      <div class="chart-box">
+        <h4>Daily Revenue</h4>
+        <div class="chart-wrap"><canvas id="wBarChart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <h4>Employee Earnings</h4>
+        <div class="chart-wrap"><canvas id="wEmpChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" id="wEmpCard" style="display:none;margin-bottom:14px">
       <div class="card-title">Per-Employee Totals</div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th>Paid</th><th>Owed</th></tr></thead>
-        <tbody id="wEmpBody"><tr><td colspan="7" class="empty">Select a date range</td></tr></tbody>
+        <thead><tr><th>Employee</th><th>Jobs</th><th>Crew</th><th>Sales</th><th>Tips</th><th>Total</th><th>Paid</th><th>Owed</th></tr></thead>
+        <tbody id="wEmpBody"><tr><td colspan="8" class="empty">Select a date range</td></tr></tbody>
       </table></div>
     </div>
-    <div class="card">
+    <div class="card" id="wDayCard" style="display:none">
       <div class="card-title">Daily Breakdown</div>
       <div class="tbl-wrap"><table>
         <thead><tr><th>Date</th><th>Revenue</th><th>Owner Gross</th><th>Tax</th><th>Emergency</th><th>Take-Home</th></tr></thead>
@@ -198,21 +246,48 @@
 
   <!-- ── PAYROLL ── -->
   <div class="page" id="page-payroll">
-    <div class="page-header"><h2>Weekly Pay Out</h2><p>Check off employees once you've paid them for the week.</p></div>
-    <div class="date-bar">
-      <label>Week</label><input type="date" id="payStart" style="width:auto;min-width:150px" />
-      <label>to</label><input type="date" id="payEnd" style="width:auto;min-width:150px" />
-      <button class="btn" id="loadPayrollBtn">Load</button>
-      <button class="btn-ghost" id="payThisWeekBtn">This Week</button>
-      <button class="btn orange" id="markAllPaidBtn" style="margin-left:auto">Mark All Paid</button>
+    <div class="page-header"><h2>Weekly Pay Out</h2><p>Weeks 11 down to 1 — pay crew, add tips, check everyone off.</p></div>
+    <div class="season-banner" id="seasonBanner">
+      <span class="countdown" id="seasonCountdown">— days until Aug 16</span>
+      <span>Season: <strong id="seasonWeekLabel">Week 10</strong> of <strong id="seasonTotalWeeks">19</strong></span>
+      <span style="font-size:12px;color:var(--muted)">Last day: Aug 16, 2026</span>
     </div>
-    <div class="sum-grid" id="paySumGrid" style="display:none">
-      <div class="sum-card"><div class="lbl">Week Revenue</div><div class="val" id="payRev">$0</div></div>
-      <div class="sum-card"><div class="lbl">Your Gross</div><div class="val" id="payGross">$0</div></div>
-      <div class="sum-card hi"><div class="lbl">Your Take-Home</div><div class="val" id="payTake">$0</div></div>
-      <div class="sum-card"><div class="lbl">Total Owed Crew</div><div class="val" id="payOwed">$0</div></div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">💵 Add Tip</div>
+      <div class="form-grid" style="max-width:720px">
+        <div class="field"><label>Employee</label><select id="tipEmployee"></select></div>
+        <div class="field"><label>Date</label><input type="date" id="tipDate" /></div>
+        <div class="field"><label>Amount ($)</label><input type="number" id="tipAmount" min="0" step="0.01" placeholder="20.00" /></div>
+        <div class="field"><label>Note (optional)</label><input type="text" id="tipNote" placeholder="Great job today" /></div>
+      </div>
+      <button class="btn orange" id="addTipBtn" style="margin-top:4px">Add Tip</button>
     </div>
-    <div class="card"><div class="card-title">Employee Payouts</div><div id="payrollList"><div class="empty">Select a week</div></div></div>
+
+    <div class="card week-messages-card" style="margin-bottom:14px">
+      <div class="card-title">📱 Week Messages <span style="font-size:12px;font-weight:500;color:var(--muted)">— copy &amp; paste to group chat or DMs</span></div>
+      <div class="date-bar" style="margin-bottom:12px">
+        <label>Week</label>
+        <select id="msgWeekSelect" style="min-width:200px"></select>
+        <button class="btn" id="genMsgBtn" type="button">Generate</button>
+      </div>
+      <div class="msg-type-tabs">
+        <button type="button" class="msg-tab active" data-msg="groupFull">👥 Group — full totals</button>
+        <button type="button" class="msg-tab" data-msg="groupHighlights">🏆 Group — shout-outs</button>
+        <button type="button" class="msg-tab" data-msg="leaders">📊 Leaders (sales · crew · tips)</button>
+        <button type="button" class="msg-tab" data-msg="individual">✉️ Individual DMs</button>
+      </div>
+      <div id="msgMainPanel">
+        <textarea id="msgOutput" class="msg-textarea" readonly placeholder="Pick a week and hit Generate…"></textarea>
+        <button type="button" class="btn orange" id="copyMsgBtn" style="margin-top:10px">Copy Message</button>
+      </div>
+      <div id="msgIndividualPanel" style="display:none">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">One message per person — tap Copy to paste in their DM.</p>
+        <div id="msgIndividualList" class="msg-individual-list"></div>
+      </div>
+    </div>
+
+    <div id="seasonPaySections"><div class="empty">Loading season weeks…</div></div>
   </div>
 
   <!-- ── LEADERBOARD ── -->
@@ -222,13 +297,18 @@
       <button type="button" class="lb-tab active" data-lb="total">💰 Total Earnings</button>
       <button type="button" class="lb-tab" data-lb="sales">💼 Sales Leaders</button>
     </div>
+    <div class="lb-view-tabs">
+      <button type="button" class="lb-tab active" data-lbview="podium">🏟 Podium</button>
+      <button type="button" class="lb-tab" data-lbview="table">📋 Table</button>
+    </div>
     <div class="date-bar" style="margin-bottom:16px">
       <label>Period (optional)</label><input type="date" id="lbStart" style="width:auto;min-width:140px" />
       <label>to</label><input type="date" id="lbEnd" style="width:auto;min-width:140px" />
       <button class="btn-ghost" id="lbAllTimeBtn">All Time</button>
       <button class="btn" id="lbLoadBtn">Apply</button>
     </div>
-    <div class="card"><div class="tbl-wrap"><table>
+    <div class="card lb-view active" id="lbPodiumView"><div id="lbPodium"><div class="empty">Loading…</div></div></div>
+    <div class="card lb-view" id="lbTableView"><div class="tbl-wrap"><table>
       <thead id="lbHead"><tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:90px"></th></tr></thead>
       <tbody id="lbBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
     </table></div></div>
@@ -236,8 +316,12 @@
 
   <!-- ── MANAGE CREW ── -->
   <div class="page" id="page-crew">
-    <div class="page-header"><h2>Manage Crew</h2><p>Add or remove employees.</p></div>
+    <div class="page-header"><h2>Manage Crew</h2><p>Click a person for full payroll by week — notes save on their profile.</p></div>
     <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Current Roster <span style="font-size:12px;font-weight:500;color:var(--muted)">— click for details</span></div>
+      <div id="empRoster" class="crew-card-grid"></div>
+    </div>
+    <div class="card">
       <div class="card-title">➕ Add Employee</div>
       <div class="form-grid">
         <div class="field"><label>Full Name</label><input type="text" id="newEmpName" placeholder="Jake Miller" /></div>
@@ -252,11 +336,39 @@
       </div>
       <button class="btn" id="addEmpBtn" style="margin-top:8px">Add Employee</button>
     </div>
-    <div class="card"><div class="card-title">Current Roster</div><div id="empRoster"></div></div>
   </div>
 
 </div>
 
+<div class="modal-overlay modal-panel" id="empDetailModal">
+  <div class="modal modal-wide" id="empDetailDialog">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px">
+      <h3 id="empDetailName" style="margin:0">Employee</h3>
+      <button type="button" class="btn-ghost" id="empDetailCloseTop" style="padding:6px 12px;font-size:18px;line-height:1">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 10px" id="empDetailMeta"></p>
+    <div id="empDetailRoleBanner" class="emp-role-banner crew" style="display:none"></div>
+    <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Notes</label>
+    <textarea id="empDetailNotes" style="width:100%;min-height:56px;margin:8px 0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--text2);font-family:inherit"></textarea>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <button type="button" class="btn-save-notes" id="empDetailSaveNotes">Save Notes</button>
+      <button type="button" class="btn-override" id="empDetailOverrideBtn">Admin Override</button>
+      <button type="button" class="btn-danger" id="empDetailRemove" style="display:none">Remove</button>
+      <button type="button" class="btn-ghost" id="empDetailClose">Close</button>
+    </div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:12px" id="empDetailTotals"></div>
+    <div class="card-title" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span>Weekly Pay <span style="font-weight:500;color:var(--muted);font-size:12px">(Weeks 11 → 1)</span></span>
+      <span id="empOverrideHint" style="display:none;font-size:11px;color:var(--orange);font-weight:700">Edit amounts below, then Save each week</span>
+    </div>
+    <div class="modal-scroll-body">
+      <div class="tbl-wrap"><table class="emp-week-table" id="empDetailTable">
+        <thead id="empDetailHead"><tr><th>Week</th><th>Dates</th><th>Jobs</th><th>Crew</th><th>Sales</th><th>Tips</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody id="empDetailWeeks"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
     <h3 id="modalTitle">Are you sure?</h3>
@@ -273,6 +385,13 @@
 <script>
 const $  = id => document.getElementById(id);
 const fmt = n => n == null ? '—' : '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+
+function lockBodyScroll() { document.body.classList.add('modal-open'); }
+function unlockBodyScroll() {
+  if (!document.querySelector('.modal-overlay.open')) document.body.classList.remove('modal-open');
+}
+function openOverlay(el) { if (el) { el.classList.add('open'); lockBodyScroll(); } }
+function closeOverlay(el) { if (el) { el.classList.remove('open'); unlockBodyScroll(); } }
 
 function toast(msg, type='ok', opts={}) {
   const el = document.createElement('div');
@@ -302,21 +421,43 @@ function confirm(title, body, warn, btnText) {
     if (warn) { warnEl.textContent = warn; warnEl.style.display = 'block'; }
     else warnEl.style.display = 'none';
     $('confirmModal').classList.add('open');
-    $('modalConfirm').onclick = () => { $('confirmModal').classList.remove('open'); resolve(true); };
-    $('modalCancel').onclick  = () => { $('confirmModal').classList.remove('open'); resolve(false); };
+    lockBodyScroll();
+    $('modalConfirm').onclick = () => { closeOverlay($('confirmModal')); resolve(true); };
+    $('modalCancel').onclick  = () => { closeOverlay($('confirmModal')); resolve(false); };
   });
 }
 
 // ── Nav ───────────────────────────────────────────────────────────────────────
 let employees = [];
 let crewPoolMode = 30;
+let wizardStep = 1;
+let wizardMaxStep = 1;
+let dailyEntryMode = localStorage.getItem('dailyEntryMode') || 'wizard';
+const WIZARD_STEPS = 4;
 let lbType = 'total';
+let lbView = 'podium';
 let revBarChart = null;
 let revDoughnutChart = null;
+let wBarChart = null;
+let wEmpChart = null;
+let payOwedChart = null;
+let payStatusChart = null;
+const chartInstances = {};
 
 const ROLE_LABELS = {
   owner: 'Owner', crew: 'Crew', cleaning_tech: 'Cleaning Tech', d2d: 'D2D',
 };
+const ROLE_PAYROLL_HINT = {
+  d2d: 'Door-to-door — track sales commission as primary pay; crew pool usually $0 unless they worked the job.',
+  cleaning_tech: 'Cleaning tech — track crew pool pay on jobs; sales commission only if they sold the job.',
+  crew: 'Crew — crew pool split on jobs plus any sales commission they earn.',
+};
+
+function rolePrimaryCol(role) {
+  if (role === 'd2d') return 'commission';
+  if (role === 'cleaning_tech') return 'crew';
+  return null;
+}
 
 function goPage(p) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -326,7 +467,7 @@ function goPage(p) {
   if (p==='daily')       loadDay();
   if (p==='revenue')     loadRevenue();
   if (p==='weekly')      loadWeekly();
-  if (p==='payroll')     loadPayroll();
+  if (p==='payroll')     loadSeasonPayroll();
   if (p==='leaderboard') loadLeaderboard();
   if (p==='crew')        loadRoster();
 }
@@ -341,8 +482,20 @@ async function init() {
   $('ownerName').textContent = me.name;
   employees = await fetch('/api/employees').then(r=>r.json());
   buildPersonLists();
+  buildTipEmployeeSelect();
   setDefaultDates();
   loadDay();
+  setDailyEntryMode(dailyEntryMode);
+  updateWizardProgress();
+}
+
+function buildTipEmployeeSelect() {
+  const sel = $('tipEmployee');
+  if (!sel) return;
+  const crew = employees.filter(e => e.active && e.role !== 'owner');
+  sel.innerHTML = crew.map(e => `<option value="${e.id}">${e.name}</option>`).join('')
+    || '<option value="">No employees</option>';
+  if ($('tipDate')) $('tipDate').value = todayStr();
 }
 $('logoutBtn').addEventListener('click', async () => {
   await fetch('/api/auth/logout',{method:'POST'});
@@ -497,20 +650,246 @@ function setThisWeek() {
   const sun = new Date(mon); sun.setDate(mon.getDate()+6);
   const s = mon.toISOString().slice(0,10), e = sun.toISOString().slice(0,10);
   $('weekStart').value = s; $('weekEnd').value = e;
-  $('payStart').value = s; $('payEnd').value = e;
   $('revStart').value = s; $('revEnd').value = e;
 }
 $('todayBtn').addEventListener('click', () => { $('dailyDate').value = todayStr(); loadDay(); });
 $('dailyDate').addEventListener('change', loadDay);
 $('jobTotal').addEventListener('input', updateWorkerTotal);
+$('jobName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); wizardNext(); } });
+$('jobTotal').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); wizardNext(); } });
 
-// ── Add Job ───────────────────────────────────────────────────────────────────
-$('addJobBtn').addEventListener('click', async () => {
+// ── Job wizard ────────────────────────────────────────────────────────────────
+function setDailyEntryMode(mode) {
+  dailyEntryMode = mode;
+  localStorage.setItem('dailyEntryMode', mode);
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.dailyMode === mode);
+  });
+  $('activeJobCard').classList.toggle('classic-mode', mode === 'classic');
+  if (mode === 'wizard') updateWizardProgress();
+}
+
+function flashStepError() {
+  const pane = document.querySelector(`.wizard-pane[data-step="${wizardStep}"]`);
+  pane?.classList.remove('wizard-error');
+  void pane?.offsetWidth;
+  pane?.classList.add('wizard-error');
+  setTimeout(() => pane?.classList.remove('wizard-error'), 450);
+}
+
+function updateWizardProgress() {
+  if (dailyEntryMode === 'classic') return;
+  document.querySelectorAll('.wp-step').forEach(el => {
+    const n = Number(el.dataset.wp);
+    el.classList.toggle('active', n === wizardStep);
+    el.classList.toggle('done', n < wizardStep);
+  });
+  document.querySelectorAll('.wizard-pane').forEach(p => {
+    p.classList.toggle('active', Number(p.dataset.step) === wizardStep);
+  });
+  $('wizardBack').disabled = wizardStep <= 1;
+  $('wizardNext').style.display = wizardStep >= WIZARD_STEPS ? 'none' : 'inline-flex';
+  if (wizardStep === WIZARD_STEPS) updateWizardReview();
+  if (wizardStep === 1) setTimeout(() => $('jobName')?.focus(), 120);
+  if (wizardStep === 2) setTimeout(() => $('jobTotal')?.focus(), 120);
+}
+
+function updateWizardReview() {
+  const name = $('jobName').value.trim() || '(no name)';
+  const total = parseFloat($('jobTotal').value) || 0;
+  const workers = [...document.querySelectorAll('.worker-cb:checked')].map(cb => {
+    const id = cb.dataset.id;
+    return `${cb.closest('.person-row')?.querySelector('.person-label')?.textContent?.trim().split('(')[0].trim()} ${$(`wpct-${id}`)?.value || 0}%`;
+  });
+  const sellers = [...document.querySelectorAll('.sales-cb:checked')].map(cb => {
+    const id = parseInt(cb.dataset.id);
+    const label = cb.closest('.person-row')?.querySelector('.person-label')?.textContent?.trim().split('(')[0].trim();
+    return `${label} ${getSalesPct(id)}%`;
+  });
+  $('wizardReview').innerHTML = `
+    <strong>${name}</strong> · ${fmt(total)}<br>
+    ${workers.length ? `Crew: ${workers.join(', ')}` : 'Crew: none selected'}<br>
+    ${sellers.length ? `Sales: ${sellers.join(', ')}` : 'Sales: none'}`;
+}
+
+function wizardValidateStep(step) {
+  if (step === 1) {
+    if (!$('jobName').value.trim()) {
+      toast('Enter a job name (required)', 'err');
+      flashStepError();
+      return false;
+    }
+  }
+  if (step === 2) {
+    const total = parseFloat($('jobTotal').value);
+    if (isNaN(total) || total <= 0) {
+      toast('Enter a valid job total (required)', 'err');
+      flashStepError();
+      return false;
+    }
+  }
+  if (step === 3) {
+    const checked = document.querySelectorAll('.worker-cb:checked');
+    if (!checked.length) {
+      toast('Select at least one crew worker (required)', 'err');
+      flashStepError();
+      return false;
+    }
+    const pool = crewPoolMode === 'custom' ? null : Number(crewPoolMode);
+    let pct = 0;
+    checked.forEach(cb => { pct += parseFloat($(`wpct-${cb.dataset.id}`).value) || 0; });
+    if (pool && pct > pool + 0.01) {
+      toast('Worker % exceeds crew pool', 'err');
+      flashStepError();
+      return false;
+    }
+    if (pool && pct < pool - 0.01) {
+      toast(`Assign full pool (${pool}%) to workers before continuing`, 'err');
+      flashStepError();
+      return false;
+    }
+  }
+  if (step === 4) {
+    if (!validateJobReady()) return false;
+  }
+  return true;
+}
+
+function validateJobReady() {
+  if (!$('jobName').value.trim()) { toast('Job name is required', 'err'); return false; }
+  const total = parseFloat($('jobTotal').value);
+  if (isNaN(total) || total <= 0) { toast('Valid job total is required', 'err'); return false; }
+  const workers = document.querySelectorAll('.worker-cb:checked');
+  if (!workers.length) { toast('Select at least one crew worker', 'err'); return false; }
+  const pool = crewPoolMode === 'custom' ? null : Number(crewPoolMode);
+  let pct = 0;
+  workers.forEach(cb => { pct += parseFloat($(`wpct-${cb.dataset.id}`).value) || 0; });
+  if (pool && pct > pool + 0.01) { toast('Worker % exceeds crew pool', 'err'); return false; }
+  if (pool && pct < pool - 0.01) { toast(`Assign full pool (${pool}%) to workers`, 'err'); return false; }
+  const sellers = document.querySelectorAll('.sales-cb:checked');
+  if (!workers.length && !sellers.length) {
+    toast('Select at least one worker or seller', 'err');
+    return false;
+  }
+  return true;
+}
+
+function wizardNext() {
+  if (dailyEntryMode === 'classic') return;
+  if (!wizardValidateStep(wizardStep)) return;
+  if (wizardStep < WIZARD_STEPS) {
+    wizardStep += 1;
+    wizardMaxStep = Math.max(wizardMaxStep, wizardStep);
+    updateWizardProgress();
+  }
+}
+
+function wizardBack() {
+  if (dailyEntryMode === 'classic') return;
+  if (wizardStep > 1) {
+    wizardStep -= 1;
+    updateWizardProgress();
+  }
+}
+
+function resetJobForm(full = true) {
+  $('jobName').value = '';
+  $('jobTotal').value = '';
+  if (full) {
+    crewPoolMode = 30;
+    $('poolLabel').textContent = '30%';
+    document.querySelectorAll('.pool-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.pool === '30');
+    });
+    document.querySelectorAll('.worker-cb').forEach(cb => { cb.checked = false; });
+    document.querySelectorAll('.worker-pct').forEach(inp => {
+      inp.value = 0;
+      delete inp.dataset.manuallySet;
+      inp.closest('.pct-wrap')?.classList.remove('show');
+    });
+    applySalesPreset('clear');
+  }
+  updateWorkerTotal();
+  wizardStep = 1;
+  wizardMaxStep = 1;
+  if (dailyEntryMode === 'wizard') updateWizardProgress();
+}
+
+async function runTestJobWalkthrough() {
+  resetJobForm(true);
+  if (dailyEntryMode === 'classic') setDailyEntryMode('wizard');
+
+  const active = employees.filter(e => e.active && e.role !== 'owner');
+  if (active.length < 1) { toast('Add employees to roster first', 'err'); return; }
+
+  $('jobName').value = 'Test — 456 Oak St';
+  $('jobTotal').value = '425';
+  wizardStep = 1;
+  wizardMaxStep = 1;
+  updateWizardProgress();
+  toast('Test walkthrough — Step 1');
+  await new Promise(r => setTimeout(r, 700));
+
+  if (!wizardValidateStep(1)) return;
+  wizardStep = 2; wizardMaxStep = 2; updateWizardProgress();
+  toast('Step 2 — total');
+  await new Promise(r => setTimeout(r, 700));
+
+  if (!wizardValidateStep(2)) return;
+  document.querySelector('.pool-btn[data-pool="30"]')?.click();
+  const w1 = document.querySelector('.worker-cb');
+  if (w1) { w1.checked = true; onWorkerChange(); }
+  const w2 = document.querySelectorAll('.worker-cb')[1];
+  if (w2) { w2.checked = true; onWorkerChange(); }
+  wizardStep = 3; wizardMaxStep = 3; updateWizardProgress();
+  toast('Step 3 — crew selected');
+  await new Promise(r => setTimeout(r, 800));
+
+  if (!wizardValidateStep(3)) return;
+  if (active.length >= 1) applySalesPreset('single15');
+  wizardStep = 4; wizardMaxStep = 4; updateWizardProgress();
+  updateWizardReview();
+  toast('Step 4 — review & save (or Reset to discard)');
+}
+
+$('wizardNext').addEventListener('click', wizardNext);
+$('wizardBack').addEventListener('click', wizardBack);
+$('resetJobFormBtn').addEventListener('click', () => { resetJobForm(true); toast('Job form reset'); });
+$('testJobWalkBtn').addEventListener('click', runTestJobWalkthrough);
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => setDailyEntryMode(btn.dataset.dailyMode));
+});
+document.querySelectorAll('.wp-step').forEach(el => {
+  el.addEventListener('click', () => {
+    if (dailyEntryMode === 'classic') return;
+    const target = Number(el.dataset.wp);
+    if (target === wizardStep) return;
+    if (target < wizardStep) { wizardStep = target; updateWizardProgress(); return; }
+    if (target > wizardMaxStep) { toast('Complete each step in order', 'err'); return; }
+    for (let s = wizardStep; s < target; s++) {
+      if (!wizardValidateStep(s)) return;
+    }
+    wizardStep = target;
+    wizardMaxStep = Math.max(wizardMaxStep, wizardStep);
+    updateWizardProgress();
+  });
+});
+
+async function submitJob() {
   const date = $('dailyDate').value;
+  if (!date) { toast('Pick a date', 'err'); return; }
+  if (dailyEntryMode === 'wizard' && wizardStep < WIZARD_STEPS) {
+    toast('Complete all 4 steps first', 'err');
+    return;
+  }
+  if (!validateJobReady()) {
+    if (dailyEntryMode === 'wizard') flashStepError();
+    return;
+  }
+
   const jobNameRaw = $('jobName').value.trim();
-  const jobName = jobNameRaw || `Job — ${date}`;
+  const jobName = jobNameRaw;
   const totalAmount = parseFloat($('jobTotal').value);
-  if (!date || isNaN(totalAmount) || totalAmount <= 0) { toast('Enter a valid job total.','err'); return; }
 
   const crewMap = {};
   document.querySelectorAll('.worker-cb:checked').forEach(cb => {
@@ -535,18 +914,21 @@ $('addJobBtn').addEventListener('click', async () => {
   });
 
   if (res.ok) {
-    $('jobTotal').value = '';
-    $('jobName').value = '';
-    updateWorkerTotal();
+    resetJobForm(false);
     const flash = $('jobFlash');
     flash.classList.add('show');
     setTimeout(() => flash.classList.remove('show'), 3500);
     loadDay();
+    if (dailyEntryMode === 'wizard') updateWizardProgress();
+    $('activeJobCard')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   } else {
     const { error } = await res.json().catch(() => ({}));
     toast(error || 'Failed to add job','err');
   }
-});
+}
+
+$('addJobBtn').addEventListener('click', submitJob);
+$('addJobBtnClassic').addEventListener('click', submitJob);
 
 // ── Quick add employee ────────────────────────────────────────────────────────
 $('toggleQuickAdd').addEventListener('click', () => {
@@ -574,56 +956,96 @@ $('qaSubmit').addEventListener('click', async () => {
   }
 });
 
+function weekRangeForDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const day = d.getDay();
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  return { start: mon.toISOString().slice(0, 10), end: sun.toISOString().slice(0, 10) };
+}
+
+function toggleJobCard(id) {
+  $(`job-card-${id}`)?.classList.toggle('open');
+}
+
+function jobCrewTable(job) {
+  const rows = job.crew.map(c => {
+    const isW = c.crew_pay > 0, isS = c.commission_pay > 0;
+    const pill = isW && isS ? '<span class="role-pill b">Worker+Sales</span>'
+               : isW ? '<span class="role-pill w">Worker</span>'
+               : '<span class="role-pill s">Sales</span>';
+    return `<tr>
+      <td><strong>${c.name}</strong></td>
+      <td>${pill}</td>
+      <td class="mono">${isW ? fmt(c.crew_pay) : '—'}</td>
+      <td class="mono">${isS ? c.commission_pct + '%' : '—'}</td>
+      <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(c.crew_pay + c.commission_pay)}</td>
+      <td><button class="paid-toggle ${c.paid ? 'paid' : 'unpaid'}"
+            onclick="togglePaid(${c.id},${c.paid ? 0 : 1},this)">
+            ${c.paid ? '✓ Paid' : '○ Unpaid'}</button></td>
+    </tr>`;
+  }).join('');
+  return `<table class="pay-table">
+    <thead><tr><th>Name</th><th>Role</th><th>Crew</th><th>Sales %</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderSavedJobCard(job, index) {
+  const safeName = job.job_name.replace(/'/g, "\\'");
+  return `<div class="saved-job-card" id="job-card-${job.id}">
+    <div class="saved-hdr" onclick="toggleJobCard(${job.id})">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+        <div class="job-slot-label" style="margin:0">
+          <span class="num">${index}</span> Job ${index} of the day
+        </div>
+        <div style="min-width:0">
+          <div class="job-name" style="font-size:15px;font-weight:700">${job.job_name}</div>
+          <div class="job-meta" style="font-size:12px;color:var(--muted)">${job.crew.length} crew · ${fmt(job.total_amount)}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div class="job-amt">${fmt(job.total_amount)}</div>
+        <button class="btn-delete" onclick="event.stopPropagation();deleteJob(${job.id},'${safeName}')">Delete</button>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="saved-body">${jobCrewTable(job)}</div>
+  </div>`;
+}
+
+function updateActiveJobSlot(n) {
+  $('activeJobNum').textContent = n;
+  $('activeJobLabel').textContent = `Job ${n} of the day`;
+}
+
+async function loadDayRevenue(date, summary, jobs) {
+  const dayRev = summary?.total_revenue ?? jobs.reduce((s, j) => s + (j.total_amount || 0), 0);
+  $('dayRev').textContent = fmt(dayRev);
+  $('dayGross').textContent = fmt(summary?.owner_gross || 0);
+  $('dayTake').textContent = fmt(summary?.owner_take_home || 0);
+
+  const range = weekRangeForDate(date);
+  $('weekRevRange').textContent = `${range.start.slice(5)} → ${range.end.slice(5)}`;
+  const { summaries = [] } = await fetch(`/api/reports/weekly?start=${range.start}&end=${range.end}`).then(r => r.json());
+  const weekRev = summaries.reduce((s, x) => s + (x.total_revenue || 0), 0);
+  $('weekRevDay').textContent = fmt(weekRev);
+}
+
 // ── Load day ──────────────────────────────────────────────────────────────────
 async function loadDay() {
   const date = $('dailyDate').value;
   if (!date) return;
-  const { jobs=[] } = await fetch(`/api/reports/daily?date=${date}`).then(r=>r.json());
+  const { summary, jobs = [] } = await fetch(`/api/reports/daily?date=${date}`).then(r => r.json());
 
-  $('jobCountLabel').textContent = jobs.length ? `${jobs.length} job${jobs.length>1?'s':''}` : '';
+  $('savedJobsStack').innerHTML = jobs.length
+    ? jobs.map((job, i) => renderSavedJobCard(job, i + 1)).join('')
+    : '';
 
-  if (!jobs.length) {
-    $('jobsList').innerHTML='<div class="empty">No jobs on this date yet. Add one on the left.</div>';
-    return;
-  }
-
-  $('jobsList').innerHTML = jobs.map(job => {
-    const rows = job.crew.map(c => {
-      const isW = c.crew_pay > 0, isS = c.commission_pay > 0;
-      const pill = isW&&isS ? '<span class="role-pill b">Worker+Sales</span>'
-                 : isW ? '<span class="role-pill w">Worker</span>'
-                 : '<span class="role-pill s">Sales</span>';
-      return `<tr>
-        <td><strong>${c.name}</strong></td>
-        <td>${pill}</td>
-        <td class="mono">${isW ? fmt(c.crew_pay) : '—'}</td>
-        <td class="mono">${isS ? c.commission_pct+'%' : '—'}</td>
-        <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(c.crew_pay+c.commission_pay)}</td>
-        <td><button class="paid-toggle ${c.paid?'paid':'unpaid'}"
-              onclick="togglePaid(${c.id},${c.paid?0:1},this)">
-              ${c.paid?'✓ Paid':'○ Unpaid'}</button></td>
-      </tr>`;
-    }).join('');
-    const safeName = job.job_name.replace(/'/g, "\\'");
-    return `<div class="job-card">
-      <div class="job-card-hdr">
-        <div>
-          <div class="job-name">${job.job_name}</div>
-          <div class="job-meta">${job.crew.length} crew · ${fmt(job.total_amount)}</div>
-        </div>
-        <div class="job-card-actions">
-          <div class="job-amt">${fmt(job.total_amount)}</div>
-          <button class="btn-delete" onclick="deleteJob(${job.id},'${safeName}')">Delete</button>
-        </div>
-      </div>
-      <div class="job-card-body">
-        <table class="pay-table">
-          <thead><tr><th>Name</th><th>Role</th><th>Crew</th><th>Sales %</th><th>Total</th><th>Status</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  }).join('');
+  updateActiveJobSlot(jobs.length + 1);
+  await loadDayRevenue(date, summary, jobs);
 }
 
 async function togglePaid(jcId, newPaid, btn) {
@@ -672,6 +1094,41 @@ Chart.defaults.color = chartDefaults.color;
 Chart.defaults.borderColor = chartDefaults.borderColor;
 Chart.defaults.font.family = "'Inter', sans-serif";
 
+function destroyChart(key) {
+  if (chartInstances[key]) { chartInstances[key].destroy(); chartInstances[key] = null; }
+}
+
+function makeBarChart(canvasId, key, labels, datasets, horizontal) {
+  destroyChart(key);
+  chartInstances[key] = new Chart($(canvasId), {
+    type: horizontal ? 'bar' : 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { boxWidth: 12, padding: 14 } } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: v => '$' + v } },
+        y: { grid: { display: horizontal ? false : undefined, color: 'rgba(255,255,255,0.05)' } },
+      },
+    },
+  });
+  return chartInstances[key];
+}
+
+function makeDoughnut(canvasId, key, labels, data, colors) {
+  destroyChart(key);
+  chartInstances[key] = new Chart($(canvasId), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 8 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } } },
+    },
+  });
+  return chartInstances[key];
+}
+
 async function loadRevenue() {
   const start = $('revStart').value, end = $('revEnd').value;
   if (!start || !end) return;
@@ -703,7 +1160,7 @@ async function loadRevenue() {
     <td>${s.date}</td><td class="mono">${fmt(s.total_revenue)}</td>
     <td class="mono">${fmt(s.owner_gross)}</td><td class="mono">${fmt(s.owner_tax_reserve)}</td>
     <td class="mono">${fmt(s.owner_emergency_reserve)}</td>
-    <td class="mono" style="color:var(--orange);font-weight:700">${fmt(s.owner_take_home)}</td>
+    <td class="mono" style="color:#3dffaa;font-weight:700">${fmt(s.owner_take_home)}</td>
   </tr>`).join('');
 
   const labels = summaries.map(s => s.date.slice(5));
@@ -711,43 +1168,15 @@ async function loadRevenue() {
   const takeData = summaries.map(s => s.owner_take_home);
 
   if (revBarChart) revBarChart.destroy();
-  revBarChart = new Chart($('revBarChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Revenue', data: revData, backgroundColor: 'rgba(0,170,239,0.6)', borderRadius: 8 },
-        { label: 'Take-Home', data: takeData, backgroundColor: 'rgba(247,148,29,0.6)', borderRadius: 8 },
-      ],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
-      scales: {
-        x: { grid: { display: false } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: v => '$' + v } },
-      },
-    },
-  });
+  revBarChart = makeBarChart('revBarChart', 'revBar', labels, [
+    { label: 'Revenue', data: revData, backgroundColor: 'rgba(0,170,239,0.65)', borderRadius: 8 },
+    { label: 'Take-Home', data: takeData, backgroundColor: 'rgba(61,255,170,0.55)', borderRadius: 8 },
+  ]);
 
   if (revDoughnutChart) revDoughnutChart.destroy();
-  revDoughnutChart = new Chart($('revDoughnutChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Take-Home (70%)', 'Tax (20%)', 'Emergency (10%)'],
-      datasets: [{
-        data: [agg.take, agg.tax, agg.emerg],
-        backgroundColor: ['#F7941D', '#00AAEF', '#2dd4a0'],
-        borderWidth: 0, hoverOffset: 8,
-      }],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false, cutout: '68%',
-      plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } },
-      },
-    },
-  });
+  revDoughnutChart = makeDoughnut('revDoughnutChart', 'revDoughnut',
+    ['Take-Home (70%)', 'Tax (20%)', 'Emergency (10%)'],
+    [agg.take, agg.tax, agg.emerg], ['#3dffaa', '#f5c842', '#ff6b6b']);
 }
 
 $('resetDataBtn').addEventListener('click', async () => {
@@ -778,115 +1207,357 @@ $('loadWeekBtn').addEventListener('click', loadWeekly);
 async function loadWeekly() {
   const start=$('weekStart').value, end=$('weekEnd').value;
   if (!start||!end) return;
-  const { summaries=[], employeeTotals=[] } = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r=>r.json());
+  const [{ summaries=[], employeeTotals=[] }, tips=[]] = await Promise.all([
+    fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r=>r.json()),
+    fetch(`/api/tips?start=${start}&end=${end}`).then(r=>r.json()),
+  ]);
   const agg = summaries.reduce((a,s)=>({
     rev:a.rev+s.total_revenue, gross:a.gross+s.owner_gross,
-    tax:a.tax+s.owner_tax_reserve, emerg:a.emerg+s.owner_emergency_reserve,
     take:a.take+s.owner_take_home
-  }),{rev:0,gross:0,tax:0,emerg:0,take:0});
-  if (summaries.length) {
-    $('wSumGrid').style.display='grid';
-    $('wRev').textContent=fmt(agg.rev); $('wGross').textContent=fmt(agg.gross);
-    $('wTax').textContent=fmt(agg.tax); $('wEmerg').textContent=fmt(agg.emerg);
-    $('wTake').textContent=fmt(agg.take);
+  }),{rev:0,gross:0,take:0});
+  const crewOut = employeeTotals.reduce((s,e)=>s+(e.crew_pay||0)+(e.commission_pay||0),0);
+  const tipsTotal = tips.reduce((s,t)=>s+(t.amount||0),0);
+
+  if (!summaries.length && !employeeTotals.length) {
+    $('wStats').style.display='none'; $('wCharts').style.display='none';
+    $('wEmpCard').style.display='none'; $('wDayCard').style.display='none';
+    $('wEmpBody').innerHTML='<tr><td colspan="8" class="empty">No data for this range</td></tr>';
+    return;
   }
+
+  $('wStats').style.display='grid';
+  $('wCharts').style.display='grid';
+  $('wEmpCard').style.display='block';
+  $('wDayCard').style.display='block';
+  $('wRev').textContent=fmt(agg.rev);
+  $('wGross').textContent=fmt(agg.gross);
+  $('wCrewOut').textContent=fmt(crewOut);
+  $('wTips').textContent=fmt(tipsTotal);
+  $('wTake').textContent=fmt(agg.take);
+
+  if (summaries.length) {
+    const labels = summaries.map(s => s.date.slice(5));
+    makeBarChart('wBarChart', 'wBar', labels, [
+      { label: 'Revenue', data: summaries.map(s=>s.total_revenue), backgroundColor: 'rgba(0,170,239,0.65)', borderRadius: 8 },
+      { label: 'Take-Home', data: summaries.map(s=>s.owner_take_home), backgroundColor: 'rgba(61,255,170,0.55)', borderRadius: 8 },
+    ]);
+    $('wDayBody').innerHTML = summaries.map(s=>`<tr><td>${s.date}</td><td class="mono">${fmt(s.total_revenue)}</td>
+        <td class="mono" style="color:#c084fc">${fmt(s.owner_gross)}</td><td class="mono">${fmt(s.owner_tax_reserve)}</td>
+        <td class="mono">${fmt(s.owner_emergency_reserve)}</td>
+        <td class="mono" style="color:#3dffaa;font-weight:700">${fmt(s.owner_take_home)}</td></tr>`).join('');
+  }
+
+  if (employeeTotals.length) {
+    const names = employeeTotals.map(e => e.name.split(' ')[0]);
+    makeBarChart('wEmpChart', 'wEmp', names, [
+      { label: 'Crew', data: employeeTotals.map(e=>e.crew_pay||0), backgroundColor: 'rgba(0,170,239,0.55)', borderRadius: 6 },
+      { label: 'Sales', data: employeeTotals.map(e=>e.commission_pay||0), backgroundColor: 'rgba(247,148,29,0.55)', borderRadius: 6 },
+      { label: 'Tips', data: employeeTotals.map(e=>e.tips_pay||0), backgroundColor: 'rgba(45,212,160,0.55)', borderRadius: 6 },
+    ], true);
+  }
+
   $('wEmpBody').innerHTML = employeeTotals.length
     ? employeeTotals.map(e=>`<tr><td style="font-weight:600">${e.name}</td>
         <td class="mono">${e.job_count||0}</td>
         <td class="mono">${fmt(e.crew_pay)}</td><td class="mono">${fmt(e.commission_pay)}</td>
+        <td class="mono" style="color:var(--green)">${fmt(e.tips_pay||0)}</td>
         <td class="mono" style="color:var(--blue);font-weight:700">${fmt(e.total_pay)}</td>
         <td class="mono" style="color:var(--green)">${fmt(e.paid_amount)}</td>
         <td class="mono" style="color:var(--orange)">${fmt(e.unpaid_amount)}</td></tr>`).join('')
-    : '<tr><td colspan="7" class="empty">No data for this range</td></tr>';
-  $('wDayBody').innerHTML = summaries.length
-    ? summaries.map(s=>`<tr><td>${s.date}</td><td class="mono">${fmt(s.total_revenue)}</td>
-        <td class="mono">${fmt(s.owner_gross)}</td><td class="mono">${fmt(s.owner_tax_reserve)}</td>
-        <td class="mono">${fmt(s.owner_emergency_reserve)}</td>
-        <td class="mono" style="color:var(--orange);font-weight:700">${fmt(s.owner_take_home)}</td></tr>`).join('')
-    : '<tr><td colspan="6" class="empty">No data for this range</td></tr>';
+    : '<tr><td colspan="8" class="empty">No employee earnings</td></tr>';
 }
 
-// ── Payroll ───────────────────────────────────────────────────────────────────
-$('payThisWeekBtn').addEventListener('click', () => { setThisWeek(); loadPayroll(); });
-$('loadPayrollBtn').addEventListener('click', loadPayroll);
-$('markAllPaidBtn').addEventListener('click', async () => {
-  const start = $('payStart').value, end = $('payEnd').value;
-  if (!start || !end) return;
-  if (!await confirm('Mark All Paid', `Mark every employee as paid for ${start} to ${end}?`)) return;
-  const res = await fetch('/api/reports/payroll/mark-all', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ start, end }),
-  });
-  if (res.ok) { toast('All employees marked paid!'); loadPayroll(); loadDay(); }
-  else toast('Failed','err');
-});
+// ── Season Pay Out ────────────────────────────────────────────────────────────
+let seasonPayData = null;
 
-async function loadPayroll() {
-  const start = $('payStart').value, end = $('payEnd').value;
-  if (!start || !end) return;
-  const { rows = [], weekRevenue = {} } = await fetch(`/api/reports/payroll?start=${start}&end=${end}`).then(r=>r.json());
-  if (rows.length || weekRevenue.revenue) {
-    $('paySumGrid').style.display = 'grid';
-    $('payRev').textContent = fmt(weekRevenue.revenue);
-    $('payGross').textContent = fmt(weekRevenue.owner_gross);
-    $('payTake').textContent = fmt(weekRevenue.take_home);
-    const owed = rows.reduce((s,r) => s + (r.unpaid_amount||0), 0);
-    $('payOwed').textContent = fmt(owed);
-  } else $('paySumGrid').style.display = 'none';
+function toggleWeekSection(el) {
+  el.closest('.week-section')?.classList.toggle('open');
+}
 
-  if (!rows.length) {
-    $('payrollList').innerHTML = '<div class="empty">No earnings this week</div>';
-    return;
-  }
-  $('payrollList').innerHTML = rows.map(r => `
+function renderWeekPayrollRows(rows, start, end) {
+  if (!rows.length) return '<div class="empty" style="padding:12px 0">No earnings this week</div>';
+  return rows.map(r => `
     <div class="payroll-row">
       <label class="pay-check">
-        <input type="checkbox" ${r.weekPaid?'checked':''} onchange="toggleWeekPaid(${r.id}, this.checked)" />
+        <input type="checkbox" ${r.weekPaid ? 'checked' : ''} onchange="toggleWeekPaid(${r.id}, this.checked, '${start}', '${end}')" />
         <span>${r.name} <span style="font-size:11px;color:var(--muted);font-weight:500">(${ROLE_LABELS[r.role]||r.role})</span></span>
       </label>
       <div style="text-align:right">
         <div class="pay-amt">${fmt(r.total_pay)}</div>
-        <div style="font-size:11px;color:var(--muted)">Crew ${fmt(r.crew_pay)} · Sales ${fmt(r.commission_pay)} · ${r.job_count} jobs</div>
+        <div style="font-size:11px;color:var(--muted)">Crew ${fmt(r.crew_pay)} · Sales ${fmt(r.commission_pay)} · Tips ${fmt(r.tips_pay||0)} · ${r.job_count} jobs</div>
         ${r.unpaid_amount > 0 ? `<div style="font-size:11px;color:var(--orange);font-weight:600">Still owed ${fmt(r.unpaid_amount)}</div>` : ''}
       </div>
     </div>`).join('');
 }
 
-async function toggleWeekPaid(empId, paid) {
-  const start = $('payStart').value, end = $('payEnd').value;
+async function loadSeasonPayroll() {
+  const data = await fetch('/api/reports/payroll/season').then(r => r.json());
+  seasonPayData = data;
+  $('seasonCountdown').textContent = `${data.daysUntilLeave} day${data.daysUntilLeave === 1 ? '' : 's'} until Aug 16`;
+  $('seasonWeekLabel').textContent = `Week ${data.currentWeek}`;
+  $('seasonTotalWeeks').textContent = String(data.maxDisplayWeek ?? data.totalWeeks ?? 11);
+
+  if (!data.weeks?.length) {
+    $('seasonPaySections').innerHTML = '<div class="empty">No season weeks configured</div>';
+    return;
+  }
+
+  $('seasonPaySections').innerHTML = data.weeks.map(w => {
+    const owed = (w.rows || []).reduce((s, r) => s + (r.unpaid_amount || 0), 0);
+    const allPaid = w.rows?.length && w.rows.every(r => r.weekPaid);
+    const tips = w.totalTips?.total || 0;
+    const rev = w.weekRevenue || {};
+    return `<div class="week-section ${w.isCurrent ? 'open current' : ''}" data-start="${w.start}" data-end="${w.end}">
+      <div class="week-section-hdr" onclick="toggleWeekSection(this)">
+        <div>
+          <div class="wk-title">Week ${w.number}${w.isCurrent ? ' · NOW' : ''}</div>
+          <div class="wk-dates">${w.start} → ${w.end}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="wk-badges">
+            ${w.isCurrent ? '<span class="wk-badge current">Current</span>' : ''}
+            ${allPaid && w.rows?.length ? '<span class="wk-badge paid">All paid</span>' : ''}
+          </div>
+          <span class="mono" style="font-size:14px;font-weight:700;color:var(--blue)">${fmt((w.rows||[]).reduce((s,r)=>s+(r.total_pay||0),0))} crew</span>
+          <span class="week-chevron">▼</span>
+        </div>
+      </div>
+      <div class="week-section-body">
+        <div class="week-mini-stats">
+          <span>Revenue <strong class="c-revenue">${fmt(rev.revenue)}</strong></span>
+          <span>Owner gross <strong style="color:#c084fc">${fmt(rev.owner_gross)}</strong></span>
+          <span>Take-home <strong style="color:#3dffaa">${fmt(rev.take_home)}</strong></span>
+          <span>Tips <strong style="color:var(--green)">${fmt(tips)}</strong></span>
+          <span>Owed <strong style="color:var(--orange)">${fmt(owed)}</strong></span>
+        </div>
+        ${w.rows?.length ? `<button class="btn orange" style="margin:8px 0 12px;font-size:12px;padding:8px 14px" onclick="markAllPaidWeek('${w.start}','${w.end}')">Mark All Paid — Week ${w.number}</button>` : ''}
+        ${renderWeekPayrollRows(w.rows || [], w.start, w.end)}
+      </div>
+    </div>`;
+  }).join('');
+
+  populateMsgWeekSelect();
+  if ($('msgWeekSelect').value) loadWeekMessages();
+}
+
+async function markAllPaidWeek(start, end) {
+  if (!await confirm('Mark All Paid', `Mark every employee paid for week ${start} to ${end}?`)) return;
+  const res = await fetch('/api/reports/payroll/mark-all', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ start, end }),
+  });
+  if (res.ok) { toast('Week marked paid!'); loadSeasonPayroll(); loadDay(); }
+  else toast('Failed', 'err');
+}
+
+// ── Week chat messages ────────────────────────────────────────────────────────
+let weekMsgData = null;
+let weekMsgType = 'groupFull';
+const weekMsgCopyStore = {};
+
+function populateMsgWeekSelect() {
+  const sel = $('msgWeekSelect');
+  if (!seasonPayData?.weeks?.length) {
+    sel.innerHTML = '<option value="">Load Pay Out first</option>';
+    return;
+  }
+  sel.innerHTML = seasonPayData.weeks.map(w =>
+    `<option value="${w.start}|${w.end}" ${w.isCurrent ? 'selected' : ''}>Week ${w.number} (${w.start.slice(5)} – ${w.end.slice(5)})${w.isCurrent ? ' — NOW' : ''}</option>`
+  ).join('');
+}
+
+async function loadWeekMessages() {
+  const val = $('msgWeekSelect').value;
+  if (!val) return;
+  const [start, end] = val.split('|');
+  weekMsgData = await fetch(`/api/reports/week-messages?start=${start}&end=${end}`).then(r => r.json());
+  if (weekMsgData.error) { toast(weekMsgData.error, 'err'); return; }
+  renderWeekMessageView();
+}
+
+function renderWeekMessageView() {
+  if (!weekMsgData?.messages) return;
+  const isIndividual = weekMsgType === 'individual';
+  $('msgMainPanel').style.display = isIndividual ? 'none' : 'block';
+  $('msgIndividualPanel').style.display = isIndividual ? 'block' : 'none';
+
+  if (isIndividual) {
+    const items = Object.values(weekMsgData.messages.individual || {});
+    weekMsgCopyStore.length = 0;
+    $('msgIndividualList').innerHTML = items.length
+      ? items.map((item, i) => {
+          weekMsgCopyStore[i] = item.text;
+          return `<div class="msg-individual-item">
+            <div class="mi-head">
+              <span class="mi-name">${item.name} <span class="role-badge ${item.role}">${ROLE_LABELS[item.role]||item.role}</span></span>
+              <button type="button" class="btn-copy-sm" data-copy-idx="${i}">Copy DM</button>
+            </div>
+            <div class="mi-preview">${item.text.replace(/</g,'&lt;')}</div>
+          </div>`;
+        }).join('')
+      : '<div class="empty">No pay recorded for anyone this week</div>';
+    return;
+  }
+
+  const text = weekMsgData.messages[weekMsgType] || '';
+  $('msgOutput').value = text;
+}
+
+function copyMsgText(text) {
+  const t = typeof text === 'string' ? text.replace(/\\n/g, '\n') : $('msgOutput').value;
+  navigator.clipboard.writeText(t).then(() => toast('Copied to clipboard!')).catch(() => {
+    $('msgOutput').value = t;
+    $('msgOutput').select();
+    document.execCommand('copy');
+    toast('Copied!');
+  });
+}
+
+document.querySelectorAll('.msg-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.msg-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    weekMsgType = tab.dataset.msg;
+    renderWeekMessageView();
+  });
+});
+$('genMsgBtn').addEventListener('click', loadWeekMessages);
+$('msgWeekSelect').addEventListener('change', loadWeekMessages);
+$('copyMsgBtn').addEventListener('click', () => copyMsgText($('msgOutput').value));
+$('msgIndividualList').addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-copy-idx]');
+  if (!btn) return;
+  copyMsgText(weekMsgCopyStore[Number(btn.dataset.copyIdx)]);
+});
+
+$('addTipBtn').addEventListener('click', async () => {
+  const employeeId = parseInt($('tipEmployee').value);
+  const date = $('tipDate').value;
+  const amount = parseFloat($('tipAmount').value);
+  const note = $('tipNote').value.trim();
+  if (!employeeId || !date || isNaN(amount) || amount <= 0) {
+    toast('Pick employee, date, and valid amount', 'err'); return;
+  }
+  const res = await fetch('/api/tips', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ employeeId, date, amount, note }),
+  });
+  if (res.ok) {
+    toast('Tip added!');
+    $('tipAmount').value = ''; $('tipNote').value = '';
+    loadSeasonPayroll(); loadWeekly();
+  } else {
+    const { error } = await res.json().catch(() => ({}));
+    toast(error || 'Failed', 'err');
+  }
+});
+
+async function deleteTip(id) {
+  if (!await confirm('Remove Tip?', 'Delete this tip entry?', null, 'Remove')) return;
+  if ((await fetch(`/api/tips/${id}`, { method: 'DELETE' })).ok) {
+    toast('Tip removed'); loadSeasonPayroll(); loadWeekly();
+  } else toast('Failed', 'err');
+}
+
+async function toggleWeekPaid(empId, paid, start, end) {
   const res = await fetch('/api/reports/payroll', {
     method:'PATCH', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ start, end, employeeId: empId, paid }),
   });
-  if (res.ok) { toast(paid ? 'Marked paid!' : 'Marked unpaid'); loadPayroll(); loadDay(); }
+  if (res.ok) { toast(paid ? 'Marked paid!' : 'Marked unpaid'); loadSeasonPayroll(); loadDay(); }
   else toast('Update failed','err');
 }
 
 // ── Leaderboard ───────────────────────────────────────────────────────────────
-document.querySelectorAll('.lb-tab').forEach(t => {
+document.querySelectorAll('.lb-tab[data-lb]').forEach(t => {
   t.addEventListener('click', () => {
-    document.querySelectorAll('.lb-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.lb-tab[data-lb]').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     lbType = t.dataset.lb;
     loadLeaderboard();
   });
 });
+document.querySelectorAll('.lb-tab[data-lbview]').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.lb-tab[data-lbview]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    lbView = t.dataset.lbview;
+    $('lbPodiumView').classList.toggle('active', lbView === 'podium');
+    $('lbTableView').classList.toggle('active', lbView === 'table');
+    if (lastLbRows) renderLeaderboardViews(lastLbRows);
+  });
+});
 $('lbAllTimeBtn').addEventListener('click', () => { $('lbStart').value=''; $('lbEnd').value=''; loadLeaderboard(); });
 $('lbLoadBtn').addEventListener('click', loadLeaderboard);
 
-async function loadLeaderboard() {
-  const start = $('lbStart')?.value || '', end = $('lbEnd')?.value || '';
-  let url = `/api/reports/leaderboard?type=${lbType}`;
-  if (start && end) url += `&start=${start}&end=${end}`;
-  const rows = await fetch(url).then(r=>r.json());
+let lastLbRows = null;
+
+function renderPodium(rows, sortKey, label) {
+  const amt = r => r[sortKey] || 0;
+  const medals = ['🥇', '🥈', '🥉'];
+  const displayOrder = [1, 0, 2];
+  const slotClass = ['second', 'first', 'third'];
+  if (!rows.length) return '<div class="empty">No data yet</div>';
+
+  let html = '<div class="podium-wrap">';
+  html += '<div class="podium-stage">';
+  displayOrder.forEach((idx, i) => {
+    const r = rows[idx];
+    if (!r) {
+      html += `<div class="podium-slot ${slotClass[i]}"><div class="podium-block" style="opacity:.25;height:70px"></div></div>`;
+      return;
+    }
+    html += `<div class="podium-slot ${slotClass[i]}">
+      <div class="podium-block">
+        <span class="podium-medal">${medals[idx]}</span>
+        <span class="podium-name">${r.name}</span>
+        <span class="podium-amt">${fmt(amt(r))}</span>
+      </div>
+      <div class="podium-rank">#${idx + 1} · ${label}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  if (rows.length > 3) {
+    html += '<div class="podium-row5">';
+    rows.slice(3, 5).forEach((r, i) => {
+      html += `<div class="podium-mini">
+        <div class="rank">#${i + 4}</div>
+        <div class="name">${r.name}</div>
+        <div class="amt">${fmt(amt(r))}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (rows.length > 5) {
+    html += renderLbTicker(rows.slice(5), sortKey);
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderLbTicker(rest, sortKey) {
+  const amt = r => r[sortKey] || 0;
+  const chips = rest.map((r, i) => {
+    const rank = i + 6;
+    return `<span class="lb-ticker-chip"><span class="ding">🔔</span><span class="rk">#${rank}</span> ${r.name} <strong>${fmt(amt(r))}</strong></span>`;
+  }).join('');
+  return `<div class="lb-ticker-title">The rest of the pack</div>
+    <div class="lb-ticker-mask"><div class="lb-ticker-track">${chips}${chips}</div></div>`;
+}
+
+function renderLeaderboardViews(rows) {
   const sortKey = lbType === 'sales' ? 'commission_pay' : 'total_pay';
-  const headCol = lbType === 'sales' ? 'Sales $' : 'Total';
+  const label = lbType === 'sales' ? 'sales commission' : 'total earnings';
+  $('lbPodium').innerHTML = renderPodium(rows, sortKey, label);
+
+  const max = rows[0]?.[sortKey] || 1;
   $('lbHead').innerHTML = lbType === 'sales'
     ? `<tr><th>#</th><th>Employee</th><th>Sales Jobs</th><th>Commission</th><th style="min-width:90px"></th></tr>`
     : `<tr><th>#</th><th>Employee</th><th>Jobs</th><th>Crew Pay</th><th>Commission</th><th>Total</th><th style="min-width:90px"></th></tr>`;
-  if (!rows.length) { $('lbBody').innerHTML=`<tr><td colspan="7" class="empty">No data yet</td></tr>`; return; }
-  const max = rows[0][sortKey]||1;
-  $('lbBody').innerHTML = rows.map((r,i) => lbType === 'sales'
+
+  $('lbBody').innerHTML = rows.map((r, i) => lbType === 'sales'
     ? `<tr>
       <td style="font-size:17px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
       <td style="font-weight:600">${r.name}</td>
@@ -905,23 +1576,229 @@ async function loadLeaderboard() {
     </tr>`).join('');
 }
 
+async function loadLeaderboard() {
+  const start = $('lbStart')?.value || '', end = $('lbEnd')?.value || '';
+  let url = `/api/reports/leaderboard?type=${lbType}`;
+  if (start && end) url += `&start=${start}&end=${end}`;
+  const rows = await fetch(url).then(r=>r.json());
+  lastLbRows = rows;
+  if (!rows.length) {
+    $('lbPodium').innerHTML = '<div class="empty">No data yet</div>';
+    $('lbBody').innerHTML = `<tr><td colspan="7" class="empty">No data yet</td></tr>`;
+    return;
+  }
+  renderLeaderboardViews(rows);
+}
+
 // ── Manage Crew ───────────────────────────────────────────────────────────────
+let detailEmpId = null;
+let detailEmpData = null;
+let empOverrideMode = false;
+
+function closeEmpDetail() {
+  empOverrideMode = false;
+  $('empDetailOverrideBtn')?.classList.remove('active');
+  $('empOverrideHint').style.display = 'none';
+  closeOverlay($('empDetailModal'));
+}
+
+function renderEmpDetailHead(role) {
+  const primary = rolePrimaryCol(role);
+  const col = (name, key) => {
+    const cls = primary === key ? ' class="col-primary"' : '';
+    const labels = { crew: 'Crew', commission: 'Sales', tips: 'Tips' };
+    return `<th${cls}>${labels[key] || name}</th>`;
+  };
+  $('empDetailHead').innerHTML = `<tr>
+    <th>Week</th><th>Dates</th><th>Jobs</th>
+    ${col('Crew', 'crew')}${col('Sales', 'commission')}${col('Tips', 'tips')}
+    <th>Total</th><th>${empOverrideMode ? 'Override' : 'Status'}</th>
+  </tr>`;
+}
+
+function renderEmpDetailWeeks() {
+  if (!detailEmpData) return;
+  const e = detailEmpData.employee;
+  const primary = rolePrimaryCol(e.role);
+  const weeks = (detailEmpData.weeks || []).slice().reverse();
+
+  $('empDetailWeeks').innerHTML = weeks.map(w => {
+    const rowCls = [
+      w.isCurrent ? 'current-week' : '',
+      w.hasOverride ? 'tr-override' : '',
+    ].filter(Boolean).join(' ');
+    const crewCls = primary === 'crew' ? ' col-primary' : '';
+    const salesCls = primary === 'commission' ? ' col-primary' : '';
+
+    if (empOverrideMode) {
+      return `<tr class="${rowCls}" data-start="${w.start}" data-end="${w.end}">
+        <td><strong>Week ${w.number}</strong>${w.isCurrent ? ' ★' : ''}${w.hasOverride ? ' ✎' : ''}</td>
+        <td style="font-size:12px;color:var(--muted)">${w.start.slice(5)} – ${w.end.slice(5)}</td>
+        <td class="mono">${w.job_count||0}</td>
+        <td class="mono${crewCls}"><input class="ov-input ov-crew" type="number" min="0" step="0.01" value="${(w.crew_pay||0).toFixed(2)}" /></td>
+        <td class="mono${salesCls}"><input class="ov-input ov-comm" type="number" min="0" step="0.01" value="${(w.commission_pay||0).toFixed(2)}" /></td>
+        <td class="mono"><input class="ov-input ov-tips" type="number" min="0" step="0.01" value="${(w.tips_pay||0).toFixed(2)}" /></td>
+        <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(w.total_pay)}</td>
+        <td><div class="ov-actions">
+          <button type="button" class="ov-save" onclick="saveWeekOverride(this)">Save</button>
+          ${w.hasOverride ? `<button type="button" class="ov-clear" onclick="clearWeekOverride('${w.start}','${w.end}')">Reset</button>` : ''}
+        </div></td>
+      </tr>`;
+    }
+
+    return `<tr class="${rowCls}">
+      <td><strong>Week ${w.number}</strong>${w.isCurrent ? ' ★' : ''}${w.hasOverride ? ' <span style="color:var(--orange);font-size:10px">OVERRIDE</span>' : ''}</td>
+      <td style="font-size:12px;color:var(--muted)">${w.start.slice(5)} – ${w.end.slice(5)}</td>
+      <td class="mono">${w.job_count||0}</td>
+      <td class="mono${crewCls}">${fmt(w.crew_pay)}</td>
+      <td class="mono${salesCls}">${fmt(w.commission_pay)}</td>
+      <td class="mono" style="color:var(--green)">${fmt(w.tips_pay)}</td>
+      <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(w.total_pay)}</td>
+      <td>${w.total_pay > 0 ? (w.weekPaid ? '<span style="color:var(--green);font-weight:700">Paid</span>' : '<span style="color:var(--orange);font-weight:700">Unpaid</span>') : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="empty">No weeks</td></tr>';
+}
+
+function renderEmpDetailTotals(t, role) {
+  const primary = rolePrimaryCol(role);
+  $('empDetailTotals').innerHTML = `
+    <div class="stat-card c-revenue"><div class="lbl">Season Total</div><div class="val c-revenue">${fmt(t.total_pay)}</div></div>
+    <div class="stat-card"><div class="lbl">Crew</div><div class="val blue" ${primary==='crew'?'style="color:var(--orange)"':''}>${fmt(t.crew_pay)}</div></div>
+    <div class="stat-card"><div class="lbl">Sales</div><div class="val orange" ${primary==='commission'?'style="font-size:28px"':''}>${fmt(t.commission_pay)}</div></div>
+    <div class="stat-card"><div class="lbl">Tips</div><div class="val green">${fmt(t.tips_pay)}</div></div>
+    <div class="stat-card c-emergency"><div class="lbl">Still Owed</div><div class="val c-emergency">${fmt(t.unpaid_amount)}</div></div>`;
+}
+
 async function loadRoster() {
-  const emps = await fetch('/api/employees').then(r=>r.json());
-  $('empRoster').innerHTML = emps.map(e=>`
-    <div class="emp-row">
-      <div>
-        <span class="emp-name">${e.name}</span>
+  const emps = await fetch('/api/reports/roster-payroll').then(r => r.json());
+  $('empRoster').innerHTML = emps.map(e => {
+    if (e.role === 'owner') {
+      return `<div class="crew-profile-card compact inactive">
+        <div class="cpc-name">${e.name} <span class="role-badge owner">Owner</span></div>
+        <div class="cpc-user">@${e.username}</div>
+        <div class="cpc-preview">You — owner dashboard only</div>
+      </div>`;
+    }
+    const preview = (e.notes || '').trim() || 'No notes yet — click to view payroll';
+    return `<div class="crew-profile-card compact ${e.active ? '' : 'inactive'}" onclick="openEmpDetail(${e.id})" role="button" tabindex="0">
+      <div class="cpc-name">${e.name}
         <span class="role-badge ${e.role}">${ROLE_LABELS[e.role]||e.role}</span>
-        ${!e.active ? '<span style="font-size:10px;color:var(--red);margin-left:6px">Inactive</span>' : ''}
-        <div class="emp-user">@${e.username} · default pw: last name</div>
+        ${!e.active ? '<span style="font-size:10px;color:var(--red)">Off</span>' : ''}
       </div>
-      ${e.role!=='owner' && e.active
-        ? `<button class="btn-danger" onclick="removeEmp(${e.id},'${e.name.replace(/'/g,"\\'")}')">Remove</button>`
-        : e.role==='owner'
-        ? '<span style="font-size:12px;color:var(--muted)">Owner</span>'
-        : '<span style="font-size:12px;color:var(--muted)">Inactive</span>'}
-    </div>`).join('') || '<div class="empty">No employees</div>';
+      <div class="cpc-user">@${e.username}</div>
+      <div class="cpc-preview">${preview.replace(/</g,'&lt;')}</div>
+      <div class="cpc-total">${fmt(e.total_pay)}</div>
+      <div style="font-size:11px;color:var(--muted)">${e.job_count||0} jobs · owed ${fmt(e.unpaid_amount||0)}</div>
+    </div>`;
+  }).join('') || '<div class="empty">No employees</div>';
+}
+
+async function openEmpDetail(id) {
+  detailEmpId = id;
+  empOverrideMode = false;
+  $('empDetailOverrideBtn')?.classList.remove('active');
+  $('empOverrideHint').style.display = 'none';
+
+  const data = await fetch(`/api/reports/employee/${id}/payroll`).then(r => r.json());
+  if (!data.employee) { toast('Employee not found', 'err'); return; }
+  detailEmpData = data;
+  const e = data.employee;
+  const t = data.totals || {};
+
+  $('empDetailName').textContent = e.name;
+  $('empDetailMeta').textContent = `@${e.username} · ${ROLE_LABELS[e.role]||e.role}`;
+
+  const banner = $('empDetailRoleBanner');
+  banner.style.display = 'block';
+  banner.className = `emp-role-banner ${e.role === 'cleaning_tech' ? 'cleaning_tech' : e.role === 'd2d' ? 'd2d' : 'crew'}`;
+  banner.textContent = ROLE_PAYROLL_HINT[e.role] || ROLE_PAYROLL_HINT.crew;
+
+  $('empDetailNotes').value = e.notes || '';
+  renderEmpDetailHead(e.role);
+  renderEmpDetailTotals(t, e.role);
+  renderEmpDetailWeeks();
+
+  openOverlay($('empDetailModal'));
+  $('empDetailDialog')?.scrollIntoView({ behavior: 'instant', block: 'center' });
+
+  const rmBtn = $('empDetailRemove');
+  if (e.role !== 'owner' && e.active) {
+    rmBtn.style.display = 'inline-flex';
+    rmBtn.onclick = async () => {
+      closeEmpDetail();
+      await removeEmp(e.id, e.name);
+    };
+  } else rmBtn.style.display = 'none';
+}
+
+async function refreshEmpDetail() {
+  if (!detailEmpId) return;
+  const data = await fetch(`/api/reports/employee/${detailEmpId}/payroll`).then(r => r.json());
+  detailEmpData = data;
+  renderEmpDetailTotals(data.totals || {}, data.employee?.role);
+  renderEmpDetailHead(data.employee?.role);
+  renderEmpDetailWeeks();
+  loadRoster();
+  loadSeasonPayroll();
+}
+
+async function saveWeekOverride(btn) {
+  const row = btn.closest('tr');
+  const weekStart = row.dataset.start;
+  const weekEnd = row.dataset.end;
+  const crewPay = parseFloat(row.querySelector('.ov-crew')?.value);
+  const commissionPay = parseFloat(row.querySelector('.ov-comm')?.value);
+  const tipsPay = parseFloat(row.querySelector('.ov-tips')?.value);
+  if ([crewPay, commissionPay, tipsPay].some(n => isNaN(n) || n < 0)) {
+    toast('Enter valid amounts', 'err'); return;
+  }
+  const res = await fetch(`/api/reports/employee/${detailEmpId}/override`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ weekStart, weekEnd, crewPay, commissionPay, tipsPay, note: 'Admin override' }),
+  });
+  if (res.ok) { toast('Week totals updated'); refreshEmpDetail(); }
+  else toast('Override failed', 'err');
+}
+
+async function clearWeekOverride(weekStart, weekEnd) {
+  if (!await confirm('Reset Override?', 'Restore calculated pay from jobs for this week?', null, 'Reset')) return;
+  const res = await fetch(`/api/reports/employee/${detailEmpId}/override?weekStart=${weekStart}&weekEnd=${weekEnd}`, { method: 'DELETE' });
+  if (res.ok) { toast('Override cleared'); refreshEmpDetail(); }
+  else toast('Failed', 'err');
+}
+
+$('empDetailOverrideBtn').addEventListener('click', () => {
+  empOverrideMode = !empOverrideMode;
+  $('empDetailOverrideBtn').classList.toggle('active', empOverrideMode);
+  $('empOverrideHint').style.display = empOverrideMode ? 'inline' : 'none';
+  if (detailEmpData) {
+    renderEmpDetailHead(detailEmpData.employee.role);
+    renderEmpDetailWeeks();
+  }
+});
+
+['empDetailClose', 'empDetailCloseTop'].forEach(id => {
+  $(id).addEventListener('click', closeEmpDetail);
+});
+$('empDetailModal').addEventListener('click', ev => {
+  if (ev.target === $('empDetailModal')) closeEmpDetail();
+});
+$('empDetailDialog')?.addEventListener('click', ev => ev.stopPropagation());
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && $('empDetailModal')?.classList.contains('open')) closeEmpDetail();
+});
+$('empDetailSaveNotes').addEventListener('click', () => detailEmpId && saveEmpNotes(detailEmpId, $('empDetailNotes').value));
+
+async function saveEmpNotes(id, notesText) {
+  const notes = notesText ?? $(`notes-${id}`)?.value ?? '';
+  const res = await fetch(`/api/employees/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes }),
+  });
+  if (res.ok) { toast('Notes saved!'); loadRoster(); }
+  else toast('Failed to save notes', 'err');
 }
 $('addEmpBtn').addEventListener('click', async () => {
   const name = $('newEmpName').value.trim();
@@ -935,7 +1812,7 @@ $('addEmpBtn').addEventListener('click', async () => {
     toast(`${name} added!`);
     $('newEmpName').value=$('newEmpUser').value=$('newEmpPw').value='';
     employees = await fetch('/api/employees').then(r=>r.json());
-    buildPersonLists(); loadRoster();
+    buildPersonLists(); buildTipEmployeeSelect(); loadRoster();
   } else { const {error}=await res.json(); toast(error||'Failed','err'); }
 });
 async function removeEmp(id,name) {
@@ -943,7 +1820,8 @@ async function removeEmp(id,name) {
   await fetch(`/api/employees/${id}`,{method:'DELETE'});
   toast(`${name} removed`);
   employees = await fetch('/api/employees').then(r=>r.json());
-  buildPersonLists(); loadRoster();
+  buildPersonLists(); buildTipEmployeeSelect(); loadRoster();
+  if (detailEmpId === id) closeEmpDetail();
 }
 
 init();

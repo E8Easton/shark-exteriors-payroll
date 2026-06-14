@@ -96,6 +96,10 @@ if (!columnExists('jobs', 'crew_pool_pct')) {
   db.exec('ALTER TABLE jobs ADD COLUMN crew_pool_pct REAL NOT NULL DEFAULT 30');
 }
 
+if (!columnExists('employees', 'notes')) {
+  db.exec('ALTER TABLE employees ADD COLUMN notes TEXT DEFAULT \'\'');
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS weekly_payouts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,6 +109,29 @@ db.exec(`
     paid INTEGER NOT NULL DEFAULT 0,
     paid_at TEXT,
     UNIQUE(week_start, week_end, employee_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS tips (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER NOT NULL REFERENCES employees(id),
+    date TEXT NOT NULL,
+    amount REAL NOT NULL,
+    note TEXT,
+    paid INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS week_pay_overrides (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER NOT NULL REFERENCES employees(id),
+    week_start TEXT NOT NULL,
+    week_end TEXT NOT NULL,
+    crew_pay REAL NOT NULL DEFAULT 0,
+    commission_pay REAL NOT NULL DEFAULT 0,
+    tips_pay REAL NOT NULL DEFAULT 0,
+    note TEXT,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(employee_id, week_start, week_end)
   );
 `);
 

@@ -46,7 +46,34 @@
       <div class="stat-card"><div class="lbl">All-Time Earnings</div><div class="val" id="statAllTime">—</div><div class="sub" id="statJobs">— jobs</div></div>
       <div class="stat-card"><div class="lbl">Crew Pay</div><div class="val" id="statCrewPay">—</div></div>
       <div class="stat-card"><div class="lbl">Commission</div><div class="val" id="statCommission">—</div></div>
+      <div class="stat-card"><div class="lbl">Tips</div><div class="val" style="color:var(--green)" id="statTips">—</div><div class="sub" id="statWeekTips">—</div></div>
       <div class="stat-card"><div class="lbl">Outstanding</div><div class="val orange" id="statOutstanding">—</div><div class="sub" id="statPaidJobs">— paid</div></div>
+    </div>
+
+    <div class="card" id="taxCard">
+      <div class="card-title">💰 Your Pay Breakdown <span style="font-size:12px;font-weight:500;color:var(--muted)">1099 estimate</span></div>
+      <div class="stats-grid" style="margin-bottom:0">
+        <div class="stat-card"><div class="lbl">Gross Earnings</div><div class="val blue" id="taxGross">—</div><div class="sub">Crew + sales + tips</div></div>
+        <div class="stat-card"><div class="lbl">Self-Employment Tax (15.3%)</div><div class="val" style="color:#f5c842" id="taxSE">—</div><div class="sub">Estimated — not withheld</div></div>
+        <div class="stat-card"><div class="lbl">Est. After Tax</div><div class="val" style="color:#3dffaa" id="taxNet">—</div><div class="sub" id="taxNote">Plan for quarterly taxes</div></div>
+        <div class="stat-card"><div class="lbl">Paid to You</div><div class="val green" id="taxPaid">—</div><div class="sub">Jobs + tips marked paid</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Season Weeks <span id="crewSeasonMeta" style="font-size:12px;font-weight:500;color:var(--muted)">Weeks 1–11</span></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Week</th><th>Dates</th><th>Jobs</th><th>Crew</th><th>Sales</th><th>Tips</th><th>Total</th><th>Paid?</th></tr></thead>
+        <tbody id="seasonWeekBody"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Tips</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Amount</th><th>Note</th><th>Status</th></tr></thead>
+        <tbody id="tipsBody"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+      </table></div>
     </div>
 
     <div class="card">
@@ -97,7 +124,10 @@
       <div class="week-sum" id="weekSum" style="display:none">
         <div class="ws-item"><div class="lbl">Crew Pay</div><div class="val" id="wCrewPay">$0</div></div>
         <div class="ws-item"><div class="lbl">Commission</div><div class="val" id="wCommPay">$0</div></div>
-        <div class="ws-item hi"><div class="lbl">Total</div><div class="val" id="wTotal">$0</div></div>
+        <div class="ws-item"><div class="lbl">Tips</div><div class="val" style="color:var(--green)" id="wTipsPay">$0</div></div>
+        <div class="ws-item"><div class="lbl">SE Tax (15.3%)</div><div class="val" style="color:#f5c842" id="wSETax">$0</div></div>
+        <div class="ws-item hi"><div class="lbl">Total Gross</div><div class="val" id="wTotal">$0</div></div>
+        <div class="ws-item hi"><div class="lbl">Est. After Tax</div><div class="val" style="color:#3dffaa" id="wAfterTax">$0</div></div>
       </div>
 
       <div class="tbl-wrap"><table>
@@ -250,16 +280,58 @@ async function loadMyPay() {
   const a = d.allTime || {};
   const tw = d.thisWeek || {};
   const td = d.todayEarnings || {};
+  const tips = d.tipsAll || {};
+  const weekTips = d.weekTips || {};
+  const totalWithTips = (a.total_pay || 0) + (tips.tips_pay || 0);
+  const weekWithTips = (tw.total_pay || 0) + (weekTips.tips_pay || 0);
   $('statToday').textContent = fmt(td.total_pay || 0);
   $('statTodayJobs').textContent = `${td.job_count || 0} jobs today`;
-  $('statThisWeek').textContent = fmt(tw.total_pay || 0);
-  $('statWeekJobs').textContent = `${tw.job_count || 0} jobs this week (${d.weekStart || ''} – ${d.weekEnd || ''})`;
-  $('statAllTime').textContent    = fmt(a.total_pay);
+  $('statThisWeek').textContent = fmt(weekWithTips);
+  $('statWeekJobs').textContent = `${tw.job_count || 0} jobs · tips ${fmt(weekTips.tips_pay||0)} (${d.weekStart || ''} – ${d.weekEnd || ''})`;
+  $('statAllTime').textContent    = fmt(totalWithTips);
   $('statCrewPay').textContent    = fmt(a.crew_pay);
   $('statCommission').textContent = fmt(a.commission_pay);
-  $('statOutstanding').textContent = fmt(a.outstanding);
+  $('statTips').textContent = fmt(tips.tips_pay || 0);
+  $('statWeekTips').textContent = `${fmt(weekTips.tips_pay||0)} this week`;
+  $('statOutstanding').textContent = fmt((a.outstanding || 0) + (tips.tips_outstanding || 0));
   $('statJobs').textContent       = `${a.job_count || 0} jobs`;
-  $('statPaidJobs').textContent   = `${a.paid_count || 0} paid`;
+  $('statPaidJobs').textContent   = `${a.paid_count || 0} jobs paid`;
+
+  const gross = d.grossIncome ?? totalWithTips;
+  const seTax = d.selfEmploymentTax ?? gross * 0.153;
+  const afterTax = d.estimatedAfterTax ?? gross - seTax;
+  const paidJobs = (a.total_pay || 0) - (a.outstanding || 0);
+  const paidTips = (tips.tips_pay || 0) - (tips.tips_outstanding || 0);
+  $('taxGross').textContent = fmt(gross);
+  $('taxSE').textContent = fmt(seTax);
+  $('taxNet').textContent = fmt(afterTax);
+  $('taxPaid').textContent = fmt(paidJobs + paidTips);
+  $('taxNote').textContent = `${d.daysUntilLeave ?? '—'} days until season ends (Aug 16)`;
+
+  $('crewSeasonMeta').textContent = `Week ${d.currentWeek ?? '—'} · ${d.daysUntilLeave ?? '—'} days left`;
+  const seasonWeeks = d.seasonWeeks || [];
+  $('seasonWeekBody').innerHTML = seasonWeeks.length
+    ? seasonWeeks.slice().reverse().map(w => `<tr${w.isCurrent ? ' style="background:rgba(168,85,247,0.08)"' : ''}>
+        <td><strong>Week ${w.number}</strong>${w.isCurrent ? ' ★' : ''}</td>
+        <td style="font-size:12px;color:var(--muted)">${w.start.slice(5)} – ${w.end.slice(5)}</td>
+        <td>${w.job_count || 0}</td>
+        <td class="mono">${fmt(w.crew_pay)}</td>
+        <td class="mono">${fmt(w.commission_pay)}</td>
+        <td class="mono" style="color:var(--green)">${fmt(w.tips_pay)}</td>
+        <td class="mono" style="font-weight:700;color:var(--blue)">${fmt(w.total_pay)}</td>
+        <td>${w.total_pay > 0 ? (w.weekPaid ? '<span class="paid-badge paid">Paid</span>' : '<span class="paid-badge unpaid">Unpaid</span>') : '—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" class="empty">No season data</td></tr>';
+
+  const recentTips = d.recentTips || [];
+  $('tipsBody').innerHTML = recentTips.length
+    ? recentTips.map(t => `<tr>
+        <td>${t.date}</td>
+        <td class="mono" style="color:var(--green);font-weight:700">${fmt(t.amount)}</td>
+        <td>${t.note || '—'}</td>
+        <td><span class="paid-badge ${t.paid ? 'paid' : 'unpaid'}">${t.paid ? 'Paid' : 'Unpaid'}</span></td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">No tips yet</td></tr>';
 
   const recent = d.recent || [];
   $('recentBody').innerHTML = recent.length
@@ -320,13 +392,19 @@ async function loadWeekly() {
   if (!start || !end) return;
   const d = await fetch(`/api/reports/weekly?start=${start}&end=${end}`).then(r => r.json());
   const rows = d.rows || [];
+  const tipsPay = d.tipsTotal?.tips_pay || 0;
 
-  if (rows.length) {
+  if (rows.length || tipsPay) {
     const totCrew = rows.reduce((s, r) => s + (r.crew_pay || 0), 0);
     const totComm = rows.reduce((s, r) => s + (r.commission_pay || 0), 0);
+    const gross = totCrew + totComm + tipsPay;
+    const seTax = gross * 0.153;
     $('wCrewPay').textContent = fmt(totCrew);
     $('wCommPay').textContent = fmt(totComm);
-    $('wTotal').textContent   = fmt(totCrew + totComm);
+    $('wTipsPay').textContent = fmt(tipsPay);
+    $('wTotal').textContent   = fmt(gross);
+    $('wSETax').textContent   = fmt(seTax);
+    $('wAfterTax').textContent = fmt(gross - seTax);
     $('weekSum').style.display = 'flex';
   } else {
     $('weekSum').style.display = 'none';

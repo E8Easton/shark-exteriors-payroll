@@ -19,6 +19,7 @@ router.post('/reset-payroll', ownerOnly, (req, res) => {
   db.exec('DELETE FROM jobs');
   db.exec('DELETE FROM daily_summaries');
   db.exec('DELETE FROM weekly_payouts');
+  db.exec('DELETE FROM tips');
 
   res.json({ ok: true, message: 'All payroll data cleared. Employees kept.' });
 });

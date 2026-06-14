@@ -18,7 +18,7 @@ function requireAuth(req, res, next) {
 router.get('/', requireAuth, (req, res) => {
   if (req.session.role === 'owner') {
     const rows = db.prepare(
-      'SELECT id, name, username, role, active FROM employees ORDER BY name'
+      'SELECT id, name, username, role, active, notes FROM employees ORDER BY name'
     ).all();
     return res.json(rows);
   }
@@ -65,6 +65,14 @@ router.put('/:id/reset-password', ownerOnly, (req, res) => {
   if (!password) return res.status(400).json({ error: 'Password required' });
   const hash = bcrypt.hashSync(password, 10);
   db.prepare('UPDATE employees SET password_hash = ? WHERE id = ?').run(hash, req.params.id);
+  res.json({ ok: true });
+});
+
+router.patch('/:id', ownerOnly, (req, res) => {
+  const { notes } = req.body;
+  const emp = db.prepare('SELECT id FROM employees WHERE id = ?').get(req.params.id);
+  if (!emp) return res.status(404).json({ error: 'Employee not found' });
+  db.prepare('UPDATE employees SET notes = ? WHERE id = ?').run(notes ?? '', req.params.id);
   res.json({ ok: true });
 });
 

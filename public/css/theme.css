@@ -150,6 +150,17 @@ input::placeholder { color: var(--muted); }
 .stat-card .val.blue { color: var(--blue); }
 .stat-card .val.orange { color: var(--orange); }
 .stat-card .val.green { color: var(--green); }
+.stat-card .val.c-revenue { color: #00AAEF; }
+.stat-card .val.c-gross { color: #c084fc; }
+.stat-card .val.c-tax { color: #f5c842; }
+.stat-card .val.c-emergency { color: #ff6b6b; }
+.stat-card .val.c-take { color: #3dffaa; }
+.stat-card.c-revenue::before { background: linear-gradient(90deg, #00AAEF, #0090cc); opacity: 1; }
+.stat-card.c-gross::before { background: linear-gradient(90deg, #a855f7, #7c3aed); opacity: 1; }
+.stat-card.c-tax::before { background: linear-gradient(90deg, #f5c842, #e6a800); opacity: 1; }
+.stat-card.c-emergency::before { background: linear-gradient(90deg, #ff6b6b, #e53935); opacity: 1; }
+.stat-card.c-take::before { background: linear-gradient(90deg, #3dffaa, #2dd4a0); opacity: 1; }
+.stat-card.c-week::before { background: linear-gradient(90deg, var(--blue), var(--orange)); opacity: .8; }
 .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
 /* Charts */
@@ -184,19 +195,39 @@ tr:last-child td { border-bottom: none; }
 tr:hover td { background: rgba(255,255,255,0.02); }
 .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
 
+body.modal-open { overflow: hidden; touch-action: none; }
+
 /* Modal */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
   z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s;
 }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-overlay.modal-panel {
+  z-index: 120;
+  align-items: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 28px 16px 40px;
+}
 .modal {
   background: var(--surface); border: 1px solid var(--border2);
   border-radius: 20px; padding: 28px; width: 440px; max-width: 92vw;
   box-shadow: 0 24px 80px rgba(0,0,0,0.6);
   transform: translateY(12px); transition: transform .2s;
+  flex-shrink: 0;
+}
+.modal-wide {
+  width: min(760px, 96vw); max-width: 760px; padding: 24px 26px 26px;
+}
+.modal-scroll-body {
+  max-height: min(58vh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-top: 4px;
+  padding-right: 4px;
 }
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
