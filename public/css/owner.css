@@ -5,6 +5,7 @@ body.owner-app { display: flex; min-height: 100vh; }
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   position: fixed; top: 0; left: 0; height: 100vh; z-index: 20;
+  transform: translateZ(0);
 }
 .sidebar-logo {
   padding: 22px 18px 18px;
@@ -48,10 +49,9 @@ nav { flex: 1; padding: 14px 10px; overflow-y: auto; }
 }
 .btn-logout:hover { background: rgba(255,107,107,0.1); color: var(--red); border-color: rgba(255,107,107,0.3); }
 
-#main { margin-left: 240px; flex: 1; padding: 28px 32px 48px; max-width: 1200px; }
-.page { display: none; }
-.page.active { display: block; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+#main { margin-left: 240px; flex: 1; padding: 28px 32px 48px; max-width: 1200px; min-height: 100vh; }
+.page { display: none; contain: layout style; }
+.page.active { display: block; }
 
 /* Daily entry layout */
 .daily-layout {

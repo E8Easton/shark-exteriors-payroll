@@ -85,7 +85,8 @@ body {
   border-radius: var(--radius);
   padding: 22px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .card + .card { margin-top: 16px; }
 .card-title {

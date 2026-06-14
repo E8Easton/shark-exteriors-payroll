@@ -1,0 +1,116 @@
+/* Scroll fluency + GPU-friendly motion (Netlify / mobile / desktop) */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Faster taps, no double-tap zoom delay on controls */
+button,
+.btn,
+.btn-ghost,
+.btn-danger,
+.btn-link,
+.nav-item,
+.tab,
+.pool-btn,
+.preset-btn,
+.saved-job-hdr,
+.week-section-hdr,
+.crew-card-click {
+  touch-action: manipulation;
+}
+
+/* Cheaper than backdrop-filter on every card (smoother scroll) */
+.card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.modal-overlay {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+/* Smooth scroll regions */
+nav,
+.modal-overlay.modal-panel,
+.modal-scroll-body,
+.wizard-person-list,
+.tbl-wrap,
+.tab-bar,
+.lb-ticker-mask {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Main content scrolls as one fluent column */
+.owner-app #main,
+body:not(.owner-app) main {
+  scroll-margin-top: 12px;
+}
+
+/* GPU layer for infinite ticker (transform-only animation) */
+.lb-ticker-track {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* Lighter page transitions — opacity only */
+.page.active,
+.tab-panel.active {
+  animation: pageFadeIn 0.2s ease-out both;
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .lb-ticker-track {
+    animation: none !important;
+    will-change: auto;
+  }
+}
+
+/* Slightly shorter default transitions site-wide */
+.btn,
+.btn-ghost,
+.nav-item,
+.tab {
+  transition-duration: 0.12s;
+}
+
+/* Table rows: highlight without repainting whole table */
+tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Prevent layout shift while fonts load */
+.stat-card .val,
+.mono {
+  font-variant-numeric: tabular-nums;
+}

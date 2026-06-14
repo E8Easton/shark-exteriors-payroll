@@ -32,9 +32,8 @@ header {
 .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
 main { max-width: 920px; margin: 0 auto; padding: 28px 20px 48px; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tab-panel { display: none; contain: layout style; }
+.tab-panel.active { display: block; }
 
 .stats-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));

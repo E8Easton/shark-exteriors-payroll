@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Exteriors — My Pay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/crew.css" />
+  <link rel="stylesheet" href="/css/perf.css" />
+  <meta name="theme-color" content="#080c12" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     .mono { font-family: 'DM Mono', monospace; }
@@ -233,6 +236,7 @@ document.querySelectorAll('.tab').forEach(t => {
     document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     $(`tab-${t.dataset.tab}`).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (t.dataset.tab === 'leaderboard') loadLeaderboard();
     if (t.dataset.tab === 'daily') loadDaily();
     if (t.dataset.tab === 'monthly') setThisMonth();
