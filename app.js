@@ -5,22 +5,24 @@ const cookieSession = require('cookie-session');
 const fs = require('fs');
 const path = require('path');
 const { resolveDataDir, resolveSessionSecret } = require('./lib/dataDir');
+const { resolvePublicDir } = require('./lib/paths');
 
 const isServerless = Boolean(
   process.env.NETLIFY
   || process.env.AWS_LAMBDA_FUNCTION_NAME
-  || process.env.TURSO_DATABASE_URL,
+  || process.env.DATABASE_URL
+  || process.env.SUPABASE_DB_URL,
 );
 
 function createApp() {
   const app = express();
   const isProduction = process.env.NODE_ENV === 'production';
-  const publicDir = path.join(__dirname, 'public');
+  const publicDir = resolvePublicDir();
   const dataDir = resolveDataDir();
   const SESSIONS_PATH = process.env.SESSIONS_PATH || path.join(dataDir, 'sessions');
   const sessionSecret = resolveSessionSecret(dataDir);
 
-  if (!process.env.TURSO_DATABASE_URL && !process.env.DB_PATH) {
+  if (!process.env.DATABASE_URL && !process.env.SUPABASE_DB_URL && !process.env.DB_PATH) {
     process.env.DB_PATH = path.join(dataDir, 'payroll.db');
   }
 
@@ -77,7 +79,7 @@ function createApp() {
         ok: true,
         platform: isServerless ? 'netlify' : 'local',
         driver: db.driver,
-        dataDir: isServerless ? 'turso' : dataDir,
+        database: isServerless ? 'supabase-postgres' : dataDir,
       });
     } catch (err) {
       res.status(500).json({ ok: false, error: err.message });

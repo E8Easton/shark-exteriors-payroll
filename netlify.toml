@@ -9,7 +9,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["express", "bcryptjs", "cookie-session", "@libsql/client"]
+  external_node_modules = ["express", "bcryptjs", "cookie-session", "pg"]
   included_files = ["public/**", "app.js", "db.js", "routes/**", "lib/**"]
 
 [functions.server]

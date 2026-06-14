@@ -1,62 +1,82 @@
-# Deploy on Netlify (netlify.com)
+# Deploy Shark Exteriors Payroll — Netlify + Supabase
 
-Connect your GitHub repo and deploy. All payroll data is stored in a **Turso** cloud database (SQLite) so it persists for the full season.
+**Netlify** hosts the website. **Supabase** stores all payroll data (jobs, tips, crew, 11 weeks).
 
-## Step 1 — Create a Turso database (free, one time)
+---
 
-Turso stores your payroll data in the cloud. Netlify cannot save SQLite files on its own servers.
+## Step 1 — Create Supabase project (free)
 
-1. Go to [turso.tech](https://turso.tech) and sign up (free).
-2. Install the Turso CLI or use the web dashboard to create a database named `shark-payroll`.
-3. Copy these two values:
-   - **Database URL** → looks like `libsql://shark-payroll-yourname.turso.io`
-   - **Auth token** → from `turso db tokens create shark-payroll`
+1. Go to [supabase.com](https://supabase.com) → **New project**
+2. Pick a name (e.g. `shark-payroll`) and set a database password — **save the password**
 
-Or use the **[Turso integration on Netlify](https://www.netlify.com/integrations/turso/)** — it can add the env vars for you automatically.
+## Step 2 — Create database tables
 
-## Step 2 — Connect GitHub on Netlify
+1. In Supabase: **SQL Editor** → **New query**
+2. Copy everything from `supabase/migrations/001_schema.sql` in this repo
+3. Click **Run**
+
+## Step 3 — Get connection string
+
+1. Supabase → **Project Settings** → **Database**
+2. Under **Connection string**, choose **URI**
+3. Use the **Transaction pooler** string (port **6543**) — best for Netlify
+4. Replace `[YOUR-PASSWORD]` with your database password
+
+Example:
+```
+postgresql://postgres.xxxxx:YOUR_PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+```
+
+## Step 4 — Connect GitHub on Netlify
 
 1. Go to [app.netlify.com](https://app.netlify.com)
-2. **Add new site** → **Import an existing project**
-3. Choose **GitHub** → select `E8Easton/shark-exteriors-payroll`
-4. Netlify reads `netlify.toml` automatically — do **not** change the publish folder unless Netlify asks (should be `public`)
+2. **Add new site** → **Import from GitHub**
+3. Select `E8Easton/shark-exteriors-payroll`
+4. Netlify reads `netlify.toml` automatically — click **Deploy**
 
-## Step 3 — Add environment variables
+## Step 5 — Add environment variable on Netlify
 
-In Netlify: **Site configuration** → **Environment variables** → add:
+**Site configuration** → **Environment variables** → add:
 
 | Name | Value |
 |------|--------|
-| `TURSO_DATABASE_URL` | your `libsql://...` URL |
-| `TURSO_AUTH_TOKEN` | your Turso token |
+| `DATABASE_URL` | your Supabase pooler URI (step 3) |
 | `NODE_ENV` | `production` |
 
-## Step 4 — Deploy
+Optional: `SESSION_SECRET` — any long random string (login cookie signing)
 
-Click **Deploy site**. When it finishes, open your Netlify URL (e.g. `https://something.netlify.app`).
+## Step 6 — Redeploy and test
 
-- `/health` should show `{"ok":true,"platform":"netlify","driver":"libsql"}`
-- `/` should redirect to the **login page**
+1. **Deploys** → **Trigger deploy** → **Deploy site**
+2. Open `https://YOUR-SITE.netlify.app/health` → should show `"ok": true, "driver": "postgres"`
+3. Open `/` → login page
+4. Login: **easton** / **zastrow**
 
-**Owner login:** `easton` / `zastrow`
+---
 
-## Step 5 — Redeploy after GitHub updates
-
-Push to GitHub → Netlify auto-redeploys (if enabled) or click **Trigger deploy** in the Netlify dashboard. Your Turso data is **not** wiped.
-
-## Local development
+## Local development (no Supabase needed)
 
 ```bash
 npm install
 npm run dev
 ```
 
-Uses `./data/payroll.db` locally (no Turso needed). To test with Turso locally, set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in a `.env` file.
+Uses `./data/payroll.db` on your computer. To use Supabase locally, add `DATABASE_URL` to a `.env` file (not committed to git).
+
+---
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
-| **Page not found** | Check deploy logs. Usually missing `TURSO_DATABASE_URL` or failed build. |
-| **500 on login** | Turso env vars wrong or database not created. |
-| **Build failed** | Ensure Node 22 in Netlify: Site settings → Build → `NODE_VERSION` = `22` |
+| Error | Fix |
+|-------|-----|
+| **Function crashed / EROFS** | Redeploy latest GitHub code (fixed — no file writes on Netlify) |
+| **relation "employees" does not exist** | Run `001_schema.sql` in Supabase SQL Editor |
+| **Page not found** | Check deploy logs; build must succeed |
+| **Login fails / 500** | Check `DATABASE_URL` is correct pooler URI with password |
+| **Health shows ok:false** | Read the `error` field — usually bad DATABASE_URL |
+
+---
+
+## After code updates
+
+Push to GitHub → Netlify redeploys. Supabase data is **not** deleted.
